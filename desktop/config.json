@@ -83,9 +83,39 @@
     {
       "name": "GitHubDesktop.exe",
       "path": "C:\\Users\\IRamp\\AppData\\Local\\GitHubDesktop\\app-3.1.2\\GitHubDesktop.exe"
+    },
+    {
+      "name": "AsPowerBar.exe",
+      "path": "C:\\Program Files (x86)\\ASUS\\AI Suite III\\AsPowerBar\\AsPowerBar.exe"
+    },
+    {
+      "name": "Microsoft Excel",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-8.10.3\\gitkraken.exe"
     }
   ],
   "ledPatternList": [
+    {
+      "name": "Brightness Fill",
+      "id": "brightness-fill",
+      "options": [
+        {
+          "id": "color",
+          "name": "Fill Color",
+          "type": "color",
+          "default": "000000"
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
     {
       "name": "Christmas",
       "id": "christmas",
@@ -386,20 +416,6 @@
         6
       ],
       "id": 4
-    },
-    {
-      "trigger": "app",
-      "triggerOption": "Firefox",
-      "pattern": "christmas",
-      "patternOptions": {},
-      "effect": "wipe",
-      "effectOptions": {
-        "speed": ".1"
-      },
-      "strips": [
-        1
-      ],
-      "id": 5
     }
   ]
 }

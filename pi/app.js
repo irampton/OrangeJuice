@@ -50,6 +50,9 @@ function drawLEDs() {
     ledControl.updateLEDs(arr);
 }
 
+//set up homekit
+const HomeKit = require('./homekit.js');
+const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights',[1,2,3,4,5],setLEDs);
 
 io.on('connection', function (socket) {
     console.log('a user connected');
@@ -90,21 +93,7 @@ io.on('connection', function (socket) {
         callback(scriptsList);
     });
     socket.on('setLEDs', (options) => {
-        //console.log('setLEDS', options);
-        //clear all other app scripts
-        if (options.trigger === "app") {
-            clearAppConfigs(options.strips);
-            setStripDefaults();
-        }
-        //write the config to each strip separately
-        options.strips.forEach((stripIndex) => {
-            if (options.trigger === "default") {
-                currentLEDs.strips[stripIndex].default = options;
-            }
-            writeConfigToStrips(stripIndex, options);
-        });
-        //after all the strips are set, draw the colors to the strip
-        drawLEDs();
+        setLEDs(options);
     });
     socket.on('clearAppConfigs', () => {
         clearAppConfigs();
@@ -223,4 +212,22 @@ function setStripDefaults() {
             blankStrip(strip);
         }
     })
+}
+
+function setLEDs(options){
+    //console.log('setLEDS', options);
+    //clear all other app scripts
+    if (options.trigger === "app") {
+        clearAppConfigs(options.strips);
+        setStripDefaults();
+    }
+    //write the config to each strip separately
+    options.strips.forEach((stripIndex) => {
+        if (options.trigger === "default") {
+            currentLEDs.strips[stripIndex].default = options;
+        }
+        writeConfigToStrips(stripIndex, options);
+    });
+    //after all the strips are set, draw the colors to the strip
+    drawLEDs();
 }
