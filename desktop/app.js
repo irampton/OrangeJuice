@@ -132,7 +132,7 @@ function checkActiveProgram() {
                         "effect": configuration.effect,
                         "effectOptions": configuration.effectOptions,
                         "strips": configuration.strips,
-                        "transition": 'fade',
+                        //"transition": 'fade',
                         "transitionOptions": {"time": 250}
                     }
                     sendToServer('setLEDs', options);

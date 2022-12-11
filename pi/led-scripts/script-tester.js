@@ -45,7 +45,10 @@ io.on('connection', function (socket) {
         socket.emit('newColorArr', config, colorArr);
 
         if (config.effect) {
-            running.effect = new ledScripts.effects[config.effect].Create(colorArr, config.effectOptions);
+            running.effect = new ledScripts.effects[config.effect].Create(colorArr, config.effectOptions, config.num);
+            running.effect.step((arr) => {
+                socket.emit('newColorArr', config, arr);
+            });
             running.effectInterval = setInterval(() => {
                 running.effect.step((arr) => {
                     socket.emit('newColorArr', config, arr);

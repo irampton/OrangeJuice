@@ -182,6 +182,18 @@
   ],
   "ledEffectList": [
     {
+      "name": "Blink",
+      "id": "blink",
+      "options": [
+        {
+          "id": "speed",
+          "name": "Speed",
+          "type": "number",
+          "default": 1
+        }
+      ]
+    },
+    {
       "name": "Chase",
       "id": "chase",
       "options": [
@@ -202,6 +214,18 @@
     {
       "name": "Strobe",
       "id": "strobe",
+      "options": [
+        {
+          "id": "speed",
+          "name": "Speed",
+          "type": "number",
+          "default": 1
+        }
+      ]
+    },
+    {
+      "name": "Wipe",
+      "id": "wipe",
       "options": [
         {
           "id": "speed",
@@ -362,6 +386,20 @@
         6
       ],
       "id": 4
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "Firefox",
+      "pattern": "christmas",
+      "patternOptions": {},
+      "effect": "wipe",
+      "effectOptions": {
+        "speed": ".1"
+      },
+      "strips": [
+        1
+      ],
+      "id": 5
     }
   ]
 }
