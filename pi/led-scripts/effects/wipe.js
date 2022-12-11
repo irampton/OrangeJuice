@@ -21,7 +21,7 @@ module.exports = {
                 this.currentLight = 0;
                 this.currentStep++;
             }
-            if(this.currentStep === this.numLeds){
+            if(this.currentStep >= this.baseColorArray.length){
                 this.currentStep = 0;
             }
             this.colorArray[this.currentLight] = this.baseColorArray[this.currentStep];
