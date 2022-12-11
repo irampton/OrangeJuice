@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Script Tester</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .light {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        body {
+            color: white;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<h1>Script Tester</h1>
+<div id="controls">
+    <label for="pattern">Pattern:</label> <select id="pattern" onchange="changePattern()"></select>
+    <label for="effect">Effect:</label> <select id="effect" onchange="changeEffect()"></select>
+    <label for="number">Number:</label> <input id="number" type="number" value="16"/>
+    <button style="margin-left: 1%" onclick="display()">Set!</button>
+    <h3>Pattern Options</h3>
+    <div id="patternOptions"></div>
+    <h3>Effect Options</h3>
+    <div id="effectOptions"></div>
+</div>
+<br><br><br>
+<div id="lights"></div>
+
+<script>
+    const socket = io();
+
+    let ledScripts;
+
+    socket.on('connect', function () {
+        socket.emit('getScripts', (data) => {
+            ledScripts = data;
+            drawSettings();
+        });
+    });
+
+    socket.on('newColorArr', (config, colorArr) => {
+        let html = "";
+        for (let i = 0; i < config.num; i++) {
+            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % 8) * 60}px; margin-top: ${Math.floor(i / 8) * 60}px"></div>`;
+        }
+        document.getElementById("lights").innerHTML = html;
+    });
+
+    function drawSettings() {
+        let html = "<option value=\"\" selected></option>";
+        ledScripts.patterns.list.forEach(v => {
+            html += `<option value="${v}">${ledScripts.patterns[v].name}</option>`;
+        })
+        document.getElementById('pattern').innerHTML = html;
+
+        html = "<option value=\"\" selected></option>";
+        ledScripts.effects.list.forEach(v => {
+            html += `<option value="${v}">${ledScripts.effects[v].name}</option>`;
+        })
+        document.getElementById('effect').innerHTML = html;
+    }
+
+    function changePattern() {
+        let html = '';
+        const pattern = ledScripts.patterns[document.getElementById('pattern').value];
+        if (pattern) {
+            for (let i in pattern.options) {
+                const option = pattern.options[i];
+                html += `${option.name}: <input id="pattern-${option.id}" type="${option.type}" value="${option.default}">`;
+            }
+        }
+        document.getElementById(`patternOptions`).innerHTML = html;
+    }
+
+    function changeEffect() {
+        let html = '';
+        const effect = ledScripts.effects[document.getElementById('effect').value];
+        if (effect) {
+            for (let i in effect.options) {
+                const option = effect.options[i];
+                html += `${option.name}: <input id="effect-${option.id}" type="${option.type}" value="${option.default}">`;
+            }
+        }
+        document.getElementById(`effectOptions`).innerHTML = html;
+    }
+
+    function display() {
+        let config = {
+            "pattern": document.getElementById("pattern").value,
+            "patternOptions": {},
+            "effect": document.getElementById("effect").value,
+            "effectOptions": {},
+            "num": document.getElementById('number').value
+        }
+
+        ledScripts.patterns[config.pattern].options.forEach((value) => {
+            config.patternOptions[value.id] = document.getElementById(`pattern-${value.id}`).value;
+            if (value.type === "color") {
+                config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
+            }
+        });
+        if (config.effect) {
+            ledScripts.effects[config.effect].options.forEach((value) => {
+                config.effectOptions[value.id] = document.getElementById(`effect-${value.id}`).value;
+                if (value.type === "color") {
+                    config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
+                }
+            });
+        }
+
+        if (!config.pattern) {
+            alert("you are missing something");
+            return;
+        }
+        socket.emit('newConfig', config);
+    }
+</script>
+</body>
+</html>

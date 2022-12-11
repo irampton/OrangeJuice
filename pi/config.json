@@ -1,0 +1,75 @@
+{
+  "strips": [
+    {
+      "name": "Backlight",
+      "start": 0,
+      "length": 64,
+      "type": "matrix",
+      "height": 8,
+      "modifier": "brightness",
+      "modifierOptions": {
+        "level": 75
+      }
+    },
+    {
+      "name": "Can #1",
+      "start": 64,
+      "length": 16,
+      "type": "ring"
+    },
+    {
+      "name": "Can #2",
+      "start": 80,
+      "length": 16,
+      "type": "ring"
+    },
+    {
+      "name": "Can #3",
+      "start": 96,
+      "length": 16,
+      "type": "ring"
+    },
+    {
+      "name": "Can #4",
+      "start": 112,
+      "length": 16,
+      "type": "ring"
+    },
+    {
+      "name": "Can #5",
+      "start": 128,
+      "length": 16,
+      "type": "ring"
+    },
+    {
+      "name": "Wall Strip",
+      "start": 144,
+      "length": 150,
+      "type": "strip",
+      "segments": [
+        0,
+        94,
+        118
+      ],
+      "modifier": "brightness",
+      "modifierOptions": {
+        "level": 50
+      }
+    },
+    {
+      "name": "Left Backlight",
+      "start": 294,
+      "length": 64,
+      "type": "strip",
+      "segments": [
+        0,
+        94,
+        118
+      ],
+      "modifier": "brightness",
+      "modifierOptions": {
+        "level": 85
+      }
+    }
+  ]
+}

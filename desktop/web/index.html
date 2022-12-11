@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OrangeJuice Client Config</title>
+    <link href="lib/w3.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="lib/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="lib/tabulator.min.js"></script>
+    <style>
+        td {
+            vertical-align: middle !important;
+        }
+
+        .colorInput {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<h1 style="padding-left: 2%">OrangeJuice Client Config</h1>
+
+<div style="padding: 2%;">
+    <button class="w3-button w3-round-large w3-white w3-border w3-border-blue" onclick="document.getElementById('newConfigurationModal').style.display='block'; document.getElementById('newTriggerSelect').value = '';">Add a new configuration</button>
+</div>
+
+<div style="padding-left: 2%; width: 60%">
+    <div id="configurationsTable">
+    </div>
+</div>
+
+<div id="appList"></div>
+
+<div id="newConfigurationModal" class="w3-modal">
+    <div class="w3-modal-content">
+        <div class="w3-container">
+            <span onclick="document.getElementById('newConfigurationModal').style.display='none'"
+                  class="w3-button w3-display-topright">&times;</span>
+            <h2>Add New Configuration</h2>
+            <hr>
+            Trigger:
+            <select id="newTriggerSelect" onchange="newTriggerSelectChange()">
+                <option value='' selected></option>
+                <option value="default">Default</option>
+                <option value="disconnect">On Disconnect</option>
+                <option value="app">Open App</option>
+            </select>
+            <br><br>
+            <span id="newTriggerOptions">
+                <span id="newTriggerOption-app" style="display: none">
+                    App:<select id="newAppTriggerSelect"></select>
+                    <br><br>
+                </span>
+            </span>
+            Pattern: <select id="newPatternSelect" onchange="newPatternSelectChange()"></select>
+            <span id="newPatternOptions"></span>
+            <br><br>
+            Effect: <select id="newEffectSelect" onchange="newEffectSelectChange()"></select>
+            <span id="newEffectOptions"></span>
+            <hr>
+            Strips:
+            <br>
+            <span id="newStripsList"></span>
+            <hr>
+            <button class="w3-button w3-round-large w3-white w3-border w3-border-green" onclick="createConfiguration()">Add Configuration</button>
+            <br><br>
+        </div>
+    </div>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>

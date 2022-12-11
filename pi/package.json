@@ -1,0 +1,17 @@
+{
+  "name": "orangejuice-2.0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nconf": "^0.12.0",
+    "socket.io": "^4.5.3"
+  }
+}

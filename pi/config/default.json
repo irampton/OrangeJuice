@@ -1,0 +1,10 @@
+{
+  "strips": [
+    {"name": "Backlight", "start": 0, "length": 64, "type": "matrix", "height": 8, "modifier":  "brightness", "modifierOptions":  {"level":  70}},
+    {"name": "Can #1", "start": 64, "length": 16, "type": "ring"},
+    {
+      "name": "Wall Strip", "start": 80, "length": 150, "type": "strip",
+      "segments": [0, 94, 118], "modifier":  "brightness", "modifierOptions":  {"level":  30}
+    }
+  ]
+}
