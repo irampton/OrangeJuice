@@ -9,7 +9,7 @@ module.exports = {
         this.colorArray = [...colorArray];
         this.pattern = [...colorArray];
         this.speed = options.speed;
-        this.timeout = 1 / this.speed * 1000;
+        this.interval = 1 / this.speed * 1000;
         this.step = function (callback) {
             if (this.colorArray[0] === '000000') {
                 this.colorArray = [...this.pattern];

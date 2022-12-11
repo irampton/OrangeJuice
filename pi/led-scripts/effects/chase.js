@@ -10,7 +10,7 @@ module.exports = {
         this.colorArray = [...colorArray];
         this.reverse = options.reverse;
         this.speed = options.speed;
-        this.timeout = 1 / this.speed * 1000;
+        this.interval = 1 / this.speed * 1000;
         this.step = function (callback) {
             if (this.reverse) {
                 this.colorArray.unshift(this.colorArray.pop());

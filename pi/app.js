@@ -34,7 +34,7 @@ stripConfig.forEach((strip, index) => {
 //Load in modules
 const ledControlModule = require("./led-control.js");
 const ledControl = new ledControlModule(numPixels);
-const ledScripts = require("./led-scripts.js");
+const ledScripts = require("./led-scripts/led-scripts.js");
 
 function drawLEDs() {
     let arr = [];
@@ -208,7 +208,7 @@ function writeConfigToStrips(stripIndex, options) {
                 currentLEDs.strips[stripIndex].arr = arr;
                 drawLEDs();
             })
-        }, currentLEDs.strips[stripIndex].effect.timeout);
+        }, currentLEDs.strips[stripIndex].effect.interval);
     }
 }
 

@@ -50,7 +50,7 @@ io.on('connection', function (socket) {
                 running.effect.step((arr) => {
                     socket.emit('newColorArr', config, arr);
                 })
-            }, running.effect.timeout);
+            }, running.effect.interval);
         }
     })
 });
