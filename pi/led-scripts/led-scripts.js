@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 let scripts = {
     "patterns": {
@@ -16,7 +17,7 @@ let scripts = {
 };
 module.exports = scripts;
 
-fs.readdir('./led-scripts/patterns', (err, files) => {
+fs.readdir(path.join(__dirname,"led-scripts","patterns"), (err, files) => {
     files.forEach((file) => {
         if (file.match(/.js$/)) {
             let script = require(`./led-scripts/patterns/${file}`);
@@ -26,7 +27,7 @@ fs.readdir('./led-scripts/patterns', (err, files) => {
     })
 });
 
-fs.readdir('./led-scripts/effects', (err, files) => {
+fs.readdir(path.join(__dirname,"led-scripts","effects"), (err, files) => {
     files.forEach((file) => {
         if (file.match(/.js$/)) {
             let script = require(`./led-scripts/effects/${file}`);
@@ -36,7 +37,7 @@ fs.readdir('./led-scripts/effects', (err, files) => {
     })
 });
 
-fs.readdir('./led-scripts/modifiers', (err, files) => {
+fs.readdir(path.join(__dirname,"led-scripts","modifiers"), (err, files) => {
     files.forEach((file) => {
         if (file.match(/.js$/)) {
             let script = require(`./led-scripts/modifiers/${file}`);
@@ -46,7 +47,7 @@ fs.readdir('./led-scripts/modifiers', (err, files) => {
     })
 });
 
-fs.readdir('./led-scripts/transitions', (err, files) => {
+fs.readdir(path.join(__dirname,"led-scripts","transitions"), (err, files) => {
     files.forEach((file) => {
         if (file.match(/.js$/)) {
             let script = require(`./led-scripts/transitions/${file}`);
