@@ -1,4 +1,3 @@
-const {currentStep} = require("../transitions/fade");
 module.exports = {
     'id': "blink",
     'name': "Blink",
