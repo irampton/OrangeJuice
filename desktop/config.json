@@ -95,6 +95,82 @@
     {
       "name": "GitKraken",
       "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-8.10.3\\gitkraken.exe"
+    },
+    {
+      "name": "Minecraft Launcher",
+      "path": "C:\\Program Files (x86)\\Minecraft Launcher\\MinecraftLauncher.exe"
+    },
+    {
+      "name": "OpenJDK Platform binary",
+      "path": "C:\\Program Files (x86)\\Minecraft Launcher\\runtime\\java-runtime-gamma\\windows-x64\\java-runtime-gamma\\bin\\javaw.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9008\\Discord.exe"
+    },
+    {
+      "name": "Notepad",
+      "path": "C:\\Windows\\System32\\notepad.exe"
+    },
+    {
+      "name": "Steam",
+      "path": "C:\\Program Files (x86)\\Steam\\steam.exe"
+    },
+    {
+      "name": "Steam Client WebHelper",
+      "path": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win7x64\\steamwebhelper.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.7.0.4841\\t2gp.exe"
+    },
+    {
+      "name": "Sid Meier's Civilization VI (DX12)",
+      "path": "D:\\Games\\steamapps\\common\\Sid Meier's Civilization VI\\Base\\Binaries\\Win64Steam\\CivilizationVI_DX12.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.7.1.4891\\t2gp.exe"
+    },
+    {
+      "name": "Task Manager",
+      "path": "C:\\Windows\\System32\\Taskmgr.exe"
+    },
+    {
+      "name": "ScreenClippingHost.exe",
+      "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\ScreenClippingHost.exe"
+    },
+    {
+      "name": "Runtime Broker",
+      "path": "C:\\Windows\\System32\\RuntimeBroker.exe"
+    },
+    {
+      "name": "DaVinci_Resolve_18.1.2_Windows.exe",
+      "path": "C:\\Users\\IRamp\\Downloads\\DaVinci_Resolve_18.1.2_Windows\\DaVinci_Resolve_18.1.2_Windows.exe"
+    },
+    {
+      "name": "DaVinci Resolve Installer",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\7zS046BE1BD\\SetupResolve.exe"
+    },
+    {
+      "name": "Setup/Uninstall",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\is-KVLLA.tmp\\FairlightAudioAccelerator v1.0.13.tmp"
+    },
+    {
+      "name": "Windows® installer",
+      "path": "C:\\Windows\\SysWOW64\\msiexec.exe"
+    },
+    {
+      "name": "vcredist_x64_vc14.exe",
+      "path": "C:\\Windows\\Temp\\{E67B126B-CDE7-43C5-BA7B-49389F153D61}\\.cr\\vcredist_x64_vc14.exe"
+    },
+    {
+      "name": "DaVinci Resolve Welcome.exe",
+      "path": "C:\\ProgramData\\Blackmagic Design\\DaVinci Resolve\\Support\\Onboarding\\DaVinci Resolve Welcome.exe"
+    },
+    {
+      "name": "DaVinci Resolve",
+      "path": "C:\\Program Files\\Blackmagic Design\\DaVinci Resolve\\Resolve.exe"
     }
   ],
   "ledPatternList": [
@@ -275,7 +351,7 @@
       "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 75
+        "level": 55
       }
     },
     {
@@ -320,7 +396,7 @@
       ],
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 50
+        "level": 33
       }
     },
     {
@@ -335,11 +411,70 @@
       ],
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 85
+        "level": 50
       }
     }
   ],
   "configurations": [
+    {
+      "trigger": "app",
+      "triggerOption": "Firefox",
+      "pattern": "fill",
+      "patternOptions": {
+        "color": "cf8030"
+      },
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 1
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "WebStorm",
+      "pattern": "fill",
+      "patternOptions": {
+        "color": "3cc4c4"
+      },
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 1
+    },
+    {
+      "trigger": "disconnect",
+      "triggerOption": "",
+      "pattern": "off",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0,
+        6,
+        7
+      ],
+      "id": 4
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "SSH, Telnet and Rlogin client",
+      "pattern": "rainbow",
+      "patternOptions": {
+        "multiplier": "1"
+      },
+      "effect": "chase",
+      "effectOptions": {
+        "reverse": "false",
+        "speed": "5"
+      },
+      "strips": [
+        6
+      ],
+      "id": 3
+    },
     {
       "trigger": "app",
       "triggerOption": "Aerial",
@@ -350,60 +485,19 @@
       "strips": [
         0
       ],
-      "id": 2
+      "id": 4
     },
     {
       "trigger": "app",
-      "triggerOption": "WebStorm",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "00ffff"
-      },
+      "triggerOption": "OpenJDK Platform binary",
+      "pattern": "backlight",
+      "patternOptions": {},
       "effect": "",
       "effectOptions": {},
       "strips": [
         0
       ],
-      "id": 2
-    },
-    {
-      "trigger": "default",
-      "triggerOption": "",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "ebe9cd"
-      },
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "id": 2
-    },
-    {
-      "trigger": "disconnect",
-      "triggerOption": "",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "000000"
-      },
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "id": 3
+      "id": 5
     },
     {
       "trigger": "default",
@@ -415,7 +509,19 @@
       "strips": [
         6
       ],
-      "id": 4
+      "id": 6
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "Sid Meier's Civilization VI (DX12)",
+      "pattern": "backlight",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 7
     }
   ]
 }

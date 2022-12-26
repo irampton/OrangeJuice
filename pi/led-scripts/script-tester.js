@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
     });
 })
 
-const ledScripts = require("./led-scripts.js");
+let ledScripts = require("./led-scripts.js");
 
 let running = {};
 
@@ -32,6 +32,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('getScripts', (callback) => {
+        ledScripts = require('./led-scripts');
         callback(ledScripts);
     });
 

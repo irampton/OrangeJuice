@@ -8,7 +8,7 @@
       "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 75
+        "level": 55
       }
     },
     {
@@ -53,7 +53,7 @@
       ],
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 50
+        "level": 33
       }
     },
     {
@@ -68,7 +68,7 @@
       ],
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 85
+        "level": 50
       }
     }
   ]

@@ -17,12 +17,10 @@ module.exports = function (id,name, strips, setLEDs){
     this.currentLightState = false; // on or off
     this.currentBrightnessLevel = 100;
 
-
 // 'On' characteristic is required for the light service
     const onCharacteristic = lightService.getCharacteristic(Characteristic.On);
 // 'Brightness' characteristic is optional for the light service; 'getCharacteristic' will automatically add it to the service!
     const brightnessCharacteristic = lightService.getCharacteristic(Characteristic.Brightness);
-
 
 // with the 'on' function we can add event handlers for different events, mainly the 'get' and 'set' event
     onCharacteristic.on(CharacteristicEventTypes.GET, callback => {
@@ -35,7 +33,6 @@ module.exports = function (id,name, strips, setLEDs){
         callback();
     });
 
-
     brightnessCharacteristic.on(CharacteristicEventTypes.GET, (callback) => {
         callback(undefined, this.currentBrightnessLevel);
     });
@@ -46,8 +43,8 @@ module.exports = function (id,name, strips, setLEDs){
         callback();
     });
 
-
     accessory.addService(lightService); // adding the service to the accessory
+
 
 // once everything is set up, we publish the accessory. Publish should always be the last step!
     accessory.publish({
@@ -65,7 +62,7 @@ function createConfig(state,brightness, strips){
         return {
             "trigger": 'homekit',
             "pattern": 'brightness-fill',
-            "patternOptions": {"color": "ffffff", "brightness": brightness},
+            "patternOptions": {"color": "FFFFAF", "brightness": brightness},
             "effect": "",
             "strips": strips,
             //"transition": 'fade',

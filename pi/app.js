@@ -8,18 +8,14 @@ app.use(express.static('web'));
 const nconf = require('nconf');
 nconf.file({file: './config.json'});
 
+//catch all errors
+process.on('uncaughtException', function (err) {
+    console.log(new Date().toString(), " - Got an error:");
+    console.log(err)
+});
+
 //general
 let disconnectConfigs = nconf.get('disconnectConfigs');
-
-function saveConfig() {
-    nconf.save(function (err) {
-        if (err) {
-            console.error(err.message);
-            return;
-        }
-        //console.log('Configuration saved successfully.');
-    });
-}
 
 let numPixels = 0;
 let currentLEDs = {
@@ -52,7 +48,7 @@ function drawLEDs() {
 
 //set up homekit
 const HomeKit = require('./homekit.js');
-const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights',[1,2,3,4,5],setLEDs);
+const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights', [1, 2, 3, 4, 5], setLEDs);
 
 io.on('connection', function (socket) {
     console.log('a user connected');
@@ -173,7 +169,7 @@ function writeConfigToStrips(stripIndex, options) {
     //clear strip config completely
     currentLEDs.strips[stripIndex] = blankStrip(currentLEDs.strips[stripIndex]);
     //generate pattern
-    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate(stripConfig[stripIndex].length,options.patternOptions);
+    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate(stripConfig[stripIndex].length, options.patternOptions);
     //set trigger
     currentLEDs.strips[stripIndex].trigger = options.trigger;
     if (options.transition) {
@@ -214,7 +210,7 @@ function setStripDefaults() {
     })
 }
 
-function setLEDs(options){
+function setLEDs(options) {
     //console.log('setLEDS', options);
     //clear all other app scripts
     if (options.trigger === "app") {
@@ -230,4 +226,14 @@ function setLEDs(options){
     });
     //after all the strips are set, draw the colors to the strip
     drawLEDs();
+}
+
+function saveConfig() {
+    nconf.save(function (err) {
+        if (err) {
+            console.error(err.message);
+            return;
+        }
+        //console.log('Configuration saved successfully.');
+    });
 }
