@@ -8,7 +8,7 @@
       "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 55
+        "level": 90
       }
     },
     {
@@ -71,5 +71,12 @@
         "level": 50
       }
     }
-  ]
+  ],
+  "homekit": {
+    "name": "LED Lights",
+    "services": [
+      {"name": "Closet Light","subtype": "closet_light", "strips": [1]},
+      {"name": "Desk Lights","subtype": "desk_light", "strips": [2,3]}
+    ]
+  }
 }

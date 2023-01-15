@@ -193,6 +193,26 @@
       ]
     },
     {
+      "name": "Color Temperature & Brightness",
+      "id": "brightness-kelvin",
+      "options": [
+        {
+          "id": "kelvin",
+          "name": "Temperature (k)",
+          "type": "number",
+          "default": 6500,
+          "min": 1000,
+          "max": 40000
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
+    {
       "name": "Christmas",
       "id": "christmas",
       "options": []
@@ -260,6 +280,20 @@
           "name": "Color #3",
           "type": "color",
           "default": "000000"
+        }
+      ]
+    },
+    {
+      "name": "Color Temperature",
+      "id": "kelvin",
+      "options": [
+        {
+          "id": "kelvin",
+          "name": "Temperature (k)",
+          "type": "number",
+          "default": 6500,
+          "min": 1000,
+          "max": 40000
         }
       ]
     },
@@ -351,7 +385,7 @@
       "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 55
+        "level": 90
       }
     },
     {
@@ -418,31 +452,15 @@
   "configurations": [
     {
       "trigger": "app",
-      "triggerOption": "Firefox",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "cf8030"
-      },
+      "triggerOption": "Sid Meier's Civilization VI (DX12)",
+      "pattern": "backlight",
+      "patternOptions": {},
       "effect": "",
       "effectOptions": {},
       "strips": [
         0
       ],
-      "id": 1
-    },
-    {
-      "trigger": "app",
-      "triggerOption": "WebStorm",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "3cc4c4"
-      },
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0
-      ],
-      "id": 1
+      "id": 7
     },
     {
       "trigger": "disconnect",
@@ -452,26 +470,7 @@
       "effect": "",
       "effectOptions": {},
       "strips": [
-        0,
-        6,
-        7
-      ],
-      "id": 4
-    },
-    {
-      "trigger": "app",
-      "triggerOption": "SSH, Telnet and Rlogin client",
-      "pattern": "rainbow",
-      "patternOptions": {
-        "multiplier": "1"
-      },
-      "effect": "chase",
-      "effectOptions": {
-        "reverse": "false",
-        "speed": "5"
-      },
-      "strips": [
-        6
+        0
       ],
       "id": 3
     },
@@ -485,43 +484,7 @@
       "strips": [
         0
       ],
-      "id": 4
-    },
-    {
-      "trigger": "app",
-      "triggerOption": "OpenJDK Platform binary",
-      "pattern": "backlight",
-      "patternOptions": {},
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0
-      ],
-      "id": 5
-    },
-    {
-      "trigger": "default",
-      "triggerOption": "",
-      "pattern": "christmas",
-      "patternOptions": {},
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        6
-      ],
-      "id": 6
-    },
-    {
-      "trigger": "app",
-      "triggerOption": "Sid Meier's Civilization VI (DX12)",
-      "pattern": "backlight",
-      "patternOptions": {},
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0
-      ],
-      "id": 7
+      "id": 2
     }
   ]
 }
