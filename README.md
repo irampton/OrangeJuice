@@ -1,3 +1,5 @@
 # OrangeJuice
+An All-Inclusive Software for Controlling LEDs
 
-This is a repo for my custom build software for controlling LED lights with a raspberry pi.
+
+OrangeJuice designed run on a Raspberry Pi to control WS2812b LEDs. It uses a powerful system of strips, patterns, and effects to drive LED strips, rings, and matrices.
