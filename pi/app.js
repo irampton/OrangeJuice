@@ -8,19 +8,15 @@ app.use(express.static('web'));
 const nconf = require('nconf');
 nconf.file({file: './config.json'});
 
+//catch all errors
+process.on('uncaughtException', function (err) {
+    console.log(new Date().toString(), " - Got an error:");
+    console.log(err)
+});
+
 //general
 let disconnectConfigs = nconf.get('disconnectConfigs');
-
-function saveConfig() {
-    nconf.save(function (err) {
-        if (err) {
-            console.error(err.message);
-            return;
-        }
-        //console.log('Configuration saved successfully.');
-    });
-}
-
+let connectedSystemStats = { "cpu": "100"};
 let numPixels = 0;
 let currentLEDs = {
     "strips": []
@@ -50,7 +46,49 @@ function drawLEDs() {
     ledControl.updateLEDs(arr);
 }
 
+//web listeners
+app.get('/rainbowMode', (req, res) => {
+    let options = {
+        "trigger": 'GET',
+        "pattern": 'rainbow',
+        "patternOptions": {"multiplier": 1},
+        "effect": "chase",
+        "effectOptions": {"reverse": true, "speed": 1},
+        "strips": [1],
+        //"transition": 'fade',
+        "transitionOptions": {"time": 25}
+    }
+    setLEDs(options);
+    res.send('done');
+});
+app.get('/lightsOff', (req, res) => {
+    let options = {
+        "trigger": 'GET',
+        "pattern": 'off',
+        "patternOptions": {},
+        "effect": "",
+        "strips": [1],
+        "transition": 'fade',
+        "transitionOptions": {"time": 25}
+    }
+    setLEDs(options);
+    res.send('done');
+});
 
+//set up homekit
+const HomeKit = require('./homekit.js');
+//const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights', [1, 2, 3, 4, 5], setLEDs);
+const homekit = new HomeKit("hap.orangejuice.light", nconf.get('homekit'), setLEDs);
+
+//set up matrix
+let displayMatrix = nconf.get("displayMatrix");
+const matrixScripts = require("./matrix-scripts.js");
+let matrixInterval
+setTimeout(() => {
+    changeMatrix({'id': displayMatrix.default})
+}, 500);
+
+//websockets
 io.on('connection', function (socket) {
     console.log('a user connected');
     socket.on('disconnect', function () {
@@ -86,25 +124,19 @@ io.on('connection', function (socket) {
                 'options': ledScripts.effects[value].options
             });
         });
-
         callback(scriptsList);
     });
+    socket.on('getLEDScripts', (callback) => {
+        callback(ledScripts);
+    });
+    socket.on('getMatrixScripts', (callback) => {
+        callback(matrixScripts);
+    });
     socket.on('setLEDs', (options) => {
-        //console.log('setLEDS', options);
-        //clear all other app scripts
-        if (options.trigger === "app") {
-            clearAppConfigs(options.strips);
-            setStripDefaults();
-        }
-        //write the config to each strip separately
-        options.strips.forEach((stripIndex) => {
-            if (options.trigger === "default") {
-                currentLEDs.strips[stripIndex].default = options;
-            }
-            writeConfigToStrips(stripIndex, options);
-        });
-        //after all the strips are set, draw the colors to the strip
-        drawLEDs();
+        setLEDs(options);
+    });
+    socket.on('setMatrix',(options)=>{
+        changeMatrix(options);
     });
     socket.on('clearAppConfigs', () => {
         clearAppConfigs();
@@ -127,7 +159,16 @@ io.on('connection', function (socket) {
                 break;
         }
         saveConfig();
-    })
+    });
+    socket.on('statsUpdate', (data)=>{
+        connectedSystemStats = data;
+    });
+    socket.on('startDemo', (data)=>{
+        socket.broadcast.emit('startDemo');
+    });
+    socket.on('pauseDemo', (data)=>{
+        socket.broadcast.emit('pauseDemo');
+    });
 });
 http.listen(port, () => console.log(`listening on port ${port}`));
 
@@ -184,7 +225,7 @@ function writeConfigToStrips(stripIndex, options) {
     //clear strip config completely
     currentLEDs.strips[stripIndex] = blankStrip(currentLEDs.strips[stripIndex]);
     //generate pattern
-    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate(stripConfig[stripIndex].length,options.patternOptions);
+    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate(stripConfig[stripIndex].length, options.patternOptions);
     //set trigger
     currentLEDs.strips[stripIndex].trigger = options.trigger;
     if (options.transition) {
@@ -223,4 +264,45 @@ function setStripDefaults() {
             blankStrip(strip);
         }
     })
+}
+
+function setLEDs(options) {
+    //clear all other app scripts
+    if (options.trigger === "app") {
+        clearAppConfigs(options.strips);
+        setStripDefaults();
+    }
+    //write the config to each strip separately
+    options.strips.forEach((stripIndex) => {
+        if (options.trigger === "default") {
+            currentLEDs.strips[stripIndex].default = options;
+        }
+        writeConfigToStrips(stripIndex, options);
+    });
+    //after all the strips are set, draw the colors to the strip
+    drawLEDs();
+}
+
+function saveConfig() {
+    nconf.save(function (err) {
+        if (err) {
+            console.error(err.message);
+            return;
+        }
+        //console.log('Configuration saved successfully.');
+    });
+}
+
+function changeMatrix(options){
+    clearInterval(matrixInterval);
+    options.strip = options.strip || displayMatrix.strip;
+    function runMatrix(){
+        if(matrixScripts[options.id].needsSystemStats){
+            matrixScripts[options.id].generate(options.strip, setLEDs, connectedSystemStats);
+        }else {
+            matrixScripts[options.id].generate(options.strip, setLEDs);
+        }
+    }
+    runMatrix();
+    matrixInterval = setInterval(runMatrix, matrixScripts[options.id].timeout);
 }

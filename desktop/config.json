@@ -83,9 +83,195 @@
     {
       "name": "GitHubDesktop.exe",
       "path": "C:\\Users\\IRamp\\AppData\\Local\\GitHubDesktop\\app-3.1.2\\GitHubDesktop.exe"
+    },
+    {
+      "name": "AsPowerBar.exe",
+      "path": "C:\\Program Files (x86)\\ASUS\\AI Suite III\\AsPowerBar\\AsPowerBar.exe"
+    },
+    {
+      "name": "Microsoft Excel",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-8.10.3\\gitkraken.exe"
+    },
+    {
+      "name": "Minecraft Launcher",
+      "path": "C:\\Program Files (x86)\\Minecraft Launcher\\MinecraftLauncher.exe"
+    },
+    {
+      "name": "OpenJDK Platform binary",
+      "path": "C:\\Program Files (x86)\\Minecraft Launcher\\runtime\\java-runtime-gamma\\windows-x64\\java-runtime-gamma\\bin\\javaw.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9008\\Discord.exe"
+    },
+    {
+      "name": "Notepad",
+      "path": "C:\\Windows\\System32\\notepad.exe"
+    },
+    {
+      "name": "Steam",
+      "path": "C:\\Program Files (x86)\\Steam\\steam.exe"
+    },
+    {
+      "name": "Steam Client WebHelper",
+      "path": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win7x64\\steamwebhelper.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.7.0.4841\\t2gp.exe"
+    },
+    {
+      "name": "Sid Meier's Civilization VI (DX12)",
+      "path": "D:\\Games\\steamapps\\common\\Sid Meier's Civilization VI\\Base\\Binaries\\Win64Steam\\CivilizationVI_DX12.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.7.1.4891\\t2gp.exe"
+    },
+    {
+      "name": "Task Manager",
+      "path": "C:\\Windows\\System32\\Taskmgr.exe"
+    },
+    {
+      "name": "ScreenClippingHost.exe",
+      "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\ScreenClippingHost.exe"
+    },
+    {
+      "name": "Runtime Broker",
+      "path": "C:\\Windows\\System32\\RuntimeBroker.exe"
+    },
+    {
+      "name": "DaVinci_Resolve_18.1.2_Windows.exe",
+      "path": "C:\\Users\\IRamp\\Downloads\\DaVinci_Resolve_18.1.2_Windows\\DaVinci_Resolve_18.1.2_Windows.exe"
+    },
+    {
+      "name": "DaVinci Resolve Installer",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\7zS046BE1BD\\SetupResolve.exe"
+    },
+    {
+      "name": "Setup/Uninstall",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\is-KVLLA.tmp\\FairlightAudioAccelerator v1.0.13.tmp"
+    },
+    {
+      "name": "Windows® installer",
+      "path": "C:\\Windows\\SysWOW64\\msiexec.exe"
+    },
+    {
+      "name": "vcredist_x64_vc14.exe",
+      "path": "C:\\Windows\\Temp\\{E67B126B-CDE7-43C5-BA7B-49389F153D61}\\.cr\\vcredist_x64_vc14.exe"
+    },
+    {
+      "name": "DaVinci Resolve Welcome.exe",
+      "path": "C:\\ProgramData\\Blackmagic Design\\DaVinci Resolve\\Support\\Onboarding\\DaVinci Resolve Welcome.exe"
+    },
+    {
+      "name": "DaVinci Resolve",
+      "path": "C:\\Program Files\\Blackmagic Design\\DaVinci Resolve\\Resolve.exe"
+    },
+    {
+      "name": "WebStorm",
+      "path": "C:\\Program Files\\JetBrains\\WebStorm 2022.3.2\\bin\\webstorm64.exe"
+    },
+    {
+      "name": "SearchHost.exe",
+      "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\SearchHost.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE"
+    },
+    {
+      "name": "MusicBee",
+      "path": "C:\\Program Files (x86)\\MusicBee\\MusicBee.exe"
+    },
+    {
+      "name": "Microsoft Word",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE"
+    },
+    {
+      "name": "PowerToys.Settings",
+      "path": "C:\\Program Files\\PowerToys\\Settings\\PowerToys.Settings.exe"
+    },
+    {
+      "name": "PowerToys.ColorPickerUI",
+      "path": "C:\\Program Files\\PowerToys\\modules\\ColorPicker\\PowerToys.ColorPickerUI.exe"
+    },
+    {
+      "name": "Pick an app",
+      "path": "C:\\Windows\\System32\\OpenWith.exe"
+    },
+    {
+      "name": "WindowsTerminal.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.16.10262.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"
+    },
+    {
+      "name": "Calculator",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsCalculator_11.2210.0.0_x64__8wekyb3d8bbwe\\CalculatorApp.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.2.0\\gitkraken.exe"
+    },
+    {
+      "name": "WebStorm",
+      "path": "C:\\Program Files\\JetBrains\\WebStorm 2022.3.1\\bin\\webstorm64.exe"
+    },
+    {
+      "name": "Windows Start Experience Host",
+      "path": "C:\\Windows\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe"
+    },
+    {
+      "name": "Settings",
+      "path": "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe"
+    },
+    {
+      "name": "File Picker UI Host",
+      "path": "C:\\Windows\\System32\\PickerHost.exe"
     }
   ],
   "ledPatternList": [
+    {
+      "name": "Brightness Fill",
+      "id": "brightness-fill",
+      "options": [
+        {
+          "id": "color",
+          "name": "Fill Color",
+          "type": "color",
+          "default": "000000"
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
+    {
+      "name": "Color Temperature & Brightness",
+      "id": "brightness-kelvin",
+      "options": [
+        {
+          "id": "kelvin",
+          "name": "Temperature (k)",
+          "type": "number",
+          "default": 6500,
+          "min": 1000,
+          "max": 40000
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
     {
       "name": "Christmas",
       "id": "christmas",
@@ -154,6 +340,50 @@
           "name": "Color #3",
           "type": "color",
           "default": "000000"
+        }
+      ]
+    },
+    {
+      "name": "HSL Fill",
+      "id": "hsl-fill",
+      "options": [
+        {
+          "id": "hue",
+          "name": "Hue",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "saturation",
+          "name": "Saturation",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "lightness",
+          "name": "Lightness",
+          "type": "number",
+          "default": 50
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
+    {
+      "name": "Color Temperature",
+      "id": "kelvin",
+      "options": [
+        {
+          "id": "kelvin",
+          "name": "Temperature (k)",
+          "type": "number",
+          "default": 6500,
+          "min": 1000,
+          "max": 40000
         }
       ]
     },
@@ -245,42 +475,34 @@
       "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 75
+        "level": 90
       }
     },
     {
-      "name": "Can #1",
+      "name": "Closet",
       "start": 64,
       "length": 16,
       "type": "ring"
     },
     {
-      "name": "Can #2",
+      "name": "Can #1",
       "start": 80,
       "length": 16,
       "type": "ring"
     },
     {
-      "name": "Can #3",
+      "name": "Matrix",
       "start": 96,
-      "length": 16,
-      "type": "ring"
-    },
-    {
-      "name": "Can #4",
-      "start": 112,
-      "length": 16,
-      "type": "ring"
-    },
-    {
-      "name": "Can #5",
-      "start": 128,
-      "length": 16,
-      "type": "ring"
+      "length": 256,
+      "type": "matrix",
+      "modifier": "brightness",
+      "modifierOptions": {
+        "level": 50
+      }
     },
     {
       "name": "Wall Strip",
-      "start": 144,
+      "start": 352,
       "length": 150,
       "type": "strip",
       "segments": [
@@ -290,26 +512,35 @@
       ],
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 50
-      }
-    },
-    {
-      "name": "Left Backlight",
-      "start": 294,
-      "length": 64,
-      "type": "strip",
-      "segments": [
-        0,
-        94,
-        118
-      ],
-      "modifier": "brightness",
-      "modifierOptions": {
-        "level": 85
+        "level": 66
       }
     }
   ],
   "configurations": [
+    {
+      "trigger": "app",
+      "triggerOption": "Sid Meier's Civilization VI (DX12)",
+      "pattern": "backlight",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 7
+    },
+    {
+      "trigger": "disconnect",
+      "triggerOption": "",
+      "pattern": "off",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 3
+    },
     {
       "trigger": "app",
       "triggerOption": "Aerial",
@@ -324,80 +555,41 @@
     },
     {
       "trigger": "app",
-      "triggerOption": "WebStorm",
+      "triggerOption": "Firefox",
       "pattern": "fill",
       "patternOptions": {
-        "color": "00ffff"
+        "color": "ff8000"
       },
       "effect": "",
       "effectOptions": {},
       "strips": [
         0
       ],
-      "id": 2
-    },
-    {
-      "trigger": "default",
-      "triggerOption": "",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "ebe9cd"
-      },
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "id": 2
-    },
-    {
-      "trigger": "disconnect",
-      "triggerOption": "",
-      "pattern": "fill",
-      "patternOptions": {
-        "color": "000000"
-      },
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
       "id": 3
     },
     {
-      "trigger": "default",
-      "triggerOption": "",
-      "pattern": "christmas",
+      "trigger": "app",
+      "triggerOption": "Windows Explorer",
+      "pattern": "backlight",
       "patternOptions": {},
       "effect": "",
       "effectOptions": {},
       "strips": [
-        6
+        0
       ],
       "id": 4
     },
     {
       "trigger": "app",
-      "triggerOption": "Firefox",
-      "pattern": "christmas",
-      "patternOptions": {},
-      "effect": "wipe",
-      "effectOptions": {
-        "speed": ".1"
+      "triggerOption": "Microsoft Outlook",
+      "pattern": "fill",
+      "patternOptions": {
+        "color": "0080ff"
       },
+      "effect": "",
+      "effectOptions": {},
       "strips": [
-        1
+        0
       ],
       "id": 5
     }

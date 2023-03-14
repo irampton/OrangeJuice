@@ -2,30 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OrangeJuice Preview</title>
-    <script src="lib/jscolor.min.js"></script>
+    <title>OrangeJuice Control</title>
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .light {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        body {
+            color: white;
+            background-color: black;
+        }
+    </style>
 </head>
 <body>
-<h1>OrangeJuice Preview</h1>
-<input id="fillColor" data-jscolor="{}" value="#FFFFFF">
-<button onclick="fillColor()">Fill Color</button>
-<br><br><br>
-<div id="lights"></div>
-<style>
-    .light {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        margin: 10px;
-        border-radius: 10px;
-    }
+<h1>OrangeJuice Control</h1>
+<div id="controls">
+    <h3>Pattern Options</h3>
+    <label for="pattern">Pattern:</label> <select id="pattern" onchange="changePattern()"></select>
+    <span id="patternOptions"></span>
+    <br><br>
+    <h3>Effect Options</h3>
+    <label for="effect">Effect:</label> <select id="effect" onchange="changeEffect()"></select>
+    <span id="effectOptions"></span>
+    <br><br>
+    <h3>Strips</h3>
+    <span id="stripsCheckboxes"></span>
+    <br><br>
+    <button style="margin-left: 1%" onclick="display()">Set Pattern & Effect</button>
+    <br><br>
+    <h2>32x8 Matrix Control</h2>
+    <select id="matrixSelect" ></select>
+    <br><br>
+    <button onclick="setMatrix()">Set Matrix</button>
+    <br><br><br>
+    <button onclick="socket.emit('startDemo');">Start Demo</button><button onclick="socket.emit('pauseDemo');">Pause Demo</button>
+</div>
 
-    body {
-        color: white;
-        background-color: black;
-    }
-</style>
 <script src="index.js"></script>
 </body>
 </html>

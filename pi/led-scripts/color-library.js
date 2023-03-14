@@ -8,9 +8,10 @@ module.exports = {
     //manipulators
     'hue': hue,
     'lerpColor': lerpColor,
-    'brightness': brightness,
+    'brightness': brightnessRgb,
     'brightnessHsl': brightnessHsl,
-    'brightnessRgb': brightnessRgb
+    'brightnessRgb': brightnessRgb,
+    'kelvinToRgb': kelvinToRgb
 }
 
 
@@ -53,7 +54,7 @@ function toHex(number) {
     return hex.length === 1 ? "0" + hex : hex;
 }
 
-function hexToRgb(hex){
+function hexToRgb(hex) {
     return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)]
 }
 
@@ -110,15 +111,60 @@ function hslToRgb(arr) {
 
 function brightnessRgb(color, amount) {
     //color should be [r,g,b]
-    return [color[0] * amount / 100, color[1] * amount / 100, color[2] * amount / 100];
+    return [color[0] * amount, color[1] * amount, color[2] * amount];
 }
 
-function brightnessHsl(color,amount){
+function brightnessHsl(color, amount) {
     //color should be [h,s,l]
     color[2] = color[2] * amount;
     return color
 }
 
-function brightness(color, amount){
-    return hslToRgb(brightnessHsl(rgbToHsl(color),amount));
+function brightness(color, amount) {
+    return hslToRgb(brightnessHsl(rgbToHsl(color), amount));
+}
+
+function kelvinToRgb(kelvin) {
+    let temperature = kelvin / 100;
+    let red, green, blue;
+
+    //Calculate Red:
+    if (temperature <= 66) {
+        red = 255;
+    } else {
+        red = temperature - 60;
+        red = 329.698727446 * Math.pow(red,-0.1332047592);
+        if (red < 0)
+            red = 0;
+        if (red > 255)
+            red = 255;
+    }
+
+    //Calculate Green:
+    if (temperature <= 66) {
+        green = temperature;
+        green = 99.4708025861 * Math.log(green) - 161.1195681661;
+    } else {
+        green = temperature - 60
+        green = 288.1221695283 * Math.pow(green,-0.0755148492);
+    }
+    if (green < 0)
+        green = 0;
+    if (green > 255)
+        green = 255;
+
+    //Calculate Blue:
+    if (temperature >= 66) {
+        blue = 255
+    } else if (temperature <= 19) {
+        blue = 0;
+    } else {
+        blue = temperature - 10
+        blue = 138.5177312231 * Math.log(blue) - 305.0447927307;
+        if (blue < 0)
+            blue = 0
+        if (blue > 255)
+            blue = 255;
+    }
+    return [Math.floor(red),Math.floor(green),Math.floor(blue)]
 }

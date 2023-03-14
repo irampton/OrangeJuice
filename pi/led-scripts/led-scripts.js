@@ -22,7 +22,9 @@ fs.readdir(path.join(__dirname, "patterns"), (err, files) => {
         if (file.match(/.js$/)) {
             let script = require(path.join(__dirname, "patterns",file));
             scripts.patterns[script.id] = script;
-            scripts.patterns.list.push(script.id);
+            if(!script.hide) {
+                scripts.patterns.list.push(script.id);
+            }
         }
     })
 });
