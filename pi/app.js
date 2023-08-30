@@ -9,6 +9,7 @@ const nconf = require( 'nconf' );
 nconf.file( { file: './config.json' } );
 
 //catch all errors
+
 process.on( 'uncaughtException', function ( err ) {
     console.log( new Date().toString(), " - Got an error:" );
     console.log( err )
@@ -21,6 +22,7 @@ let weatherData = {
     "indoor": {},
     "outdoor": {}
 };
+
 let numPixels = 0;
 let currentLEDs = {
     "strips": []
@@ -53,6 +55,7 @@ function drawLEDs() {
 }
 
 //web listeners
+
 app.get( '/rainbowMode', ( req, res ) => {
     let options = {
         "trigger": 'GET',
@@ -68,6 +71,7 @@ app.get( '/rainbowMode', ( req, res ) => {
     res.send( 'done' );
 } );
 app.get( '/lightsOff', ( req, res ) => {
+
     let options = {
         "trigger": 'GET',
         "pattern": 'off',
@@ -75,6 +79,7 @@ app.get( '/lightsOff', ( req, res ) => {
         "effect": "",
         "strips": [1],
         "transition": 'fade',
+
         "transitionOptions": { "time": 25 }
     }
     setLEDs( options );
@@ -178,6 +183,7 @@ io.on( 'connection', function ( socket ) {
                 'name': ledScripts.effects[value].name,
                 'id': ledScripts.effects[value].id,
                 'options': ledScripts.effects[value].options
+
             } );
         } );
         callback( scriptsList );
@@ -227,6 +233,7 @@ io.on( 'connection', function ( socket ) {
     } );
 } );
 http.listen( port, () => console.log( `listening on port ${port}` ) );
+
 
 //helper functions
 function newLEDarr( size, color ) {
@@ -359,4 +366,5 @@ function changeMatrix( options ) {
 
     runMatrix();
     matrixInterval = setInterval( runMatrix, matrixScripts[options.id].timeout );
+
 }

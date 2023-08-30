@@ -40,3 +40,4 @@ getOutdoorData( weatherData );
 setTimeout( () => {
     console.log( weatherData.outdoor );
 }, 1000 );
+

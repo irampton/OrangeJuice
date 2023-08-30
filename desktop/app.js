@@ -1,5 +1,6 @@
 const activeWindow = require('active-win');
 const {io} = require("socket.io-client");
+
 const serverSocket = io("http://10.10.42.133:7974/");
 const nconf = require('nconf');
 nconf.file({file: './config.json'});
