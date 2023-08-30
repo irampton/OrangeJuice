@@ -171,6 +171,526 @@
     {
       "name": "DaVinci Resolve",
       "path": "C:\\Program Files\\Blackmagic Design\\DaVinci Resolve\\Resolve.exe"
+    },
+    {
+      "name": "WebStorm",
+      "path": "C:\\Program Files\\JetBrains\\WebStorm 2022.3.2\\bin\\webstorm64.exe"
+    },
+    {
+      "name": "SearchHost.exe",
+      "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\SearchHost.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE"
+    },
+    {
+      "name": "MusicBee",
+      "path": "C:\\Program Files (x86)\\MusicBee\\MusicBee.exe"
+    },
+    {
+      "name": "Microsoft Word",
+      "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE"
+    },
+    {
+      "name": "PowerToys.Settings",
+      "path": "C:\\Program Files\\PowerToys\\Settings\\PowerToys.Settings.exe"
+    },
+    {
+      "name": "PowerToys.ColorPickerUI",
+      "path": "C:\\Program Files\\PowerToys\\modules\\ColorPicker\\PowerToys.ColorPickerUI.exe"
+    },
+    {
+      "name": "Pick an app",
+      "path": "C:\\Windows\\System32\\OpenWith.exe"
+    },
+    {
+      "name": "WindowsTerminal.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.16.10262.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"
+    },
+    {
+      "name": "Calculator",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsCalculator_11.2210.0.0_x64__8wekyb3d8bbwe\\CalculatorApp.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.2.0\\gitkraken.exe"
+    },
+    {
+      "name": "WebStorm",
+      "path": "C:\\Program Files\\JetBrains\\WebStorm 2022.3.1\\bin\\webstorm64.exe"
+    },
+    {
+      "name": "Windows Start Experience Host",
+      "path": "C:\\Windows\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe"
+    },
+    {
+      "name": "Settings",
+      "path": "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe"
+    },
+    {
+      "name": "File Picker UI Host",
+      "path": "C:\\Windows\\System32\\PickerHost.exe"
+    },
+    {
+      "name": "Plex.exe",
+      "path": "C:\\Program Files\\Plex\\Plex\\Plex.exe"
+    },
+    {
+      "name": "Notepad++",
+      "path": "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+    },
+    {
+      "name": "LockApp.exe",
+      "path": "C:\\Windows\\SystemApps\\Microsoft.LockApp_cw5n1h2txyewy\\LockApp.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9011\\Discord.exe"
+    },
+    {
+      "name": "PowerToys.Run",
+      "path": "C:\\Program Files\\PowerToys\\modules\\launcher\\PowerToys.PowerLauncher.exe"
+    },
+    {
+      "name": "DVDFab Passkey is a Windows-based driver that works on-the-fly to unprotect encrypted movie DVDs and Blu-ray discs. - x86",
+      "path": "C:\\Program Files (x86)\\DVDFab\\Passkey\\DVDFabPasskey.exe"
+    },
+    {
+      "name": "HandBrake",
+      "path": "C:\\Program Files\\HandBrake\\HandBrake.exe"
+    },
+    {
+      "name": "Maperitive",
+      "path": "F:\\Maps\\Maperitive-latest\\Maperitive\\Maperitive.exe"
+    },
+    {
+      "name": "Minecraft.exe",
+      "path": "C:\\XboxGames\\Minecraft Launcher\\Content\\Minecraft.exe"
+    },
+    {
+      "name": "OpenJDK Platform binary",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Packages\\Microsoft.4297127D64EC6_8wekyb3d8bbwe\\LocalCache\\Local\\runtime\\java-runtime-gamma\\windows-x64\\java-runtime-gamma\\bin\\javaw.exe"
+    },
+    {
+      "name": "Adobe Illustrator 2023",
+      "path": "C:\\Program Files\\Adobe\\Adobe Illustrator 2023\\Support Files\\Contents\\Windows\\Illustrator.exe"
+    },
+    {
+      "name": "Notepad.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsNotepad_11.2302.16.0_x64__8wekyb3d8bbwe\\Notepad\\Notepad.exe"
+    },
+    {
+      "name": "PhotosApp.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2023.11010.17009.0_x64__8wekyb3d8bbwe\\PhotosApp.exe"
+    },
+    {
+      "name": "DisneyPlus",
+      "path": "C:\\Program Files\\WindowsApps\\Disney.37853FC22B2CE_1.48.2.0_x64__6rarf9sa4v8jt\\DisneyPlus.exe"
+    },
+    {
+      "name": "The Jackbox Party Pack 4",
+      "path": "G:\\Games\\steamapps\\common\\The Jackbox Party Pack 4\\The Jackbox Party Pack 4.exe"
+    },
+    {
+      "name": "The Jackbox Party Pack 3",
+      "path": "G:\\Games\\steamapps\\common\\The Jackbox Party Pack 3\\The Jackbox Party Pack 3.exe"
+    },
+    {
+      "name": "Microsoft To Do",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.Todos_2.93.6831.0_x64__8wekyb3d8bbwe\\Todo.exe"
+    },
+    {
+      "name": "DisneyPlus",
+      "path": "C:\\Program Files\\WindowsApps\\Disney.37853FC22B2CE_1.49.3.0_x64__6rarf9sa4v8jt\\DisneyPlus.exe"
+    },
+    {
+      "name": "Microsoft To Do",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.Todos_2.94.6962.0_x64__8wekyb3d8bbwe\\Todo.exe"
+    },
+    {
+      "name": "Creative Cloud Desktop",
+      "path": "C:\\Program Files\\Adobe\\Adobe Creative Cloud\\ACC\\Creative Cloud.exe"
+    },
+    {
+      "name": "Adobe Licensing WF",
+      "path": "C:\\Program Files\\Common Files\\Adobe\\Adobe Desktop Common\\NGL\\adobe_licensing_wf.exe"
+    },
+    {
+      "name": "VLC media player",
+      "path": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9013\\Discord.exe"
+    },
+    {
+      "name": "WindowsTerminal.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.17.11461.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"
+    },
+    {
+      "name": "Sound Blaster Audigy 5/Rx Control Panel",
+      "path": "C:\\Program Files (x86)\\Creative\\SBAudigy5Rx\\SB Audigy 5_RX Control Panel\\AudioConsoleLauncher.exe"
+    },
+    {
+      "name": "DisneyPlus",
+      "path": "C:\\Program Files\\WindowsApps\\Disney.37853FC22B2CE_1.54.2.0_x64__6rarf9sa4v8jt\\DisneyPlus.exe"
+    },
+    {
+      "name": "mspaint.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.Paint_11.2302.19.0_x64__8wekyb3d8bbwe\\PaintApp\\mspaint.exe"
+    },
+    {
+      "name": "Adobe Photoshop 2023",
+      "path": "C:\\Program Files\\Adobe\\Adobe Photoshop (Beta)\\Photoshop.exe"
+    },
+    {
+      "name": "PhotosApp.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2023.11050.16005.0_x64__8wekyb3d8bbwe\\PhotosApp.exe"
+    },
+    {
+      "name": "Adobe Lightroom",
+      "path": "C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21480.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Notepad.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsNotepad_11.2304.26.0_x64__8wekyb3d8bbwe\\Notepad\\Notepad.exe"
+    },
+    {
+      "name": "WinGup for Notepad++",
+      "path": "C:\\Program Files (x86)\\Notepad++\\updater\\GUP.exe"
+    },
+    {
+      "name": "Adobe Acrobat ",
+      "path": "C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe"
+    },
+    {
+      "name": "Adobe Photoshop 2023",
+      "path": "C:\\Program Files\\Adobe\\Adobe Photoshop 2023\\Photoshop.exe"
+    },
+    {
+      "name": "Credential Manager UI Host",
+      "path": "C:\\Windows\\System32\\CredentialUIBroker.exe"
+    },
+    {
+      "name": "Microsoft Phone Link",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.23042.108.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe"
+    },
+    {
+      "name": "Microsoft Management Console",
+      "path": "C:\\Windows\\System32\\mmc.exe"
+    },
+    {
+      "name": "GospelLibrary.UI",
+      "path": "C:\\Program Files\\WindowsApps\\TheChurchofJesusChristofL.GospelLibrary_6.3.0.0_x64__ae8bh92e13w8t\\GospelLibrary.UI.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9014\\Discord.exe"
+    },
+    {
+      "name": "AnyStream",
+      "path": "C:\\Program Files\\RedFox\\AnyStream\\AnyStream.exe"
+    },
+    {
+      "name": "A~NSISu_.tmp",
+      "path": "C:\\Program Files\\RedFox\\AnyStream\\A~NSISu_.tmp"
+    },
+    {
+      "name": "Registry Editor",
+      "path": "C:\\Windows\\regedit.exe"
+    },
+    {
+      "name": "NVIDIA GeForce Experience",
+      "path": "C:\\Program Files\\NVIDIA Corporation\\NVIDIA GeForce Experience\\NVIDIA GeForce Experience.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "C:\\Users\\IRamp\\Downloads\\Butterscotch_1.1.0.1\\Butterscotch_1.1.0.1.exe"
+    },
+    {
+      "name": "Microsoft Edge",
+      "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21490.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "GitHubDesktop.exe",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\GitHubDesktop\\app-3.2.3\\GitHubDesktop.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.5.1\\gitkraken.exe"
+    },
+    {
+      "name": "GitHubDesktop.exe",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\GitHubDesktop\\app-3.2.6\\GitHubDesktop.exe"
+    },
+    {
+      "name": "Microsoft Phone Link",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.23052.121.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe"
+    },
+    {
+      "name": "Sound Blaster Audigy 5/Rx Systray Applet",
+      "path": "C:\\Program Files (x86)\\Creative\\SBAudigy5Rx\\SB Audigy 5_RX Control Panel\\CTHKCtrl.exe"
+    },
+    {
+      "name": "LGHUB",
+      "path": "C:\\Program Files\\LGHUB\\lghub.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "G:\\Godot_v4.0.3-stable_mono_win64\\Godot_v4.0.3-stable_mono_win64\\Godot_v4.0.3-stable_mono_win64.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9015\\Discord.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "G:\\Godot_v4.1-stable_win64.exe"
+    },
+    {
+      "name": "PowerToys PowerRename UI",
+      "path": "C:\\Program Files\\PowerToys\\modules\\PowerRename\\PowerToys.PowerRename.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "E:\\Export\\DragonDrop.exe"
+    },
+    {
+      "name": "Windows® installer",
+      "path": "C:\\Windows\\System32\\msiexec.exe"
+    },
+    {
+      "name": "igcmd - ImageGlass commands",
+      "path": "C:\\Program Files\\ImageGlass\\igcmd.exe"
+    },
+    {
+      "name": "ImageGlass",
+      "path": "C:\\Program Files\\ImageGlass\\ImageGlass.exe"
+    },
+    {
+      "name": "Synology Drive Client",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\SynologyDrive\\SynologyDrive.app\\bin\\cloud-drive-ui.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "D:\\Code Projects\\DragonDrop\\exports\\DragonDrop v0.3.0\\DragonDrop.exe"
+    },
+    {
+      "name": "Google Chrome",
+      "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    },
+    {
+      "name": "Adobe Animate 2023",
+      "path": "C:\\Program Files\\Adobe\\Adobe Animate 2023\\Animate.exe"
+    },
+    {
+      "name": "iCloud for Windows",
+      "path": "C:\\Program Files\\WindowsApps\\AppleInc.iCloud_14.2.96.0_x64__nzyj5cx40ttqa\\iCloud\\iCloudServices.exe"
+    },
+    {
+      "name": "Microsoft Phone Link",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.23052.122.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe"
+    },
+    {
+      "name": "OpenJDK Platform binary",
+      "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.7.7-hotspot\\bin\\javaw.exe"
+    },
+    {
+      "name": "Setup/Uninstall",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\is-U54JQ.tmp\\VoicemodSetup_2.43.4.0.tmp"
+    },
+    {
+      "name": "Setup/Uninstall",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\is-8RNER.tmp\\VoicemodSetup_2.43.4.0.tmp"
+    },
+    {
+      "name": "Voicemod",
+      "path": "C:\\Program Files\\Voicemod Desktop\\VoicemodDesktop.exe"
+    },
+    {
+      "name": "Prism Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Programs\\PrismLauncher\\prismlauncher.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.6.0\\gitkraken.exe"
+    },
+    {
+      "name": "Microsoft OneDrive",
+      "path": "C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21502.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Godot Engine",
+      "path": "C:\\Users\\IRamp\\OneDrive\\Share\\DragonDrop\\v0.4.0\\DragonDrop.exe"
+    },
+    {
+      "name": "TheEscapists2.exe",
+      "path": "G:\\Games\\steamapps\\common\\The Escapists 2\\TheEscapists2.exe"
+    },
+    {
+      "name": "GospelLibrary.UI",
+      "path": "C:\\Program Files\\WindowsApps\\TheChurchofJesusChristofL.GospelLibrary_6.3.1.0_x64__ae8bh92e13w8t\\GospelLibrary.UI.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21508.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Windows PowerShell",
+      "path": "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe"
+    },
+    {
+      "name": "vc_redist.x64.exe",
+      "path": "C:\\Windows\\Temp\\{1DDDFA43-4FBA-44A8-A57F-33A0F402813D}\\.cr\\vc_redist.x64.exe"
+    },
+    {
+      "name": "Microsoft Phone Link",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.23052.123.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe"
+    },
+    {
+      "name": "iCloudPrefs",
+      "path": "C:\\Program Files\\WindowsApps\\AppleInc.iCloud_14.2.108.0_x64__nzyj5cx40ttqa\\iCloud\\iCloudPrefs.exe"
+    },
+    {
+      "name": "DisneyPlus",
+      "path": "C:\\Program Files\\WindowsApps\\Disney.37853FC22B2CE_1.57.2.0_x64__6rarf9sa4v8jt\\DisneyPlus.exe"
+    },
+    {
+      "name": "Notepad.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsNotepad_11.2305.18.0_x64__8wekyb3d8bbwe\\Notepad\\Notepad.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21514.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Microsoft Phone Link",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.23052.125.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe"
+    },
+    {
+      "name": "NVIDIA Package Launcher",
+      "path": "C:\\Users\\IRamp\\Downloads\\cuda_12.2.1_536.67_windows.exe"
+    },
+    {
+      "name": "NVIDIA Install Application",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\cuda\\setup.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9016\\Discord.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.6.1\\gitkraken.exe"
+    },
+    {
+      "name": "Store",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsStore_22306.1401.1.0_x64__8wekyb3d8bbwe\\WinStore.App.exe"
+    },
+    {
+      "name": "PrimeVideo.exe",
+      "path": "C:\\Program Files\\WindowsApps\\AmazonVideo.PrimeVideo_1.0.145.0_x64__pwbj9vvecjh7j\\PrimeVideo.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21524.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Setup/Uninstall",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\is-GCGUM.tmp\\VoicemodUpdate_2.44.1.0.tmp"
+    },
+    {
+      "name": "Mindustry.exe",
+      "path": "G:\\Games\\steamapps\\common\\Mindustry\\Mindustry.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21532.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "PrimeVideo.exe",
+      "path": "C:\\Program Files\\WindowsApps\\AmazonVideo.PrimeVideo_1.0.146.0_x64__pwbj9vvecjh7j\\PrimeVideo.exe"
+    },
+    {
+      "name": "vc_redist.x64.exe",
+      "path": "C:\\Windows\\Temp\\{ABD73FBF-A1AC-4EDE-98B8-A3FE767EBC0E}\\.cr\\vc_redist.x64.exe"
+    },
+    {
+      "name": "COM Surrogate",
+      "path": "C:\\Windows\\System32\\dllhost.exe"
+    },
+    {
+      "name": "Remote Desktop Connection",
+      "path": "C:\\Windows\\System32\\mstsc.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.10.0.5095\\t2gp.exe"
+    },
+    {
+      "name": "Sid Meier's Civilization VI (DX12)",
+      "path": "G:\\Games\\steamapps\\common\\Sid Meier's Civilization VI\\Base\\Binaries\\Win64Steam\\CivilizationVI_DX12.exe"
+    },
+    {
+      "name": "PowerToys.Peek.UI",
+      "path": "C:\\Program Files\\PowerToys\\modules\\Peek\\PowerToys.Peek.UI.exe"
+    },
+    {
+      "name": "2K Launcher",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\T2GP Launcher\\app-1.11.0.5176\\t2gp.exe"
+    },
+    {
+      "name": "Discord",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Discord\\app-1.0.9017\\Discord.exe"
+    },
+    {
+      "name": "Windows Problem Reporting",
+      "path": "C:\\Windows\\SysWOW64\\WerFault.exe"
+    },
+    {
+      "name": "Microsoft Outlook",
+      "path": "C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.21538.0_x64__8wekyb3d8bbwe\\HxOutlook.exe"
+    },
+    {
+      "name": "Notepad.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsNotepad_11.2306.15.0_x64__8wekyb3d8bbwe\\Notepad\\Notepad.exe"
+    },
+    {
+      "name": "prusaslicer-updater 2.5.2",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\Temp\\fccc0bf46ede8f9c98aa3fbae650ace1\\prusaslicer-updater.exe"
+    },
+    {
+      "name": "Microsoft® Drive Optimizer",
+      "path": "C:\\Windows\\System32\\dfrgui.exe"
+    },
+    {
+      "name": "Raspberry Pi Imager",
+      "path": "C:\\Users\\IRamp\\Downloads\\imager_1.7.5.exe"
+    },
+    {
+      "name": "rpi-imager.exe",
+      "path": "C:\\Program Files (x86)\\Raspberry Pi Imager\\rpi-imager.exe"
+    },
+    {
+      "name": "GitHubDesktop.exe",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\GitHubDesktop\\app-3.2.7\\GitHubDesktop.exe"
+    },
+    {
+      "name": "GitKraken",
+      "path": "C:\\Users\\IRamp\\AppData\\Local\\gitkraken\\app-9.7.1\\gitkraken.exe"
     }
   ],
   "ledPatternList": [
@@ -284,6 +804,36 @@
       ]
     },
     {
+      "name": "HSL Fill",
+      "id": "hsl-fill",
+      "options": [
+        {
+          "id": "hue",
+          "name": "Hue",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "saturation",
+          "name": "Saturation",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "lightness",
+          "name": "Lightness",
+          "type": "number",
+          "default": 50
+        },
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "number",
+          "default": 100
+        }
+      ]
+    },
+    {
       "name": "Color Temperature",
       "id": "kelvin",
       "options": [
@@ -378,102 +928,35 @@
   ],
   "stripConfig": [
     {
-      "name": "Backlight",
-      "start": 0,
-      "length": 64,
+      "name": "Matrix",
+      "start": 64,
+      "length": 256,
       "type": "matrix",
-      "height": 8,
       "modifier": "brightness",
       "modifierOptions": {
-        "level": 90
+        "level": 50
       }
     },
     {
-      "name": "Can #1",
-      "start": 64,
+      "name": "Shelf Light #1",
+      "start": 320,
       "length": 16,
       "type": "ring"
     },
     {
-      "name": "Can #2",
-      "start": 80,
-      "length": 16,
-      "type": "ring"
-    },
-    {
-      "name": "Can #3",
-      "start": 96,
-      "length": 16,
-      "type": "ring"
-    },
-    {
-      "name": "Can #4",
-      "start": 112,
-      "length": 16,
-      "type": "ring"
-    },
-    {
-      "name": "Can #5",
-      "start": 128,
+      "name": "Shelf Light #2",
+      "start": 336,
       "length": 16,
       "type": "ring"
     },
     {
       "name": "Wall Strip",
-      "start": 144,
+      "start": 352,
       "length": 150,
-      "type": "strip",
-      "segments": [
-        0,
-        94,
-        118
-      ],
-      "modifier": "brightness",
-      "modifierOptions": {
-        "level": 33
-      }
-    },
-    {
-      "name": "Left Backlight",
-      "start": 294,
-      "length": 64,
-      "type": "strip",
-      "segments": [
-        0,
-        94,
-        118
-      ],
-      "modifier": "brightness",
-      "modifierOptions": {
-        "level": 50
-      }
+      "type": "strip"
     }
   ],
   "configurations": [
-    {
-      "trigger": "app",
-      "triggerOption": "Sid Meier's Civilization VI (DX12)",
-      "pattern": "backlight",
-      "patternOptions": {},
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0
-      ],
-      "id": 7
-    },
-    {
-      "trigger": "disconnect",
-      "triggerOption": "",
-      "pattern": "off",
-      "patternOptions": {},
-      "effect": "",
-      "effectOptions": {},
-      "strips": [
-        0
-      ],
-      "id": 3
-    },
     {
       "trigger": "app",
       "triggerOption": "Aerial",
@@ -485,6 +968,44 @@
         0
       ],
       "id": 2
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "Microsoft Outlook",
+      "pattern": "fill",
+      "patternOptions": {
+        "color": "0080ff"
+      },
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 5
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "VLC media player",
+      "pattern": "backlight",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 9
+    },
+    {
+      "trigger": "app",
+      "triggerOption": "DisneyPlus",
+      "pattern": "backlight",
+      "patternOptions": {},
+      "effect": "",
+      "effectOptions": {},
+      "strips": [
+        0
+      ],
+      "id": 4
     }
   ]
 }
