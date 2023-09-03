@@ -19,11 +19,12 @@ module.exports = function (id, config, setLEDs) {
         lightService.displayName = name;
         lightService.subtype = subtype;
 
-        var currentLightState = false; // on or off
-        var currentBrightnessLevel = 100;
-        var currentColorTemp = 3600;
-        var currentHue = 0;
-        var currentSat = 0;
+        let currentLightState = false; // on or off
+        let currentBrightnessLevel = 100;
+        let currentColorTemp = 3600;
+        let currentHue = 0;
+        let currentSat = 0;
+        let currentMode = "static";
 
 // 'On' characteristic is required for the light service
         const onCharacteristic = lightService.getCharacteristic(Characteristic.On);
@@ -58,7 +59,7 @@ module.exports = function (id, config, setLEDs) {
             });
             colorCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
                 currentColorTemp = 1000000 / value;
-                sendToLights();
+                sendToLights("temperature");
                 callback();
             });
         }
@@ -71,7 +72,7 @@ module.exports = function (id, config, setLEDs) {
             });
             hueCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
                 currentHue = value;
-                sendToLights();
+                sendToLights("hueAndSat");
                 callback();
             });
             const satCharacteristic = lightService.getCharacteristic(Characteristic.Saturation);
@@ -80,20 +81,21 @@ module.exports = function (id, config, setLEDs) {
             });
             satCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
                 currentSat = value;
-                sendToLights();
+                sendToLights("hueAndSat");
                 callback();
             });
 
         }
 
-        function sendToLights() {
+        function sendToLights(mode = undefined) {
+            currentMode = mode ?? currentMode
             let config;
-            if (temperature) {
+            if (mode === "temperature") {
                 config = createConfig(currentLightState, currentBrightnessLevel, {
                     'type': "temp",
                     'temp': currentColorTemp
                 }, strips);
-            } else if (hueAndSat) {
+            } else if (mode === "hueAndSat") {
                 config = createConfig(currentLightState, currentBrightnessLevel, {
                     'type': "hsl",
                     'hue': currentHue,
