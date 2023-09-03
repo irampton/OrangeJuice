@@ -2,30 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OrangeJuice Preview</title>
-    <script src="lib/jscolor.min.js"></script>
+    <title>OrangeJuice Control</title>
+    <link href="lib/w3.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .light {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        body {
+            color: white;
+            background-color: black;
+            margin-left: 10px;
+        }
+
+        .w3-select{
+            width: 200px;
+        }
+    </style>
 </head>
 <body>
-<h1>OrangeJuice Preview</h1>
-<input id="fillColor" data-jscolor="{}" value="#FFFFFF">
-<button onclick="fillColor()">Fill Color</button>
-<br><br><br>
-<div id="lights"></div>
-<style>
-    .light {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        margin: 10px;
-        border-radius: 10px;
-    }
+<h1 style="color: darkorange">OrangeJuice Control</h1>
+<div id="controls">
+    <h2>Strip Control</h2>
+    <h3>Pattern Options</h3>
+    <label for="pattern">Pattern:</label> <select id="pattern" class="w3-select" onchange="changePattern()"></select>
+    <span id="patternOptions"></span>
+    <br><br>
+    <h3>Effect Options</h3>
+    <label for="effect">Effect:</label> <select id="effect" class="w3-select" onchange="changeEffect()"></select>
+    <span id="effectOptions"></span>
+    <br><br>
+    <h3>Strips</h3>
+    <span id="stripsCheckboxes"></span>
+    <br><br>
+    <button onclick="display()" class="w3-btn w3-blue">Set Pattern & Effect</button>
+    <br><br>
+    <h2>32x8 Matrix Control</h2>
+    <select id="matrixSelect" class="w3-select"></select>
+    <br><br>
+    <button onclick="setMatrix()" class="w3-btn w3-blue">Set Matrix</button>
+    <br><br>
+    <h2>Demo Control</h2>
+    <button onclick="socket.emit('startDemo');" class="w3-btn w3-green">Start Demo</button>
+    <button onclick="socket.emit('pauseDemo');" class="w3-btn w3-red">Pause Demo</button>
+</div>
 
-    body {
-        color: white;
-        background-color: black;
-    }
-</style>
 <script src="index.js"></script>
 </body>
 </html>

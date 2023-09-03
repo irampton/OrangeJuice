@@ -1,9 +1,29 @@
+const sensorLib = require( 'node-dht-sensor' );
 const request = require( "request" );
 const cheerio = require( "cheerio" );
-let weatherData = {
-    "indoor": {},
-    "outdoor": {}
+
+// Setup sensor, warn if failed
+const sensorType = 11; // 11 for DHT11, 22 for DHT22 and AM2302
+const sensorPin = 4;  // The GPIO pin number for sensor signal
+if ( !sensorLib.initialize( sensorType, sensorPin ) ) {
+    console.warn( 'Failed to initialize sensor' );
+}
+
+//assign data to the passed by reference object
+module.exports = {
+    setData
 };
+
+function setData( weatherData ) {
+    getDHT11Data( weatherData );
+    setInterval( () => getDHT11Data( weatherData ), 2000 );
+    getOutdoorData( weatherData );
+    setInterval( () => getOutdoorData( weatherData ), 30000 );
+}
+
+function getDHT11Data( weatherData ) {
+    weatherData.indoor = sensorLib.read();
+}
 
 function getOutdoorData( weatherData ) {
     let url = "https://marvin.byu.edu/Weather/cgi-bin/textbritish";
@@ -35,8 +55,3 @@ function getOutdoorData( weatherData ) {
         }
     } );
 }
-
-getOutdoorData( weatherData );
-setTimeout( () => {
-    console.log( weatherData.outdoor );
-}, 1000 );

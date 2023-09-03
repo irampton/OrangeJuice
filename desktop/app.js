@@ -1,6 +1,6 @@
 const activeWindow = require('active-win');
 const {io} = require("socket.io-client");
-const serverSocket = io("http://192.168.50.224:7974");
+const serverSocket = io("http://10.10.42.133:7974/");
 const nconf = require('nconf');
 nconf.file({file: './config.json'});
 
@@ -95,6 +95,9 @@ ioS.on('connection', function (socket) {
             socket.emit('disconnectConfig', "remove", id);
         }
     });
+    socket.on('setLEDs', (options)=>{
+        serverSocket.emit('setLEDs', options);
+    })
 });
 http.listen(port, () => console.log(`listening on port ${port}`));
 
@@ -183,3 +186,29 @@ function sendToServer(msg, options) {
         serverSocket.emit(msg, options);
     }
 }
+
+//system information
+var os = require('os-utils');
+const exec = require('child_process').exec;
+
+function getStats(callback) {
+    os.cpuUsage((cpu) => {
+        let systemStats = {};
+        systemStats.cpu = Math.round(cpu * 100);
+        systemStats.mem = Math.round((1 - os.freememPercentage()) * 100);
+        exec("nvidia-smi --format=csv --query-gpu=utilization.gpu", (err, result) => {
+            if (err) {
+                console.error({err}, 'Failed to get stats from GPUs');
+            } else {
+                systemStats.gpu = Number(result.match(/\d+ %/g)[0].slice(0, -2));
+            }
+            callback(systemStats);
+        });
+    });
+}
+
+setInterval(()=>{
+    getStats((data)=>{
+        sendToServer('statsUpdate', data);
+    });
+}, 500);

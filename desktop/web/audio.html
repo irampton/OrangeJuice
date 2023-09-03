@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>OrangeViz</title>
+    <link href="/lib/w3.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<div class="fullscreen">
+    <canvas class="visualizer" width="640" height="100"></canvas>
+</div>
+<div class="w3-display-container fullscreen">
+    <h1 class="w3-display-middle text"></h1>
+    <p class="w3-display-topright" id="avg"></p>
+</div>
+
+<script src="audio.js"></script>
+
+</body>
+<style>
+    .fullscreen {
+        top: 0;
+        left: 0;
+        position: fixed;
+        min-width: 100%;
+        min-height: 100%;
+    }
+    .text{
+        color: white;
+        font-family: "Segoe UI";
+        font-size: 125px;
+    }
+</style>
+</html>
