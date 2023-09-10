@@ -12,9 +12,16 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.2",
-    "hap-nodejs": "^0.11.0",
+    "gpio-components": "^1.0.4",
+    "hap-nodejs": "^0.11.1",
+    "moment": "^2.29.4",
     "nconf": "^0.12.0",
+    "node-dht-sensor": "^0.4.3",
+    "oled-font-5x7": "^1.0.3",
+    "oled-i2c-bus": "^1.0.12",
+    "oled-rpi-i2c-bus": "^1.1.4",
     "request": "^2.88.2",
-    "socket.io": "^4.5.3"
+    "rpi-ws281x-native": "^1.0.4",
+    "socket.io": "^4.7.2"
   }
 }
