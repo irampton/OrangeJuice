@@ -144,6 +144,29 @@ GPIO.initDial( 0, () => {
     }
 } );
 
+//set the button config to also have a web api
+buttonMap.forEach((config, index) => {
+    app.get(`/button/${index}`, (req, res) => {
+        if ( config.pattern ) {
+            const options = {
+                "trigger": 'webAPI',
+                "pattern": config.pattern,
+                "patternOptions": config?.patternOptions,
+                "effect": config?.effect,
+                "effectOptions": config?.effectOptions,
+                "strips": config?.strips,
+                //"transition": 'fade',
+                //"transitionOptions": {"time": 25}
+            }
+            setLEDs( options );
+        }
+        if ( config.matrix ) {
+            changeMatrix( { id: config.matrix } );
+        }
+        res.send('done');
+    });
+});
+
 //websockets
 io.on( 'connection', function ( socket ) {
     console.log( 'a user connected' );
