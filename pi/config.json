@@ -1,4 +1,15 @@
 {
+  "features": {
+    "homekit": true,
+    "weatherSensor": false,
+    "weatherFetch": false,
+    "gpioButtons": false,
+    "gpioButtonsOnWeb": true,
+    "hostWebControl": true,
+    "webAPIs": true,
+    "ioStatsUpdate": false,
+    "matrixDisplay": false
+  },
   "strips": [
     {
       "name": "Backlight",
