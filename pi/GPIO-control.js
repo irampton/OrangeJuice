@@ -1,4 +1,4 @@
-const { RotaryEncoder, Switch } = require( 'gpio-components' );
+const { RotaryEncoder, Switch } = require( './gpio-library.js' );
 
 const buttonPins = [24, 25, 12, 16, 20, 21];
 let buttonArr = [];
@@ -31,7 +31,6 @@ module.exports = {
             pin: buttonArr[index].pinNum,
             onPress: () => callback()
         } );
-        buttonArr[index].handler.watch();
     },
     numDials: 1,
     initDial: ( index, CW, CCW ) => {
@@ -44,7 +43,6 @@ module.exports = {
             onIncrement: () => CW(),
             onDecrement: () => CCW()
         } );
-        dialArr[index].handler.watch();
     }
 }
 

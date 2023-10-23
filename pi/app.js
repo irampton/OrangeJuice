@@ -8,6 +8,7 @@ const buttonMap = nconf.get('buttonConfigs');
 const matrixScripts = require("./matrix-scripts.js");
 let disconnectConfigs = nconf.get('disconnectConfigs');
 const ledScripts = require("./led-scripts/led-scripts.js");
+const displayMatrix = nconf.get("displayMatrix");
 
 //general
 let globalBrightness = 20;
@@ -28,21 +29,6 @@ stripConfig.forEach((strip, index) => {
 //Load in needed modules
 const ledControlModule = require("./led-control.js");
 const ledControl = new ledControlModule(numPixels);
-
-//function that handles all writing to the LEDs
-function drawLEDs() {
-    let arr = [];
-    currentLEDs.strips.forEach((strip) => {
-        let tempArr = strip.arr;
-        if (stripConfig[strip.id].modifier) {
-            tempArr = ledScripts.modifiers[stripConfig[strip.id].modifier].modify(strip.arr, stripConfig[strip.id].modifierOptions);
-        }
-        for (let i = 0; i < stripConfig[strip.id].length; i++) {
-            arr.push(tempArr[i]);
-        }
-    });
-    ledControl.updateLEDs(arr);
-}
 
 //catch all errors
 process.on('uncaughtException', function (err) {
@@ -83,7 +69,7 @@ if (features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb) {
                 "pattern": 'off',
                 "patternOptions": {},
                 "effect": "",
-                "strips": [1],
+                "strips": [0,1],
                 "transition": 'fade',
                 "transitionOptions": {"time": 25}
             }
@@ -278,15 +264,15 @@ if(features.homekit) {
 
 //set up matrix
 let matrixInterval;
-if(features.matrixDisplay) {
-    let displayMatrix = nconf.get("displayMatrix");
 
+if(features.matrixDisplay) {
     setTimeout(() => {
         changeMatrix({'id': displayMatrix.default})
     }, 500);
 }
 
 //helper functions
+let drawOnInterval = false;
 function newLEDarr(size, color) {
     let arr = [];
     for (let i = 0; i < size; i++) {
@@ -350,7 +336,9 @@ function writeConfigToStrips(stripIndex, options) {
             if (currentLEDs.strips[stripIndex].transition) {
                 currentLEDs.strips[stripIndex].transition.step((arr) => {
                     currentLEDs.strips[stripIndex].arr = arr;
-                    drawLEDs();
+                    if(!drawOnInterval) {
+                        drawLEDs();
+                    }
                 })
             }
         }, currentLEDs.strips[stripIndex].transition.intervalTime);
@@ -364,9 +352,22 @@ function writeConfigToStrips(stripIndex, options) {
         currentLEDs.strips[stripIndex].effectTimout = setInterval(() => {
             currentLEDs.strips[stripIndex].effect.step((arr) => {
                 currentLEDs.strips[stripIndex].arr = arr;
-                drawLEDs();
+                if(!drawOnInterval) {
+                    drawLEDs();
+                }
             })
         }, currentLEDs.strips[stripIndex].effect.interval);
+    }
+
+    //figure out how many effects are being run, and if needed, switch to interval drawing
+    const effectsList = currentLEDs.strips.filter(e => e.effect.interval < 500);
+    if(effectsList.length >= 2){
+        if(!drawOnInterval) {
+            drawOnInterval = setInterval(()=>{drawLEDs()},1000 / 24);
+        }
+    } else {
+        clearInterval(drawOnInterval);
+        drawOnInterval = false;
     }
 }
 
@@ -395,6 +396,21 @@ function setLEDs(options) {
     });
     //after all the strips are set, draw the colors to the strip
     drawLEDs();
+}
+
+//function that handles all writing to the LEDs
+function drawLEDs() {
+    let arr = [];
+    currentLEDs.strips.forEach((strip) => {
+        let tempArr = strip.arr;
+        if (stripConfig[strip.id].modifier) {
+            tempArr = ledScripts.modifiers[stripConfig[strip.id].modifier].modify(strip.arr, stripConfig[strip.id].modifierOptions);
+        }
+        for (let i = 0; i < stripConfig[strip.id].length; i++) {
+            arr.push(tempArr[i]);
+        }
+    });
+    ledControl.updateLEDs(arr);
 }
 
 function saveConfig() {
