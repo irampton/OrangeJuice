@@ -1,12 +1,11 @@
 module.exports = {
     'id': "off",
     'name': "Off",
-    'options': [
-    ],
-    'generate': (numLEDs, options) => {
+    'options': [],
+    'generate': ( numLEDs, options ) => {
         let arr = [];
-        for (let i = 0; i < numLEDs; i++) {
-            arr.push("000000");
+        for ( let i = 0; i < numLEDs; i++ ) {
+            arr.push( "000000" );
         }
         return arr;
     }

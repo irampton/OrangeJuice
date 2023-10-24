@@ -1,4 +1,4 @@
-const {Color} = require('@orangejedi/yacml');
+const { Color } = require( '@orangejedi/yacml' );
 
 module.exports = {
     'id': "rainbow-num",
@@ -10,9 +10,9 @@ module.exports = {
     'generate': ( numLEDs, options ) => {
         let arr = [];
         for ( let i = 0; i < options.num; i++ ) {
-            arr.push( new Color( i / options.num * 360 ).getHex(false) );
+            arr.push( new Color( i / options.num * 360 ).getHex( false ) );
         }
-        if(options.blank){
+        if ( options.blank ) {
             for ( let i = options.num; i < numLEDs; i++ ) {
                 arr.push( "000000" );
             }

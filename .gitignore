@@ -1,3 +1,4 @@
 .idea
 desktop/node_modules
 pi/node_modules
+pi/test*.js

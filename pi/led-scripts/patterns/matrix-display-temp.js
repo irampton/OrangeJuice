@@ -1,4 +1,4 @@
-const {Color} = require('@orangejedi/yacml');
+const { Color } = require( '@orangejedi/yacml' );
 
 module.exports = {
     'id': "matrix-display-temp",
@@ -48,7 +48,7 @@ module.exports = {
                 if ( matrix[i][j] === 0 ) {
                     arr.push( "000000" );
                 } else {
-                    arr.push(new Color(matrix[i][j], 'hex').brightness((options?.brightness ?? .2) * 100).getHex(false));
+                    arr.push( new Color( matrix[i][j], 'hex' ).brightness( (options?.brightness ?? .2) * 100 ).getHex( false ) );
                 }
             }
 
@@ -114,8 +114,7 @@ const numbers = {
     " ": [
         [0, 0, 0, 0, 0, 0, 0, 0],
     ],
-    "^": [
-    ],
+    "^": [],
     "D": [
         [0, 1, 1, 1, 1, 1, 0, 0],
         [0, 1, 0, 0, 0, 1, 0, 0],

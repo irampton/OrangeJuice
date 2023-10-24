@@ -20,7 +20,7 @@ module.exports = {
                 break;
             case 2:
                 displayString = `WND^${weatherData.outdoor?.windSpeed}${getWindDirection( weatherData.outdoor?.windDirectionCardinal )}`;
-                colorArr = ["000077", "000077", "000077", "", ...[...Array(weatherData.outdoor?.windSpeed.toString().length)].map(e=>e="ff7700"), "007700", "007700", "007700", "007700", "007700"];
+                colorArr = ["000077", "000077", "000077", "", ...[...Array( weatherData.outdoor?.windSpeed.toString().length )].map( e => e = "ff7700" ), "007700", "007700", "007700", "007700", "007700"];
                 break;
             default:
                 displayString = "ERROR";

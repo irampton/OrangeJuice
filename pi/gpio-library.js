@@ -5,13 +5,7 @@ class RotaryEncoder {
     timeout = null;
     prevA = null;
 
-    constructor( {
-                     pinA,
-                     pinB,
-                     cw = () => false,
-                     ccw = () => false,
-                     always = () => false
-                 } ) {
+    constructor( { pinA, pinB, cw = () => false, ccw = () => false, always = () => false } ) {
         this.pinA = new Gpio( pinA, 'in', 'both' );
         this.pinB = new Gpio( pinB, 'in', 'both' );
         this.CW = cw;
@@ -50,11 +44,7 @@ class RotaryEncoder {
 }
 
 class Switch {
-    constructor( {
-                     pin,
-                     onPress = () => false,
-                     edge = 'rising'
-                 } ) {
+    constructor( { pin, onPress = () => false, edge = 'rising' } ) {
         this.pin = new Gpio( pin, 'in', edge );
         this.press = onPress;
         this.#watch();

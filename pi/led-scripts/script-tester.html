@@ -40,101 +40,101 @@
 
     let ledScripts;
 
-    socket.on('connect', function () {
-        socket.emit('getScripts', (data) => {
+    socket.on( 'connect', function () {
+        socket.emit( 'getScripts', ( data ) => {
             ledScripts = data;
             drawSettings();
-        });
-    });
+        } );
+    } );
 
-    socket.on('newColorArr', (config, colorArr) => {
+    socket.on( 'newColorArr', ( config, colorArr ) => {
         let html = "";
-        for (let i = 0; i < config.num; i++) {
-            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % 8) * 60}px; margin-top: ${Math.floor(i / 8) * 60}px"></div>`;
+        for ( let i = 0; i < config.num; i++ ) {
+            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % 8) * 60}px; margin-top: ${Math.floor( i / 8 ) * 60}px"></div>`;
         }
-        document.getElementById("lights").innerHTML = html;
-    });
+        document.getElementById( "lights" ).innerHTML = html;
+    } );
 
     function drawSettings() {
         let html = "<option value=\"\" selected></option>";
-        ledScripts.patterns.list.forEach(v => {
+        ledScripts.patterns.list.forEach( v => {
             html += `<option value="${v}">${ledScripts.patterns[v].name}</option>`;
-        })
-        document.getElementById('pattern').innerHTML = html;
+        } )
+        document.getElementById( 'pattern' ).innerHTML = html;
 
         html = "<option value=\"\" selected></option>";
-        ledScripts.effects.list.forEach(v => {
+        ledScripts.effects.list.forEach( v => {
             html += `<option value="${v}">${ledScripts.effects[v].name}</option>`;
-        })
-        document.getElementById('effect').innerHTML = html;
+        } )
+        document.getElementById( 'effect' ).innerHTML = html;
     }
 
     function changePattern() {
         let html = '';
-        const pattern = ledScripts.patterns[document.getElementById('pattern').value];
-        if (pattern) {
-            for (let i in pattern.options) {
+        const pattern = ledScripts.patterns[document.getElementById( 'pattern' ).value];
+        if ( pattern ) {
+            for ( let i in pattern.options ) {
                 const option = pattern.options[i];
                 html += `${option.name}: <input id="pattern-${option.id}" type="${option.type}" value="${option.default}">`;
             }
         }
-        document.getElementById(`patternOptions`).innerHTML = html;
+        document.getElementById( `patternOptions` ).innerHTML = html;
     }
 
     function changeEffect() {
         let html = '';
-        const effect = ledScripts.effects[document.getElementById('effect').value];
-        if (effect) {
-            for (let i in effect.options) {
+        const effect = ledScripts.effects[document.getElementById( 'effect' ).value];
+        if ( effect ) {
+            for ( let i in effect.options ) {
                 const option = effect.options[i];
                 html += `${option.name}: <input id="effect-${option.id}" type="${option.type}" value="${option.default}">`;
             }
         }
-        document.getElementById(`effectOptions`).innerHTML = html;
+        document.getElementById( `effectOptions` ).innerHTML = html;
     }
 
     function display() {
         let config = {
-            "pattern": document.getElementById("pattern").value,
+            "pattern": document.getElementById( "pattern" ).value,
             "patternOptions": {},
-            "effect": document.getElementById("effect").value,
+            "effect": document.getElementById( "effect" ).value,
             "effectOptions": {},
-            "num": document.getElementById('number').value
+            "num": document.getElementById( 'number' ).value
         }
 
-        ledScripts.patterns[config.pattern].options.forEach((value) => {
-            config.patternOptions[value.id] = document.getElementById(`pattern-${value.id}`).value;
-            if (value.type === "color") {
-                config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
+        ledScripts.patterns[config.pattern].options.forEach( ( value ) => {
+            config.patternOptions[value.id] = document.getElementById( `pattern-${value.id}` ).value;
+            if ( value.type === "color" ) {
+                config.patternOptions[value.id] = config.patternOptions[value.id].replace( "#", "" )
             }
-            if (value.type === "checkbox") {
-                config.patternOptions[value.id] = document.getElementById(`pattern-${value.id}`).checked;
+            if ( value.type === "checkbox" ) {
+                config.patternOptions[value.id] = document.getElementById( `pattern-${value.id}` ).checked;
             }
-        });
-        if (config.effect) {
-            ledScripts.effects[config.effect].options.forEach((value) => {
-                config.effectOptions[value.id] = document.getElementById(`effect-${value.id}`).value;
-                if (value.type === "color") {
-                    config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
+        } );
+        if ( config.effect ) {
+            ledScripts.effects[config.effect].options.forEach( ( value ) => {
+                config.effectOptions[value.id] = document.getElementById( `effect-${value.id}` ).value;
+                if ( value.type === "color" ) {
+                    config.patternOptions[value.id] = config.patternOptions[value.id].replace( "#", "" )
                 }
-                if (value.type === "checkbox") {
-                    config.patternOptions[value.id] = document.getElementById(`effect-${value.id}`).checked;
+                if ( value.type === "checkbox" ) {
+                    config.patternOptions[value.id] = document.getElementById( `effect-${value.id}` ).checked;
                 }
-            });
+            } );
         }
 
-        if (!config.pattern) {
-            alert("you are missing something");
+        if ( !config.pattern ) {
+            alert( "you are missing something" );
             return;
         }
-        socket.emit('newConfig', config);
+        socket.emit( 'newConfig', config );
     }
 
-    function reload(){
-        socket.emit('getScripts', (data) => {
+    function reload() {
+        socket.emit( 'getScripts', ( data ) => {
             ledScripts = data;
             drawSettings();
-        });
+        } );
     }
 </script>
 </body>

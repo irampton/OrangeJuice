@@ -14,14 +14,14 @@ module.exports = {
     setData
 };
 
-function setData( weatherData, {useSensor, fetchOnlineData} ) {
-    if(useSensor) {
-        getDHT11Data(weatherData);
-        setInterval(() => getDHT11Data(weatherData), 2000);
+function setData( weatherData, { useSensor, fetchOnlineData } ) {
+    if ( useSensor ) {
+        getDHT11Data( weatherData );
+        setInterval( () => getDHT11Data( weatherData ), 2000 );
     }
-    if(fetchOnlineData) {
-        getOutdoorData(weatherData);
-        setInterval(() => getOutdoorData(weatherData), 30000);
+    if ( fetchOnlineData ) {
+        getOutdoorData( weatherData );
+        setInterval( () => getOutdoorData( weatherData ), 30000 );
     }
 }
 
