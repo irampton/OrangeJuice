@@ -1,5 +1,4 @@
-const colorLibrary = require("../color-library");
-const {brightness} = require("../color-library");
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "brightness",
@@ -11,7 +10,7 @@ module.exports = {
     'modify': (arr, options) => {
         let tempArr = [...arr];
         for (let i = 0; i < tempArr.length; i++) {
-            tempArr[i] = colorLibrary.rgbToHex(brightness(colorLibrary.hexToRgb(tempArr[i]),options.level / 100))
+            tempArr[i] = new Color(tempArr[i], 'hex').brightness(options.level).getHex(false);
         }
         return tempArr;
     }

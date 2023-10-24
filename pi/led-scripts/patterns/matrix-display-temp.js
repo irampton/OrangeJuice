@@ -1,4 +1,4 @@
-const colorLibrary = require( "../color-library" );
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "matrix-display-temp",
@@ -48,7 +48,7 @@ module.exports = {
                 if ( matrix[i][j] === 0 ) {
                     arr.push( "000000" );
                 } else {
-                    arr.push( colorLibrary.rgbToHex( colorLibrary.brightness( colorLibrary.hexToRgb( matrix[i][j] ), options?.brightness ?? .2 ) ) );
+                    arr.push(new Color(matrix[i][j], 'hex').brightness((options?.brightness ?? .2) * 100).getHex(false));
                 }
             }
 

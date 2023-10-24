@@ -26,7 +26,8 @@ fs.readdir(path.join(__dirname, "patterns"), (err, files) => {
                 scripts.patterns.list.push(script.id);
             }
         }
-    })
+    });
+    scripts.patterns.list.sort((a,b) => scripts.patterns[a].name.localeCompare(scripts.patterns[b].name, 'en', { sensitivity: 'base' } ) );
 });
 
 fs.readdir(path.join(__dirname, "effects"), (err, files) => {
@@ -36,7 +37,8 @@ fs.readdir(path.join(__dirname, "effects"), (err, files) => {
             scripts.effects[script.id] = script;
             scripts.effects.list.push(script.id);
         }
-    })
+    });
+    scripts.effects.list.sort((a,b) => scripts.effects[a].name.localeCompare(scripts.effects[b].name, 'en', { sensitivity: 'base' } ) );
 });
 
 fs.readdir(path.join(__dirname, "modifiers"), (err, files) => {

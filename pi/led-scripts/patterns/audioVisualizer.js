@@ -1,4 +1,5 @@
-const {hue} = require("../color-library");
+const {Color} = require('@orangejedi/yacml');
+
 module.exports = {
     'id': "audioVisualizer",
     'name': "Audio Visualizer",
@@ -11,7 +12,7 @@ module.exports = {
         let flatten = Math.round(numLEDs / options.audioData.length + .5);
         for (let i = 0; i < numLEDs; i += flatten) {
             for (let j = 0; j < flatten; j++) {
-               arr.push(hue(options.audioData[i + j] * 360));
+               arr.push(new Color(options.audioData[i + j] * 360, "hue").getHex(false));
             }
         }
         return arr;

@@ -1,4 +1,4 @@
-const { hslToHex, hslToRgb, rgbToHex, brightness} = require("../color-library");
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "hsl-fill",
@@ -10,7 +10,7 @@ module.exports = {
         {'id': "brightness", 'name': "Brightness", 'type': "number", 'default': 100}
     ],
     'generate': (numLEDs, options) => {
-        let color = rgbToHex(brightness(hslToRgb([options.hue,options.saturation,options.lightness]),options.brightness / 100));
+        let color = new Color([options.hue,options.saturation,options.lightness], 'hsl').brightness(options.brightness).getHex(false);
         let arr = [];
         for (let i = 0; i < numLEDs; i++) {
             arr.push(color);

@@ -1,4 +1,4 @@
-const {rgbToHex, kelvinToRgb, brightness} = require("../color-library");
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "brightness-kelvin",
@@ -8,7 +8,7 @@ module.exports = {
         {'id': "brightness", 'name': "Brightness", 'type': "number", 'default': 100}
     ],
     'generate': (numLEDs, options) => {
-        let color = rgbToHex(brightness(kelvinToRgb(options.kelvin),options.brightness / 100));
+        let color = new Color(options.kelvin, 'kelvin').brightness(options.brightness).getHex(false);
         let arr = [];
         for (let i = 0; i < numLEDs; i++) {
             arr.push(color);

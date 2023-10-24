@@ -1,4 +1,4 @@
-const colorLibrary = require("../color-library");
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "brightness-fill",
@@ -10,7 +10,7 @@ module.exports = {
     'generate': (numLEDs, options) => {
         let arr = [];
         for (let i = 0; i < numLEDs; i++) {
-            arr.push(colorLibrary.rgbToHex(colorLibrary.brightness(colorLibrary.hexToRgb(options.color),options.brightness / 100)));
+            arr.push(new Color(options.color, 'hex').brightness(options.brightness).getHex(false));
         }
         return arr;
     }

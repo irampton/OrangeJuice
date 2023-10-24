@@ -42,7 +42,7 @@ io.on('connection', function (socket) {
         }
         running = {};
 
-        let colorArr = ledScripts.patterns[config.pattern].generate(config.num,config.patternOptions);
+        let colorArr = ledScripts.patterns[config.pattern].generate(Number(config.num),config.patternOptions);
         socket.emit('newColorArr', config, colorArr);
 
         if (config.effect) {

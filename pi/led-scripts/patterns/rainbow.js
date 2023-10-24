@@ -1,4 +1,4 @@
-const colorLibrary = require( "../color-library" );
+const {Color} = require('@orangejedi/yacml');
 
 module.exports = {
     'id': "rainbow",
@@ -10,7 +10,7 @@ module.exports = {
         let arr = [];
         let length = numLEDs * options.multiplier;
         for ( let i = 0; i < length; i++ ) {
-            arr.push( colorLibrary.hue( i / length * 360 ) );
+            arr.push( new Color( i / length * 360 ).getHex(false) );
         }
         while ( arr.length < numLEDs ) {
             arr.push( ...arr );
