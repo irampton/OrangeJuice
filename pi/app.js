@@ -259,7 +259,7 @@ if (features.gpioButtons) {
 if(features.homekit) {
     const HomeKit = require('./homekit.js');
     //const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights', [1, 2, 3, 4, 5], setLEDs);
-    const homekit = new HomeKit("hap.orangejuice.light", nconf.get('homekit'), setLEDs);
+    const homekit = new HomeKit("hap.orangejuice.light", nconf.get('homekit'), setLEDs, {weatherData});
 }
 
 //set up matrix

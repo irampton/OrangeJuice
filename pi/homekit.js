@@ -1,7 +1,6 @@
-const hap = require("hap-nodejs");
-const {hue} = require("./led-scripts/color-library");
+const hap = require( "hap-nodejs" );
 
-module.exports = function (id, config, setLEDs) {
+module.exports = function ( id, config, setLEDs, { weatherData } ) {
     const Accessory = hap.Accessory;
     const Characteristic = hap.Characteristic;
     const CharacteristicEventTypes = hap.CharacteristicEventTypes;
@@ -10,11 +9,25 @@ module.exports = function (id, config, setLEDs) {
 // optionally set a different storage location with code below
 // hap.HAPStorage.setCustomStoragePath("...");
 
-    const accessoryUuid = hap.uuid.generate(id);
-    const accessory = new Accessory(config.name, accessoryUuid);
+    const accessoryUuid = hap.uuid.generate( id );
+    const accessory = new Accessory( config.name, accessoryUuid );
 
-    function createLight(name, subtype, strips, temperature, hueAndSat) {
-        const lightService = new Service.Lightbulb(name);
+    function createTemperatureSensor( name, subtype ) {
+        const service = new Service.TemperatureSensor( name );
+
+        service.displayName = name;
+        service.subtype = subtype;
+
+        service.getCharacteristic( Characteristic.CurrentTemperature )
+            .on( CharacteristicEventTypes.GET, callback => {
+                callback( null, weatherData.indoor?.temperature );
+            } );
+
+        return service;
+    }
+
+    function createLight( name, subtype, strips, temperature, hueAndSat ) {
+        const lightService = new Service.Lightbulb( name );
 
         lightService.displayName = name;
         lightService.subtype = subtype;
@@ -27,137 +40,150 @@ module.exports = function (id, config, setLEDs) {
         let currentMode = "static";
 
 // 'On' characteristic is required for the light service
-        const onCharacteristic = lightService.getCharacteristic(Characteristic.On);
+        const onCharacteristic = lightService.getCharacteristic( Characteristic.On );
 // 'Brightness' characteristic is optional for the light service; 'getCharacteristic' will automatically add it to the service!
-        const brightnessCharacteristic = lightService.getCharacteristic(Characteristic.Brightness);
+        const brightnessCharacteristic = lightService.getCharacteristic( Characteristic.Brightness );
 
 
 // with the 'on' function we can add event handlers for different events, mainly the 'get' and 'set' event
-        onCharacteristic.on(CharacteristicEventTypes.GET, callback => {
-            callback(undefined, currentLightState);
-        });
-        onCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
+        onCharacteristic.on( CharacteristicEventTypes.GET, callback => {
+            callback( undefined, currentLightState );
+        } );
+        onCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
             currentLightState = value;
             sendToLights();
             callback();
-        });
+        } );
 
-        brightnessCharacteristic.on(CharacteristicEventTypes.GET, (callback) => {
-            callback(undefined, currentBrightnessLevel);
-        });
-        brightnessCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
+        brightnessCharacteristic.on( CharacteristicEventTypes.GET, ( callback ) => {
+            callback( undefined, currentBrightnessLevel );
+        } );
+        brightnessCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
             currentBrightnessLevel = value;
             sendToLights();
             callback();
-        });
+        } );
 
         //adds option to control color temperature
-        if (temperature) {
-            const colorCharacteristic = lightService.getCharacteristic(Characteristic.ColorTemperature);
-            colorCharacteristic.on(CharacteristicEventTypes.GET, (callback) => {
-                callback(undefined, 1000000 / currentColorTemp);
-            });
-            colorCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
+        if ( temperature ) {
+            const colorCharacteristic = lightService.getCharacteristic( Characteristic.ColorTemperature );
+            colorCharacteristic.on( CharacteristicEventTypes.GET, ( callback ) => {
+                callback( undefined, 1000000 / currentColorTemp );
+            } );
+            colorCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentColorTemp = 1000000 / value;
-                sendToLights("temperature");
+                sendToLights( "temperature" );
                 callback();
-            });
+            } );
         }
 
         //adds option to control hue and saturation
-        if (hueAndSat) {
-            const hueCharacteristic = lightService.getCharacteristic(Characteristic.Hue);
-            hueCharacteristic.on(CharacteristicEventTypes.GET, (callback) => {
-                callback(undefined, currentHue);
-            });
-            hueCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
+        if ( hueAndSat ) {
+            const hueCharacteristic = lightService.getCharacteristic( Characteristic.Hue );
+            hueCharacteristic.on( CharacteristicEventTypes.GET, ( callback ) => {
+                callback( undefined, currentHue );
+            } );
+            hueCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentHue = value;
-                sendToLights("hueAndSat");
+                sendToLights( "hueAndSat" );
                 callback();
-            });
-            const satCharacteristic = lightService.getCharacteristic(Characteristic.Saturation);
-            satCharacteristic.on(CharacteristicEventTypes.GET, (callback) => {
-                callback(undefined, currentSat);
-            });
-            satCharacteristic.on(CharacteristicEventTypes.SET, (value, callback) => {
+            } );
+            const satCharacteristic = lightService.getCharacteristic( Characteristic.Saturation );
+            satCharacteristic.on( CharacteristicEventTypes.GET, ( callback ) => {
+                callback( undefined, currentSat );
+            } );
+            satCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentSat = value;
-                sendToLights("hueAndSat");
+                sendToLights( "hueAndSat" );
                 callback();
-            });
+            } );
 
         }
 
-        function sendToLights(mode = undefined) {
+        function sendToLights( mode = undefined ) {
             currentMode = mode ?? currentMode
             let config;
-            if (mode === "temperature") {
-                config = createConfig(currentLightState, currentBrightnessLevel, {
+            if ( mode === "temperature" ) {
+                config = createConfig( currentLightState, currentBrightnessLevel, {
                     'type': "temp",
                     'temp': currentColorTemp
-                }, strips);
-            } else if (mode === "hueAndSat") {
-                config = createConfig(currentLightState, currentBrightnessLevel, {
+                }, strips );
+            } else if ( mode === "hueAndSat" ) {
+                config = createConfig( currentLightState, currentBrightnessLevel, {
                     'type': "hsl",
                     'hue': currentHue,
                     'sat': currentSat
-                }, strips);
+                }, strips );
             } else {
-                config = createConfig(currentLightState, currentBrightnessLevel, {'type': "none"}, strips);
+                config = createConfig( currentLightState, currentBrightnessLevel, { 'type': "none" }, strips );
             }
-            setLEDs(config);
+            setLEDs( config );
         }
 
         return lightService;
     }
 
-    config.services.forEach(v => {
-        accessory.addService(createLight(v.name, v.subtype, v.strips, v.temperature, v.hueAndSat));
-        console.log(`Added ${v.name} to HomeKit`);
-    })
+    config.services.forEach( v => {
+        switch ( v.type ) {
+            case "temperature sensor":
+                accessory.addService( createTemperatureSensor( v.name, v.subtype ) );
+                break;
+            case "light":
+            default:
+                accessory.addService( createLight( v.name, v.subtype, v.strips, v.temperature, v.hueAndSat ) );
+                break;
+        }
+        console.log( `Added ${v.name} to HomeKit` );
+    } )
 
 // once everything is set up, we publish the accessory. Publish should always be the last step!
-    accessory.publish({
+    accessory.publish( {
         username: "17:51:07:F4:BC:8A",
         pincode: "678-90-876",
         port: 47129,
         category: hap.Categories.LIGHTBULB, // value here defines the symbol shown in the pairing screen
-    });
+    } );
 
-    console.log("Accessory setup finished!");
+    console.log( "Accessory setup finished!" );
 }
 
-function createConfig(state, brightness, special, strips) {
-    if (state) {
-        switch (special.type){
+function createConfig( state, brightness, special, strips ) {
+    if ( state ) {
+        switch ( special.type ) {
             case 'temp':
                 return {
                     "trigger": 'homekit',
                     "pattern": 'brightness-kelvin',
-                    "patternOptions": {"kelvin": special.temp, "brightness": brightness},
+                    "patternOptions": { "kelvin": special.temp, "brightness": brightness },
                     "effect": "",
                     "strips": strips,
                     //"transition": 'fade',
-                    "transitionOptions": {"time": 25}
+                    "transitionOptions": { "time": 25 }
                 }
             case 'hsl':
                 return {
                     "trigger": 'homekit',
                     "pattern": 'hsl-fill',
-                    "patternOptions": {"hue": special.hue, "saturation": special.sat, "lightness": 45,"brightness": brightness},
+                    "patternOptions": {
+                        "hue": special.hue,
+                        "saturation": special.sat,
+                        "lightness": 45,
+                        "brightness": brightness
+                    },
                     "effect": "",
                     "strips": strips,
                     //"transition": 'fade',
-                    "transitionOptions": {"time": 25}
+                    "transitionOptions": { "time": 25 }
                 }
             case 'none':
                 return {
                     "trigger": 'homekit',
                     "pattern": 'brightness-kelvin',
-                    "patternOptions": {"kelvin": "3200", "brightness": brightness},
+                    "patternOptions": { "kelvin": "3200", "brightness": brightness },
                     "effect": "",
                     "strips": strips,
                     //"transition": 'fade',
-                    "transitionOptions": {"time": 25}
+                    "transitionOptions": { "time": 25 }
                 }
         }
 
@@ -169,6 +195,6 @@ function createConfig(state, brightness, special, strips) {
         "effect": "",
         "strips": strips,
         //"transition": 'fade',
-        "transitionOptions": {"time": 25}
+        "transitionOptions": { "time": 25 }
     }
 }
