@@ -46,7 +46,7 @@ module.exports = {
                     return;
                 case 'fade-out':
                     if ( this.counter <= -1 * this.fadeSpeed / 8 ) {
-                        this.color++;
+                        this.colorAt++;
                         this.color = this.patternArray[this.colorAt % this.patternArray.length];
                         this.counter = this.fadeSpeed;
                         this.stage = "fade-in";
