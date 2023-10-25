@@ -86,12 +86,24 @@ function display() {
         if (value.type === "color") {
             config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
         }
+        if ( value.type === "checkbox" ) {
+            config.patternOptions[value.id] = document.getElementById( `pattern-${value.id}` ).checked;
+        }
+        if ( value.type === "number" ) {
+            config.patternOptions[value.id] = Number(config.patternOptions[value.id]);
+        }
     });
     if (config.effect) {
         ledScripts.effects[config.effect].options.forEach((value) => {
             config.effectOptions[value.id] = document.getElementById(`effect-${value.id}`).value;
             if (value.type === "color") {
-                config.patternOptions[value.id] = config.patternOptions[value.id].replace("#", "")
+                config.effectOptions[value.id] = config.effectOptions[value.id].replace("#", "")
+            }
+            if ( value.type === "checkbox" ) {
+                config.effectOptions[value.id] = document.getElementById( `effect-${value.id}` ).checked;
+            }
+            if ( value.type === "number" ) {
+                config.effectOptions[value.id] = Number(config.effectOptions[value.id]);
             }
         });
     }

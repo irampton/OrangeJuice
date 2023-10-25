@@ -39,6 +39,7 @@
     const socket = io();
 
     let ledScripts;
+    let rows = 16;
 
     socket.on( 'connect', function () {
         socket.emit( 'getScripts', ( data ) => {
@@ -50,7 +51,7 @@
     socket.on( 'newColorArr', ( config, colorArr ) => {
         let html = "";
         for ( let i = 0; i < config.num; i++ ) {
-            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % 8) * 60}px; margin-top: ${Math.floor( i / 8 ) * 60}px"></div>`;
+            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % rows) * 60}px; margin-top: ${Math.floor( i / rows ) * 60}px"></div>`;
         }
         document.getElementById( "lights" ).innerHTML = html;
     } );
@@ -110,15 +111,21 @@
             if ( value.type === "checkbox" ) {
                 config.patternOptions[value.id] = document.getElementById( `pattern-${value.id}` ).checked;
             }
+            if ( value.type === "number" ) {
+                config.patternOptions[value.id] = Number(config.patternOptions[value.id]);
+            }
         } );
         if ( config.effect ) {
             ledScripts.effects[config.effect].options.forEach( ( value ) => {
                 config.effectOptions[value.id] = document.getElementById( `effect-${value.id}` ).value;
                 if ( value.type === "color" ) {
-                    config.patternOptions[value.id] = config.patternOptions[value.id].replace( "#", "" )
+                    config.effectOptions[value.id] = config.effectOptions[value.id].replace( "#", "" )
                 }
                 if ( value.type === "checkbox" ) {
-                    config.patternOptions[value.id] = document.getElementById( `effect-${value.id}` ).checked;
+                    config.effectOptions[value.id] = document.getElementById( `effect-${value.id}` ).checked;
+                }
+                if ( value.type === "number" ) {
+                    config.effectOptions[value.id] = Number(config.effectOptions[value.id]);
                 }
             } );
         }
