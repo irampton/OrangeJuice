@@ -5,7 +5,7 @@ module.exports = {
     'name': "Breath",
     'animate': true,
     'options': [
-        { 'id': "speed", 'name': "Min Time", 'type': "number", 'default': 5 },
+        { 'id': "speed", 'name': "Speed", 'type': "number", 'default': 5 },
         { 'id': "minBright", 'name': "Min Brightness", 'type': "number", 'default': 50 },
         { 'id': "maxBright", 'name': "Max Brightness", 'type': "number", 'default': 100 }
     ],

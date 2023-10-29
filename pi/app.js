@@ -346,7 +346,12 @@ function writeConfigToStrips( stripIndex, options ) {
     }
     //if there is an effect, apply & set it up
     if ( options.effect ) {
-        currentLEDs.strips[stripIndex].effect = new ledScripts.effects[options.effect].Create( currentLEDs.strips[stripIndex].arr, options.effectOptions, stripConfig[stripIndex].length );
+        currentLEDs.strips[stripIndex].effect = new ledScripts.effects[options.effect].Create(
+            currentLEDs.strips[stripIndex].arr,
+            {
+                ...options.effectOptions,
+                numLEDs: stripConfig[stripIndex].length
+            } );
         currentLEDs.strips[stripIndex].effect.step( ( arr ) => {
             currentLEDs.strips[stripIndex].arr = arr;
         } )

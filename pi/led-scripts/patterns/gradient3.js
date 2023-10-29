@@ -2,7 +2,7 @@ const { Color } = require( '@orangejedi/yacml' );
 
 module.exports = {
     'id': "gradient3",
-    'name': "3 Color Gradient",
+    'name': "Gradient (3 Color)",
     'options': [
         { 'id': "color1", 'name': "Color #1", 'type': "color", 'default': "000000" },
         { 'id': "color2", 'name': "Color #2", 'type': "color", 'default': "000000" },
