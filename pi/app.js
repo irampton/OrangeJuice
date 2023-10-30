@@ -9,6 +9,8 @@ const matrixScripts = require( "./matrix-scripts.js" );
 let disconnectConfigs = nconf.get( 'disconnectConfigs' );
 const ledScripts = require( "./led-scripts/led-scripts.js" );
 const displayMatrix = nconf.get( "displayMatrix" );
+let scriptGroups = nconf.get('scriptGroups') ?? [];
+let userPresets = nconf.get('userPresets') ?? [];
 
 //general
 let globalBrightness = 20;
@@ -204,6 +206,39 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             } );
             socket.on( 'pauseDemo', ( data ) => {
                 socket.broadcast.emit( 'pauseDemo' );
+            } );
+            socket.on( 'editStripGroup', ( method, data ) => {
+                switch ( method ){
+                    case "add":
+                        scriptGroups.push(data);
+                        break;
+                    case "remove":
+                        scriptGroups.splice(data,1);
+                        break;
+                }
+                nconf.set('scriptGroups', scriptGroups);
+                saveConfig();
+            } );
+            socket.on( 'getStripGroups', ( callback ) => {
+                callback( userPresets );
+            } );
+            socket.on( 'editPresets', ( method, config, index ) => {
+                switch ( method ){
+                    case "add":
+                        userPresets.push(config);
+                        break;
+                    case "remove":
+                        userPresets.splice(index,1);
+                        break;
+                    case "update":
+                        userPresets[index] = config;
+                        break;
+                }
+                nconf.set('userPresets', userPresets);
+                saveConfig();
+            } );
+            socket.on( 'getPresets', ( callback ) => {
+                callback( userPresets );
             } );
         } );
     }
@@ -444,5 +479,7 @@ function changeMatrix( options ) {
     }
 
     runMatrix();
-    matrixInterval = setInterval( runMatrix, matrixScripts[options.id].timeout );
+    if(options.id !== "off") {
+        matrixInterval = setInterval( runMatrix, matrixScripts[options.id].timeout );
+    }
 }

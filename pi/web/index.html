@@ -26,12 +26,15 @@
         .stripBox {
             display: none;
         }
+
+        .noShow{
+            display: none !important;
+        }
     </style>
 </head>
 <body>
 <section class="section">
     <h1 class="title is-1" style="color: darkorange">OrangeJuice Control</h1>
-    <h3 class="subtitle is-4">By Isaac Rampton</h3>
     <div class="columns is-mobile is-multiline mt-1">
         <div class="column box extraSpace">
             <h3 class="title is-4">Pattern</h3>
@@ -50,13 +53,31 @@
             <div class="block ml-1 mt-3" id="effectOptions"></div>
         </div>
         <div class="column box is-full">
-            <h3 class="title is-4">Strips</h3>
+            <h4 class="title is-4">Strips</h4>
             <div id="stripsCheckboxes" class="is-flex is-flex-wrap-wrap">
             </div>
+            <hr class="my-2" id="stripGroupsHR">
+            <div id="stripGroups" class="is-flex is-flex-wrap-wrap"></div>
         </div>
     </div>
-    <button onclick="display()" class="button is-info is-medium is-fullwidth">Set Pattern & Effect</button>
+    <button onclick="display()" class="button is-info is-large is-fullwidth">Set Pattern & Effect</button>
     <div class="columns is-mobile is-multiline mt-3">
+        <div class="column box is-full">
+            <h4 class="title is-4">Presets</h4>
+            <div class="is-flex is-justify-content-center">
+                <div class="select is-link">
+                    <select id="presetSelect">
+                    </select>
+                </div>
+            </div>
+            <div class="is-flex is-flex-wrap-wrap is-justify-content-center mt-3">
+                <button class="button is-medium is-success m-2" style="width: 10rem" onclick="addPreset()">Add Preset</button>
+                <button class="button is-medium is-info m-2" style="width: 10rem" onclick="setPreset()">Set Preset</button>
+                <button class="button is-medium is-warning m-2" style="width: 10rem" onclick="loadPreset()">Load Preset</button>
+                <button class="button is-medium is-success m-2" style="width: 10rem" onclick="updatePreset()">Update Preset</button>
+                <button class="button is-medium is-danger m-2" style="width: 10rem" onclick="deletePreset()">Delete Preset</button>
+            </div>
+        </div>
         <div class="column box">
             <h3 class="title is-4">32x8 Matrix Control</h3>
             <div class="block">
