@@ -4,41 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OrangeJuice Control</title>
-    <link href="lib/bulma.min.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        .bigger {
-            transform: scale(1.25);
-            transform-origin: 2rem .75rem;
-        }
-
-        @media screen and (min-width: 562px), print {
-            .extraSpace {
-                margin-right: .75rem;
-            }
-        }
-
-        input.stripBox[type="checkbox"]:checked + label {
-            background-color: hsl(206, 75%, 86%);
-            border-color: hsl(204, 86%, 53%);
-        }
-
-        .stripBox {
-            display: none;
-        }
-
-        .noShow {
-            display: none !important;
-        }
-    </style>
+    <link href="lib/bulma.custom.css" rel="stylesheet">
 </head>
 <body>
-<section class="section">
-    <h1 class="title is-1" style="color: darkorange">OrangeJuice Control</h1>
-    <div class="columns is-mobile is-multiline mt-1">
+<h1 class="is-hidden-desktop title is-size-2 has-text-centered mb-0 pt-2 has-text-white-ter has-background-info">OrangeJuice</h1>
+<div class="tabs is-centered is-medium is-boxed pt-2 has-background-info">
+    <ul>
+        <li class="is-active"><a>Control</a></li>
+        <li class="is-hidden-touch"><a class="title is-size-3 pb-0 is-disabled has-text-white-ter brand">OrangeJuice</a></li>
+        <li><a class="has-text-white-ter">Settings</a></li>
+    </ul>
+</div>
+<section class="section pt-1">
+    <div class="columns is-mobile is-multiline">
         <div class="column box extraSpace">
             <h3 class="title is-4">Pattern</h3>
-            <div class="select is-link">
+            <div class="select is-danger">
                 <select id="pattern" onchange="changePattern()">
                 </select>
             </div>
@@ -46,7 +28,7 @@
         </div>
         <div class="column box">
             <h3 class="title is-4">Effect</h3>
-            <div class="select is-link">
+            <div class="select is-danger">
                 <select id="effect" onchange="changeEffect()">
                 </select>
             </div>
@@ -60,7 +42,7 @@
             <div id="stripGroups" class="is-flex is-flex-wrap-wrap"></div>
         </div>
     </div>
-    <button onclick="display()" class="button is-info is-large is-fullwidth">Set Pattern & Effect</button>
+    <button onclick="display()" class="button is-primary is-large is-fullwidth">Set Pattern & Effect</button>
     <div class="columns is-mobile is-multiline mt-3">
         <div class="column box is-full">
             <h4 class="title is-4">Presets</h4>
@@ -71,14 +53,14 @@
                 </div>
             </div>
             <div class="is-flex is-flex-wrap-wrap is-justify-content-center mt-3">
-                <button class="button is-medium is-success m-2" style="width: 10rem" onclick="addPreset()">Add Preset
+                <button class="button is-medium is-warning m-2" style="width: 10rem" onclick="setPreset()">Set Preset
                 </button>
-                <button class="button is-medium is-info m-2" style="width: 10rem" onclick="setPreset()">Set Preset
-                </button>
-                <button class="button is-medium is-warning m-2" style="width: 10rem" onclick="loadPreset()">Load
+                <button class="button is-medium is-link m-2" style="width: 10rem" onclick="loadPreset()">Load
                     Preset
                 </button>
-                <button class="button is-medium is-success m-2" style="width: 10rem" onclick="updatePreset()">Update
+                <button class="button is-medium is-success m-2" style="width: 10rem" onclick="addPreset()">Add Preset
+                </button>
+                <button class="button is-medium is-link m-2" style="width: 10rem" onclick="updatePreset()">Update
                     Preset
                 </button>
                 <button class="button is-medium is-danger m-2" style="width: 10rem" onclick="deletePreset()">Delete
@@ -89,7 +71,7 @@
         <div class="column box" id="matrixSettings">
             <h3 class="title is-4">32x8 Matrix Control</h3>
             <div class="block">
-                <div class="select is-primary">
+                <div class="select is-danger">
                     <select id="matrixSelect" onchange="changePattern()">
                     </select>
                 </div>

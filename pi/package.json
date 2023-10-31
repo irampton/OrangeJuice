@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "css-build": "node-sass style.scss web/lib/bulma.custom.css",
+    "css-watch": "npm run css-build -- --watch"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +24,9 @@
     "request": "^2.88.2",
     "rpi-ws281x-native": "^1.0.4",
     "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "bulma": "^0.9.4",
+    "node-sass": "^9.0.0"
   }
 }

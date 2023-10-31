@@ -1,0 +1,75 @@
+@charset "utf-8";
+
+// Set your brand colors
+$orange: #FC7C38;
+$orange-light: #FFB187;
+$very-light-orange: #FFFCFA;
+$blue: #1B76F5;
+$light-blue: #B0D3F5;
+$sky: #3CBBFF;
+$purple: #9144E3;
+$ruby: #C9185F;
+$green: #35E68A;
+
+// Update Bulma's global variables
+$primary: $sky;
+$link: $blue;
+$link-light: $light-blue;
+$info: $orange;
+$info-light: $orange-light;
+$success: $green;
+$warning: $purple;
+$danger: $ruby;
+
+
+$white-ter: $very-light-orange;
+
+// Update some of Bulma's component variables
+$body-background-color: $very-light-orange;
+
+//custom classes
+input.stripBox[type="checkbox"]:checked + label {
+  background-color: $light-blue;
+  border-color: $sky;
+}
+
+.brand:hover {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+a.has-text-white-ter:hover:not(.brand) {
+  background-color: $info-light !important;
+}
+
+.tabs.is-boxed li.is-active a{
+  background-color: $very-light-orange !important;
+}
+
+.bigger {
+  transform: scale(1.25);
+  transform-origin: 2rem .75rem;
+}
+
+@media screen and (min-width: 562px), print {
+  .extraSpace {
+    margin-right: .75rem;
+  }
+}
+
+.stripBox {
+  display: none;
+}
+
+.noShow {
+  display: none !important;
+}
+
+.brand {
+  margin-top: -1.5rem;
+  cursor: default;
+}
+
+
+// Import only what you need from Bulma
+@import "node_modules/bulma/bulma.sass";
