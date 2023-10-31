@@ -2,3 +2,5 @@
 desktop/node_modules
 pi/node_modules
 pi/test*.js
+pi/config.json
+desktop/config.json

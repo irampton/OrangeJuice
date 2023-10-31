@@ -1,6 +1,6 @@
 const hap = require( "hap-nodejs" );
-
-module.exports = function ( id, config, setLEDs, { weatherData } ) {
+module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
+    let config = configManager.get( 'homekit' );
     const Accessory = hap.Accessory;
     const Characteristic = hap.Characteristic;
     const CharacteristicEventTypes = hap.CharacteristicEventTypes;
@@ -136,15 +136,24 @@ module.exports = function ( id, config, setLEDs, { weatherData } ) {
         console.log( `Added ${v.name} to HomeKit` );
     } )
 
-// once everything is set up, we publish the accessory. Publish should always be the last step!
+    //set a random username/password if once isn't set
+    if ( !config.username ) {
+        config.username = `${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}`;
+        configManager.set( 'homekit', config );
+    }
+    if ( !config.pincode ) {
+        config.pincode = `${randomInt( 100, 999 )}-${randomInt( 10, 99 )}-${randomInt( 100, 999 )}`;
+        configManager.set( 'homekit', config );
+    }
+    // once everything is set up, we publish the accessory. Publish should always be the last step!
     accessory.publish( {
-        username: "17:51:07:F4:BC:8A",
-        pincode: "678-90-876",
+        username: config.username,
+        pincode: config.pincode,
         port: 47129,
         category: hap.Categories.LIGHTBULB, // value here defines the symbol shown in the pairing screen
     } );
 
-    console.log( "Accessory setup finished!" );
+    console.log( `Accessory setup finished!\nHomeKit Username: ${config.username}\nHomeKit Pin: ${config.pincode}` );
 }
 
 function createConfig( state, brightness, special, strips ) {
@@ -197,4 +206,8 @@ function createConfig( state, brightness, special, strips ) {
         //"transition": 'fade',
         "transitionOptions": { "time": 25 }
     }
+}
+
+function randomInt( low, high ) {
+    return Math.floor( Math.random() * (high - low) ) + low;
 }

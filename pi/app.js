@@ -1,16 +1,15 @@
-const nconf = require( 'nconf' );
-nconf.file( { file: './config.json' } );
-let features = nconf.get( "features" );
+const config = require( './config-manager' );
 
 //grab data from config
-const stripConfig = nconf.get( "strips" );
-const buttonMap = nconf.get( 'buttonConfigs' );
+let features = config.get( "features" );
+const stripConfig = config.get( "strips" );
+const buttonMap = config.get( 'buttonConfigs' );
 const matrixScripts = require( "./matrix-scripts.js" );
-let disconnectConfigs = nconf.get( 'disconnectConfigs' );
+let disconnectConfigs = config.get( 'disconnectConfigs' );
 const ledScripts = require( "./led-scripts/led-scripts.js" );
-const displayMatrix = nconf.get( "displayMatrix" );
-let scriptGroups = nconf.get('scriptGroups') ?? [];
-let userPresets = nconf.get('userPresets') ?? [];
+const displayMatrix = config.get( "displayMatrix" );
+let scriptGroups = config.get( 'scriptGroups' ) ?? [];
+let userPresets = config.get( 'userPresets' ) ?? [];
 
 //general
 let globalBrightness = 20;
@@ -185,18 +184,17 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 switch ( method ) {
                     case "replace":
                         disconnectConfigs = data;
-                        nconf.set( 'disconnectConfigs', data );
+                        config.set( 'disconnectConfigs', data );
                         break;
                     case "add":
                         disconnectConfigs.push( data );
-                        nconf.set( 'disconnectConfigs', disconnectConfigs );
+                        config.set( 'disconnectConfigs', disconnectConfigs );
                         break;
                     case "remove":
                         disconnectConfigs.splice( disconnectConfigs.findIndex( ( v ) => v.id = data ), 1 );
-                        nconf.set( 'disconnectConfigs', disconnectConfigs );
+                        config.set( 'disconnectConfigs', disconnectConfigs );
                         break;
                 }
-                saveConfig();
             } );
             socket.on( 'statsUpdate', ( data ) => {
                 connectedSystemStats = data;
@@ -208,34 +206,32 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 socket.broadcast.emit( 'pauseDemo' );
             } );
             socket.on( 'editStripGroup', ( method, data ) => {
-                switch ( method ){
+                switch ( method ) {
                     case "add":
-                        scriptGroups.push(data);
+                        scriptGroups.push( data );
                         break;
                     case "remove":
-                        scriptGroups.splice(data,1);
+                        scriptGroups.splice( data, 1 );
                         break;
                 }
-                nconf.set('scriptGroups', scriptGroups);
-                saveConfig();
+                config.set( 'scriptGroups', scriptGroups );
             } );
             socket.on( 'getStripGroups', ( callback ) => {
-                callback( userPresets );
+                callback( scriptGroups );
             } );
-            socket.on( 'editPresets', ( method, config, index ) => {
-                switch ( method ){
+            socket.on( 'editPresets', ( method, ledConfig, index ) => {
+                switch ( method ) {
                     case "add":
-                        userPresets.push(config);
+                        userPresets.push( ledConfig );
                         break;
                     case "remove":
-                        userPresets.splice(index,1);
+                        userPresets.splice( index, 1 );
                         break;
                     case "update":
-                        userPresets[index] = config;
+                        userPresets[index] = ledConfig;
                         break;
                 }
-                nconf.set('userPresets', userPresets);
-                saveConfig();
+                config.set( 'userPresets', userPresets );
             } );
             socket.on( 'getPresets', ( callback ) => {
                 callback( userPresets );
@@ -293,8 +289,7 @@ if ( features.gpioButtons ) {
 //set up homekit
 if ( features.homekit ) {
     const HomeKit = require( './homekit.js' );
-    //const homekit = new HomeKit("hap.orangejuice.light", 'Track Lights', [1, 2, 3, 4, 5], setLEDs);
-    const homekit = new HomeKit( "hap.orangejuice.light", nconf.get( 'homekit' ), setLEDs, { weatherData } );
+    const homekit = new HomeKit( "hap.orangejuice.light", config, setLEDs, { weatherData } );
 }
 
 //set up matrix
@@ -456,16 +451,6 @@ function drawLEDs() {
     ledControl.updateLEDs( arr );
 }
 
-function saveConfig() {
-    nconf.save( function ( err ) {
-        if ( err ) {
-            console.error( err.message );
-            return;
-        }
-        //console.log('Configuration saved successfully.');
-    } );
-}
-
 function changeMatrix( options ) {
     clearInterval( matrixInterval );
     options.strip = options.strip || displayMatrix.strip;
@@ -479,7 +464,7 @@ function changeMatrix( options ) {
     }
 
     runMatrix();
-    if(options.id !== "off") {
+    if ( options.id !== "off" ) {
         matrixInterval = setInterval( runMatrix, matrixScripts[options.id].timeout );
     }
 }

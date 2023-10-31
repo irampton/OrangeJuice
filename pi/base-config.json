@@ -1,0 +1,29 @@
+{
+  "features": {
+    "homekit": false,
+    "weatherSensor": false,
+    "weatherFetch": false,
+    "gpioButtons": false,
+    "gpioButtonsOnWeb": false,
+    "hostWebControl": true,
+    "webAPIs": true,
+    "ioStatsUpdate": false,
+    "matrixDisplay": false
+  },
+  "strips": [
+    {
+      "name": "Test",
+      "start": 0,
+      "length": 16,
+      "type": "strip"
+    }
+  ],
+  "homekit": {
+    "name": "LED Lights",
+    "services": []
+  },
+  "buttonConfigs": [],
+  "disconnectConfigs": [],
+  "scriptGroups": [],
+  "userPresets": []
+}

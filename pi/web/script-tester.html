@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Script Tester</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .light {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        body {
+            color: white;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<h1>Script Tester</h1>
+<div id="controls">
+    <label for="number">Number:</label> <input id="number" type="number" value="16"/>
+    <button style="margin-left: 1%" onclick="setNumLEDs()">Update Length</button>
+    <button style="margin-left: 1%" onclick="reload()">Reload</button>
+</div>
+<br><br><br>
+<div id="lights"></div>
+
+<script>
+    const socket = io();
+
+    let ledScripts;
+    let rows = 16;
+
+    socket.on( 'connect', function () {
+        socket.emit( 'getLEDScripts', ( data ) => {
+            ledScripts = data;
+        } );
+    } );
+
+    socket.on( 'newColorArr', ( config, colorArr ) => {
+        let html = "";
+        for ( let i = 0; i < config.num; i++ ) {
+            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % rows) * 60}px; margin-top: ${Math.floor( i / rows ) * 60}px"></div>`;
+        }
+        document.getElementById( "lights" ).innerHTML = html;
+    } );
+
+    function setNumLEDs() {
+        socket.emit( 'setNumLEDs', Number( document.getElementById( 'number' ).value ) );
+    }
+
+    function reload() {
+        socket.emit( 'reloadScripts', ( data ) => {
+            ledScripts = data;
+        } );
+    }
+</script>
+</body>
+</html>

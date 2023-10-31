@@ -1,6 +1,6 @@
 const socket = io();
 
-let ledScripts, ledStripConfig, matrixScripts, ledStripGroups, userPresets;
+let ledScripts, ledStripConfig, matrixScripts, ledStripGroups, userPresets, systemFeatures;
 socket.on( 'connect', function () {
     socket.emit( 'getLEDScripts', ( data ) => {
         ledScripts = data;
@@ -14,6 +14,12 @@ socket.on( 'connect', function () {
     socket.emit( 'getMatrixScripts', ( data ) => {
         matrixScripts = data;
         drawMatrixStrips();
+    } );
+    socket.emit( 'getFeatures', ( data ) => {
+        systemFeatures = data;
+        if ( !systemFeatures.matrixDisplay ) {
+            document.getElementById( "matrixSettings" ).classList.add( "noShow" );
+        }
     } );
     drawPresets();
 } );
@@ -38,10 +44,10 @@ function drawStrips() {
         html += `<input id="strip-${index}" value="${index}" name="newStrips" type="checkbox" class="stripBox bigger"><label class="button py-2 px-3 m-1" for="strip-${index}"> ${value.name}</label>`;
     } );
     document.getElementById( 'stripsCheckboxes' ).innerHTML = html;
-    if(ledStripConfig.length === 1){
-        document.getElementById('strip-0').checked = true;
-        document.getElementById('stripGroups').classList.add("noShow");
-        document.getElementById('stripGroupsHR').classList.add("noShow");
+    if ( ledStripConfig.length === 1 ) {
+        document.getElementById( 'strip-0' ).checked = true;
+        document.getElementById( 'stripGroups' ).classList.add( "noShow" );
+        document.getElementById( 'stripGroupsHR' ).classList.add( "noShow" );
     }
 }
 
@@ -220,6 +226,7 @@ function getConfig() {
     return config;
 }
 
+//preset buttons
 function addPreset() {
     let config = getConfig();
     if ( !config.pattern || config.strips.length < 1 ) {
