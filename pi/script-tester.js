@@ -7,6 +7,10 @@ const io = new Server( http );
 
 app.use( express.static( 'web' ) );
 
+const config = require( './config-manager' );
+const stripConfig = config.get( "strips" );
+let features = config.get( "features" );
+const buttonMap = config.get( 'buttonConfigs' );
 let ledScripts = require( "./led-scripts/led-scripts" );
 
 let running = {};
@@ -72,6 +76,15 @@ io.on( 'connection', function ( socket ) {
         }
 
         sendCallback();
+    } );
+    socket.on( 'getConfig', ( callback ) => {
+        let send = {
+            features,
+            "homekit": config.get( 'homekit' ),
+            stripConfig,
+            buttonMap
+        };
+        callback( send );
     } );
 } );
 http.listen( port, () => console.log( `listening on port ${port}` ) );

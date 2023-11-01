@@ -26,6 +26,8 @@ $white-ter: $very-light-orange;
 
 // Update some of Bulma's component variables
 $body-background-color: $very-light-orange;
+$tabs-boxed-link-active-background-color: $very-light-orange;
+$tabs-boxed-link-hover-background-color: $info-light;
 
 //custom classes
 input.stripBox[type="checkbox"]:checked + label {
@@ -36,14 +38,6 @@ input.stripBox[type="checkbox"]:checked + label {
 .brand:hover {
   border: none !important;
   background-color: transparent !important;
-}
-
-a.has-text-white-ter:hover:not(.brand) {
-  background-color: $info-light !important;
-}
-
-.tabs.is-boxed li.is-active a{
-  background-color: $very-light-orange !important;
 }
 
 .bigger {
@@ -73,3 +67,12 @@ a.has-text-white-ter:hover:not(.brand) {
 
 // Import only what you need from Bulma
 @import "node_modules/bulma/bulma.sass";
+
+@media screen and (min-width: 769px), print {
+  .sidenav {
+    width: 18.4%;
+    margin-right: 1rem;
+    position: sticky;
+    top: 1rem;
+  }
+}

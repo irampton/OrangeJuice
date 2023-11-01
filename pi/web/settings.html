@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OrangeJuice Settings</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="lib/bulma.custom.css" rel="stylesheet">
+</head>
+<body>
+<h1 class="is-hidden-desktop title is-size-2 has-text-centered mb-0 pt-2 has-text-white-ter has-background-info">
+    OrangeJuice
+</h1>
+<div class="tabs is-centered is-medium is-boxed pt-2 has-background-info">
+    <ul>
+        <li><a href="/" class="has-text-white-ter">Control</a></li>
+        <li class="is-hidden-touch">
+            <a class="title is-size-3 pb-0 is-disabled has-text-white-ter brand">OrangeJuice</a>
+        </li>
+        <li class="is-active"><a href="settings.html">Settings</a></li>
+    </ul>
+</div>
+
+
+<section class="section pt-1">
+    <div class="columns is-multiline">
+        <div class="column box is-full-mobile is-align-self-baseline sidenav">
+            <aside class="menu">
+                <p class="menu-label">
+                    General
+                </p>
+                <ul class="menu-list">
+                    <li><a onclick="jumpTo('features')">Features</a></li>
+                    <li><a onclick="jumpTo('strips')">Strips</a></li>
+                    <li><a onclick="jumpTo('homekit')">HomeKit</a></li>
+                    <li><a onclick="jumpTo('buttons')">Buttons</a></li>
+                    <li><a onclick="jumpTo('matrix')" id="matrix-sidenav">Matrix</a></li>
+                </ul>
+            </aside>
+        </div>
+        <div class="column box is-four-fifths-tablet" id="features-section">
+            <h3 class="title is-5">Features</h3>
+            <div class="block ml-1 mt-3" id="features"></div>
+        </div>
+        <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="strips-section">
+            <h3 class="title is-5">Strips</h3>
+        </div>
+    <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="homekit-section">
+        <h3 class="title is-5">HomeKit Settings</h3>
+    </div>
+    <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="buttons-section">
+        <h3 class="title is-5">Buttons</h3>
+    </div>
+    <div class="column box  is-offset-one-fifth is-four-fifths-tablet" id="matrix-section">
+        <h3 class="title is-5">Matrix Display</h3>
+    </div>
+    </div>
+</section>
+
+<script src="shared.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

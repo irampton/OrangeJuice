@@ -6,12 +6,6 @@ input.stripBox[type="checkbox"]:checked + label {
   border: none !important;
   background-color: transparent !important; }
 
-a.has-text-white-ter:hover:not(.brand) {
-  background-color: #FFB187 !important; }
-
-.tabs.is-boxed li.is-active a {
-  background-color: #FFFCFA !important; }
-
 .bigger {
   transform: scale(1.25);
   transform-origin: 2rem .75rem; }
@@ -4715,10 +4709,10 @@ label.panel-block {
     border: 1px solid transparent;
     border-radius: 4px 4px 0 0; }
     .tabs.is-boxed a:hover {
-      background-color: #FFFCFA;
+      background-color: #FFB187;
       border-bottom-color: #dbdbdb; }
   .tabs.is-boxed li.is-active a {
-    background-color: white;
+    background-color: #FFFCFA;
     border-color: #dbdbdb;
     border-bottom-color: transparent !important; }
   .tabs.is-fullwidth li {
@@ -7907,3 +7901,10 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
 .footer {
   background-color: #fafafa;
   padding: 3rem 1.5rem 6rem; }
+
+@media screen and (min-width: 769px), print {
+  .sidenav {
+    width: 18.4%;
+    margin-right: 1rem;
+    position: sticky;
+    top: 1rem; } }
