@@ -20,9 +20,9 @@ $info-light: $orange-light;
 $success: $green;
 $warning: $purple;
 $danger: $ruby;
-
-
 $white-ter: $very-light-orange;
+
+$fullhd: 1536px + (2 * 32px);
 
 // Update some of Bulma's component variables
 $body-background-color: $very-light-orange;
@@ -40,9 +40,20 @@ input.stripBox[type="checkbox"]:checked + label {
   background-color: transparent !important;
 }
 
-.bigger {
+.big {
   transform: scale(1.25);
   transform-origin: 2rem .75rem;
+}
+
+.bigger{
+  transform: scale(2);
+  transform-origin: 1rem .5rem;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+
+.bottomDivider{
+  border-bottom: hsl(0, 0%, 86%) solid 1px;
 }
 
 @media screen and (min-width: 562px), print {

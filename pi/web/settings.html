@@ -26,34 +26,58 @@
     <div class="columns is-multiline">
         <div class="column box is-full-mobile is-align-self-baseline sidenav">
             <aside class="menu">
-                <p class="menu-label">
+                <p class="menu-label has-text-warning">
                     General
                 </p>
                 <ul class="menu-list">
                     <li><a onclick="jumpTo('features')">Features</a></li>
                     <li><a onclick="jumpTo('strips')">Strips</a></li>
                     <li><a onclick="jumpTo('homekit')">HomeKit</a></li>
+                </ul>
+                <p class="menu-label has-text-danger">
+                    Add-ons
+                </p>
+                <ul class="menu-list">
                     <li><a onclick="jumpTo('buttons')">Buttons</a></li>
                     <li><a onclick="jumpTo('matrix')" id="matrix-sidenav">Matrix</a></li>
+                </ul>
+                <p class="menu-label has-text-warning">
+                    About
+                </p>
+                <ul class="menu-list">
+                    <li><a onclick="jumpTo('scripts')">Scripts</a></li>
                 </ul>
             </aside>
         </div>
         <div class="column box is-four-fifths-tablet" id="features-section">
             <h3 class="title is-5">Features</h3>
-            <div class="block ml-1 mt-3" id="features"></div>
+            <div class="mx-1 my-2 columns is-multiline bottomDivider" id="features"></div>
+            <button class="button is-success px-6 ml-4 mt-1">Save</button>
         </div>
         <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="strips-section">
-            <h3 class="title is-5">Strips</h3>
+            <h3 class="title is-5">Attached Strips</h3>
+            <div class="mx-1 my-2 columns is-multiline bottomDivider" id="stripList"></div>
+            <button class="button is-link px-6 ml-4 mt-1">Add Strip</button>
         </div>
     <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="homekit-section">
         <h3 class="title is-5">HomeKit Settings</h3>
     </div>
     <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="buttons-section">
-        <h3 class="title is-5">Buttons</h3>
+        <h3 class="title is-5">GPIO Buttons</h3>
     </div>
     <div class="column box  is-offset-one-fifth is-four-fifths-tablet" id="matrix-section">
         <h3 class="title is-5">Matrix Display</h3>
     </div>
+        <div class="column box  is-offset-one-fifth is-four-fifths-tablet" id="scripts-section">
+            <h3 class="title is-5">Imported Scripts</h3>
+            <div class="mx-1 my-2 columns is-multiline" id="scriptsList"></div>
+            <div class="block mx-4 tags are-medium">
+                <span class="tag is-info">Total Options</span>
+                <span class="tag is-link">Numbers</span>
+                <span class="tag is-warning">Colors</span>
+                <span class="tag is-danger">Checkboxes</span>
+            </div>
+        </div>
     </div>
 </section>
 

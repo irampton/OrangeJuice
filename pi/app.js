@@ -236,7 +236,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             socket.on( 'getPresets', ( callback ) => {
                 callback( userPresets );
             } );
-            socket.on( 'getConfig', ( callback ) => {
+            socket.on( 'getSettings', ( callback ) => {
                 let send = {
                     features,
                     "homekit": config.get( 'homekit' ),
