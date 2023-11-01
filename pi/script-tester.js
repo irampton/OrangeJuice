@@ -77,11 +77,11 @@ io.on( 'connection', function ( socket ) {
 
         sendCallback();
     } );
-    socket.on( 'getConfig', ( callback ) => {
+    socket.on( 'getSettings', ( callback ) => {
         let send = {
             features,
             "homekit": config.get( 'homekit' ),
-            stripConfig,
+            "stripConfig": stripConfig,
             buttonMap
         };
         callback( send );

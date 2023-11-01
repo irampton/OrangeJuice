@@ -1,13 +1,8 @@
 const socket = io();
 
-let ledStripConfig, systemConfig, ledScripts;
+let systemConfig, ledScripts;
 socket.on( 'connect', function () {
-    socket.emit( 'getStripConfig', ( data ) => {
-        ledStripConfig = data;
-        drawStrips();
-    } );
     socket.emit( 'getSettings', ( data ) => {
-        console.log(data);
         systemConfig = data;
         //hide any features that are not turned on
         if ( !systemConfig.features.matrixDisplay ) {
@@ -15,10 +10,13 @@ socket.on( 'connect', function () {
             document.getElementById( "matrix-sidenav" ).classList.add( "noShow" );
         }
         drawFeatures();
-    } );
-    socket.emit( 'getLEDScripts', ( data ) => {
-        ledScripts = data;
-        drawScripts();
+        drawStrips();
+        drawHomekit();
+        socket.emit( 'getLEDScripts', ( data ) => {
+            ledScripts = data;
+            drawScripts();
+            drawButtons();
+        } );
     } );
 } );
 
@@ -49,20 +47,21 @@ function drawFeatures(){
     document.getElementById( 'features' ).innerHTML = html;
 }
 
+const typeClass= {
+    "strip": "is-link",
+    "matrix": "is-info",
+    "ring": "is-warning",
+    "strand": "is-danger"
+}
 function drawStrips(){
-    const typeClass= {
-        "strip": "is-link",
-        "matrix": "is-info",
-        "ring": "is-warning",
-        "strand": "is-danger"
-    }
     let html = ``;
-    ledStripConfig.forEach( (strip, index) => {
+    systemConfig.stripConfig.forEach( (strip, index) => {
         html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
                         <p class="card-header-title">
                           ${strip.name}
+                          ${strip.modifier ? `<span class="tag is-info mt-1 ml-2 px-1">modified</span>` : ""}
                         </p>
                         <div class="card-header-icon">
                           ${index}
@@ -73,7 +72,7 @@ function drawStrips(){
                             Length: ${strip.length} LEDs
                         </div>
                         <div class="content">
-                            Type: <span class="ml-1 tag is-medium ${typeClass[strip.type] ?? "is-light"}">${strip.type}</span>
+                            Type: <span class="ml-1 px-2 py-1 tag is-medium ${typeClass[strip.type] ?? "is-light"}">${strip.type}</span>
                        </div>
                       </div>
                       <footer class="card-footer">
@@ -121,6 +120,72 @@ function drawScripts(){
                 </div>`;
     } );
     document.getElementById( 'scriptsList' ).innerHTML = html;
+}
+
+function drawHomekit(){
+    let html = ``;
+    systemConfig.homekit.services.forEach( (service, index) => {
+        html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                    <div class="card">
+                     <header class="card-header">
+                        <p class="card-header-title">
+                          ${service.name}
+                        </p>
+                         <div class="card-header-icon">
+                            M
+                        </div>
+                      </header>
+                      <div class="card-content">
+                        <div class="content is-flex is-flex-wrap-wrap">
+                            ${service.strips.map(v => systemConfig.stripConfig[v]).reduce((acc, v) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 mx-1">${v.name}</span>`, "")}
+                        </div>
+                        <div class="content">
+                            ${generateInput({type: "checkbox", id: "temperature", name: "Temperature", default: service.temperature},`homekit-${service.subtype}`)}
+                        </div>
+                         <div class="content">
+                            ${generateInput({type: "checkbox", id: "hueAndSat", name: "Hue and Saturation", default: service.hueAndSat},`homekit-${service.subtype}`)}
+                       </div>
+                      </div>
+                    </div>
+                </div>`;
+    } );
+    document.getElementById( 'homekitList' ).innerHTML = html;
+}
+
+function drawButtons(){
+    let html = ``;
+    systemConfig.buttonMap.forEach( (config, index) => {
+        html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                    <div class="card">
+                     <header class="card-header">
+                        <p class="card-header-title">
+                          Button: ${index}
+                        </p>
+                         <div class="card-header-icon">
+                            M
+                        </div>
+                      </header>
+                      <div class="card-content">
+                        <div class="content">
+                            Pattern: ${ledScripts?.patterns[config.pattern]?.name ?? config.pattern}
+                        </div>
+                         <div class="content">
+                            Effect: ${(ledScripts?.effects[config.effect]?.name ?? config.effect) || "None"}
+                       </div>
+                        <div class="content is-flex is-flex-wrap-wrap">
+                            ${config.strips.map(v => systemConfig.stripConfig[v]).reduce((acc, v) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 mx-1">${v.name}</span>`, "")}
+                        </div>
+                      </div>
+                    </div>
+                </div>`;
+    } );
+    document.getElementById( 'buttonList' ).innerHTML = html;
+}
+
+function reloadScripts(){
+    socket.emit( 'reloadScripts', ( data ) => {
+        ledScripts = data;
+    } );
 }
 
 function jumpTo(header){
