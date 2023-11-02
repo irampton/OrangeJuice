@@ -241,7 +241,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                     features,
                     "homekit": config.get( 'homekit' ),
                     stripConfig,
-                    buttonMap
+                    buttonMap,
+                    displayMatrix
                 };
                 callback( send );
             } );

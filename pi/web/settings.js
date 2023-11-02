@@ -1,6 +1,6 @@
 const socket = io();
 
-let systemConfig, ledScripts;
+let systemConfig, ledScripts, matrixScripts;
 socket.on( 'connect', function () {
     socket.emit( 'getSettings', ( data ) => {
         systemConfig = data;
@@ -15,13 +15,21 @@ socket.on( 'connect', function () {
         socket.emit( 'getLEDScripts', ( data ) => {
             ledScripts = data;
             drawScripts();
-            drawButtons();
+            if ( systemConfig.features.matrixDisplay ) {
+                socket.emit( 'getMatrixScripts', ( data ) => {
+                    matrixScripts = data;
+                    drawButtons();
+                    drawMatrixDisplay()
+                } );
+            } else {
+                drawButtons();
+            }
         } );
     } );
 } );
 
-function drawFeatures(){
-    const featureNames ={
+function drawFeatures() {
+    const featureNames = {
         "homekit": "HomeKit",
         "weatherSensor": "Attached weather sensor",
         "weatherFetch": "Get weather from web",
@@ -31,31 +39,32 @@ function drawFeatures(){
         "webAPIs": "Host web APIs",
         "ioStatsUpdate": "Listen for connected system stats",
         "matrixDisplay": "Matrix display attached"
-}
+    }
     let html = ``;
-    let list = Object.keys(systemConfig.features).map(k => {
+    let list = Object.keys( systemConfig.features ).map( k => {
         return {
             id: k,
             name: featureNames[k] ?? k,
             default: systemConfig.features[k],
             type: "checkbox"
         }
-    })
+    } )
     list.forEach( v => {
-        html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">${generateInput(v, 'features', 'bigger')}</div>`;
+        html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">${generateInput( v, 'features', 'bigger' )}</div>`;
     } );
     document.getElementById( 'features' ).innerHTML = html;
 }
 
-const typeClass= {
+const typeClass = {
     "strip": "is-link",
     "matrix": "is-info",
     "ring": "is-warning",
     "strand": "is-danger"
 }
-function drawStrips(){
+
+function drawStrips() {
     let html = ``;
-    systemConfig.stripConfig.forEach( (strip, index) => {
+    systemConfig.stripConfig.forEach( ( strip, index ) => {
         html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
@@ -86,35 +95,35 @@ function drawStrips(){
     document.getElementById( 'stripList' ).innerHTML = html;
 }
 
-function drawScripts(){
+function drawScripts() {
     let html = ``;
-    Object.keys(ledScripts).forEach( key => {
+    Object.keys( ledScripts ).forEach( key => {
         html += `<div class="column is-half-desktop is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
                         <p class="card-header-title">
-                          ${properCase(key)}
+                          ${properCase( key )}
                         </p>
                         <div class="card-header-icon">
                           ${ledScripts[key].list.length}
                         </div>
                       </header>
                       <div class="card-content">`;
-        ledScripts[key].list.forEach(s => {
+        ledScripts[key].list.forEach( s => {
             html += `       <div class="level">
                                 <div class="level-left">
                                     <div class="level-item">${ledScripts[key][s].name}</div>
                                 </div>
                                 <div class="level-right">
                                     <div class="level-item">
-                                        <span class="tag is-info mr-4">${ ledScripts[key][s]?.options.length}</span>
-                                        <span class="tag is-link mx-1">${ ledScripts[key][s]?.options.filter(o => o.type === "number").length}</span>
-                                        <span class="tag is-warning mx-1">${ ledScripts[key][s]?.options.filter(o => o.type === "color").length}</span>
-                                        <span class="tag is-danger mx-1">${ ledScripts[key][s]?.options.filter(o => o.type === "checkbox").length}</span>
+                                        <span class="tag is-info mr-4">${ledScripts[key][s]?.options.length}</span>
+                                        <span class="tag is-link mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "number" ).length}</span>
+                                        <span class="tag is-warning mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "color" ).length}</span>
+                                        <span class="tag is-danger mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "checkbox" ).length}</span>
                                     </div>
                                 </div>
                             </div>`;
-        });
+        } );
         html += `     </div>
                     </div>
                 </div>`;
@@ -122,10 +131,11 @@ function drawScripts(){
     document.getElementById( 'scriptsList' ).innerHTML = html;
 }
 
-function drawHomekit(){
+function drawHomekit() {
     let html = ``;
-    systemConfig.homekit.services.forEach( (service, index) => {
-        html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+    systemConfig.homekit.services.forEach( ( service, index ) => {
+        if ( service.strips ) {
+            html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
                         <p class="card-header-title">
@@ -137,24 +147,35 @@ function drawHomekit(){
                       </header>
                       <div class="card-content">
                         <div class="content is-flex is-flex-wrap-wrap">
-                            ${service.strips.map(v => systemConfig.stripConfig[v]).reduce((acc, v) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 mx-1">${v.name}</span>`, "")}
+                            ${service.strips.map( v => systemConfig.stripConfig[v] ).reduce( ( acc, v ) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 my-1">${v.name}</span>`, "" )}
                         </div>
                         <div class="content">
-                            ${generateInput({type: "checkbox", id: "temperature", name: "Temperature", default: service.temperature},`homekit-${service.subtype}`)}
+                            ${generateInput( {
+                type: "checkbox",
+                id: "temperature",
+                name: "Temperature",
+                default: service.temperature
+            }, `homekit-${service.subtype}` )}
                         </div>
                          <div class="content">
-                            ${generateInput({type: "checkbox", id: "hueAndSat", name: "Hue and Saturation", default: service.hueAndSat},`homekit-${service.subtype}`)}
+                            ${generateInput( {
+                type: "checkbox",
+                id: "hueAndSat",
+                name: "Hue and Saturation",
+                default: service.hueAndSat
+            }, `homekit-${service.subtype}` )}
                        </div>
                       </div>
                     </div>
                 </div>`;
+        }
     } );
     document.getElementById( 'homekitList' ).innerHTML = html;
 }
 
-function drawButtons(){
+function drawButtons() {
     let html = ``;
-    systemConfig.buttonMap.forEach( (config, index) => {
+    systemConfig.buttonMap.forEach( ( config, index ) => {
         html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
@@ -165,15 +186,26 @@ function drawButtons(){
                             M
                         </div>
                       </header>
-                      <div class="card-content">
-                        <div class="content">
+                      <div class="card-content">`;
+        if ( config.pattern ) {
+            html += `    <div class="content">
                             Pattern: ${ledScripts?.patterns[config.pattern]?.name ?? config.pattern}
-                        </div>
+                         </div>
                          <div class="content">
                             Effect: ${(ledScripts?.effects[config.effect]?.name ?? config.effect) || "None"}
-                       </div>
-                        <div class="content is-flex is-flex-wrap-wrap">
-                            ${config.strips.map(v => systemConfig.stripConfig[v]).reduce((acc, v) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 mx-1">${v.name}</span>`, "")}
+                         </div>`;
+        }
+        if ( config.matrix ) {
+            config.strips = config.strips ?? [];
+            if ( systemConfig?.matrixDisplay && !config.strips.includes( systemConfig.matrixDisplay.strip ) ) {
+                config.strips.unshift( systemConfig?.matrixDisplay?.strip );
+            }
+            html += `    <div class="content">
+                            Maxtrix: ${matrixScripts?.[config.matrix].name ?? config.matrix}
+                         </div>`;
+        }
+        html += `        <div class="content is-flex is-flex-wrap-wrap">
+                            ${config.strips.map( v => systemConfig.stripConfig[v] ).reduce( ( acc, v ) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 m-1">${v.name}</span>`, "" )}
                         </div>
                       </div>
                     </div>
@@ -182,12 +214,19 @@ function drawButtons(){
     document.getElementById( 'buttonList' ).innerHTML = html;
 }
 
-function reloadScripts(){
+function drawMatrixDisplay() {
+    document.getElementById( "matrixStrip" ).innerText = systemConfig.stripConfig[systemConfig.displayMatrix.strip].name;
+    document.getElementById( "matrixIndex" ).innerText = systemConfig.displayMatrix.strip;
+    document.getElementById( "matrixDefault" ).innerText = matrixScripts[systemConfig.displayMatrix.default].name;
+
+}
+
+function reloadScripts() {
     socket.emit( 'reloadScripts', ( data ) => {
         ledScripts = data;
     } );
 }
 
-function jumpTo(header){
-    document.getElementById(`${header}-section`).scrollIntoView();
+function jumpTo( header ) {
+    document.getElementById( `${header}-section` ).scrollIntoView();
 }
