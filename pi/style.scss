@@ -14,7 +14,7 @@ $green: #35E68A;
 // Update Bulma's global variables
 $primary: $sky;
 $link: $blue;
-$link-light: $light-blue;
+//$link-light: $light-blue;
 $info: $orange;
 $info-light: $orange-light;
 $success: $green;
@@ -23,11 +23,10 @@ $danger: $ruby;
 $white-ter: $very-light-orange;
 
 $fullhd: 1536px + (2 * 32px);
+$link: $white-ter;
 
 // Update some of Bulma's component variables
 $body-background-color: $very-light-orange;
-$tabs-boxed-link-active-background-color: $very-light-orange;
-$tabs-boxed-link-hover-background-color: $info-light;
 
 //custom classes
 input.stripBox[type="checkbox"]:checked + label {
@@ -71,7 +70,6 @@ input.stripBox[type="checkbox"]:checked + label {
 }
 
 .brand {
-  margin-top: -1.5rem;
   cursor: default;
 }
 
