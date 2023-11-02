@@ -6,7 +6,13 @@ module.exports = {
     'options': [
         { 'id': "multiplier", 'name': "Multiply Length", 'type': "number", 'default': 1 },
         { 'id': "useNumLEDs", 'name': "Don't Use Strip Length", 'type': "checkbox", 'default': false },
-        { 'id': "blank", 'name': "Fill remaining with Blanks", 'type': "checkbox", 'default': false },
+        {
+            id: "handleExtra", name: "Handle Extra Space", type: "select", default: "repeat", options: [
+                { value: "repeat", name: "Repeat rainbow" },
+                { value: "blank", name: "Fill with blanks" },
+                { value: "none", name: "Leave as it" }
+            ]
+        },
         { 'id': "color1", 'name': "Starting Color", 'type': "color", 'default': "#ff0000" },
         { 'id': "color2", 'name': "Ending Color", 'type': "color", 'default': "#ff0000" },
         { 'id': "reverseDirection", 'name': "Reverse Direction", 'type': "checkbox", 'default': false },
@@ -29,15 +35,15 @@ module.exports = {
             arr.reverse();
         }
         if ( options.doubleBack ) {
-            let tempArr = [...arr];
-            arr.push(...tempArr.reverse());
+            let tempArr = [ ...arr ];
+            arr.push( ...tempArr.reverse() );
         }
-        if ( options.blank ) {
+        if ( options.handleExtra === "blank" ) {
             for ( let i = length; i < numLEDs; i++ ) {
                 arr.push( "000000" );
             }
         }
-        while ( arr.length < numLEDs ) {
+        while ( arr.length < numLEDs && options.handleExtra === "repeat") {
             arr.push( ...arr );
         }
         return arr;
