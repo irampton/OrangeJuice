@@ -2,35 +2,62 @@ function generateInput( option, superText, addClass ) {
     switch ( option.type ) {
         case "checkbox":
             return `<div class="block ml-2">
-                        <label class="checkbox" for="${superText}-${option.id}">
-                           <input id="${superText}-${option.id}" name="${superText}-${option.id}" type="checkbox" class="${addClass ?? "big"}" ${option.default ? "checked" : ""}>
-                           ${option.name}
+                        <label class="checkbox" for="${ superText }-${ option.id }">
+                           <input id="${ superText }-${ option.id }" name="${ superText }-${ option.id }" type="checkbox" class="${ addClass ?? "big" }" ${ option.default ? "checked" : "" }>
+                           ${ option.name }
                         </label>
                     </div>`;
         case "color":
             return `<div class="field is-horizontal">
-                        <label class="pt-3">${option.name}</label>
-                        <input id="${superText}-${option.id}" type="${option.type}" value="${option.default}" class="big m-2 ml-3">
+                        <label class="pt-3">${ option.name }</label>
+                        <input id="${ superText }-${ option.id }" type="${ option.type }" value="${ option.default }" class="big m-2 ml-3">
                     </div>`;
         case "select":
             return `<div class="mb-3">
-                        <span>${option.name}</span>
-                        <div class="select ${addClass}" style="vertical-align: middle;">
-                            <select id="${superText}-${option.id}">
-                                ${option.options.map( o => `<option value="${o.value}" ${o.value === option.default ? "selected" : ""}>${o.name}</option>`).join("\n")}
+                        <span>${ option.name }</span>
+                        <div class="select ${ addClass }" style="vertical-align: middle;">
+                            <select id="${ superText }-${ option.id }">
+                                ${ option.options.map( o => `<option value="${ o.value }" ${ o.value === option.default ? "selected" : "" }>${ o.name }</option>` ).join( "\n" ) }
                             </select>
                         </div>
                     </div>`;
+        case "colorArray":
+            let html = `<div class="mb-3">
+                            <p>${ option.name }</p>
+                            <span onclick="removeFromColorArray('${ superText }-${ option.id }')" class="tag is-danger is-rounded">-</span>
+                            <span id="${ superText }-${ option.id }">
+                                ${ option.default.map( ( v, index ) => getColorArrayElement( `${ superText }-${ option.id }-${ index }`, v ) ).join( "\n" ) }
+                            </span>
+                            <span onclick="addToColorArray('${ superText }-${ option.id }')" class="tag is-success is-rounded">+</span>
+                       </div>`;
+
+            return html;
         default:
             return `<div class="field is-horizontal">
-                        <label class="pt-2">${option.name}</label>
+                        <label class="pt-2">${ option.name }</label>
                         <div class="control">
-                            <input id="${superText}-${option.id}" type="${option.type}" value="${option.default}" class="input ml-2">
+                            <input id="${ superText }-${ option.id }" type="${ option.type }" value="${ option.default }" class="input ml-2">
                         </div>
                     </div>`;
     }
 }
 
-function properCase(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+function properCase( string ) {
+    return string.charAt( 0 ).toUpperCase() + string.slice( 1 ).toLowerCase();
+}
+
+function addToColorArray( id, color ) {
+    let arrHolder = document.getElementById( id );
+    let span = document.createElement( "span" );
+    span.innerHTML += getColorArrayElement( `${ id }-${ arrHolder.children.length }`, color )
+    arrHolder.appendChild( span );
+}
+
+function getColorArrayElement( id, color ) {
+    return `<input id="${ id }" style="vertical-align: middle" type="color" value="#${ color ?? "000000" }" class="big m-2 ml-3">`;
+}
+
+function removeFromColorArray( id ) {
+    let arrHolder = document.getElementById( id );
+    arrHolder.children[arrHolder.children.length - 1].remove();
 }
