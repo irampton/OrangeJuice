@@ -25,3 +25,31 @@ function generateInput( option, superText, addClass ) {
 function properCase(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
+
+let menuOn = window.innerWidth > 768;
+
+function toggleMenu(){
+    menuOn = !menuOn;
+    updateMenu();
+}
+
+
+function updateMenu(){
+    if(menuOn){
+        for(let item of document.getElementsByClassName('headerText')){
+            item.classList.remove('noShow');
+            item.parentElement.classList.remove('noMargin');
+        }
+    }else{
+        for(let item of document.getElementsByClassName('headerText')){
+            item.classList.add('noShow');
+            item.parentElement.classList.add('noMargin');
+        }
+    }
+}
+updateMenu();
+
+window.addEventListener('resize', function(event) {
+    menuOn = window.innerWidth > 768;
+    updateMenu();
+}, true);
