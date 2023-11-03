@@ -16,14 +16,13 @@ $primary: $sky;
 $link: $blue;
 //$link-light: $light-blue;
 $info: $orange;
-$info-light: $orange-light;
+//$info-light: $orange-light;
 $success: $green;
 $warning: $purple;
 $danger: $ruby;
 $white-ter: $very-light-orange;
 
 $fullhd: 1536px + (2 * 32px);
-$link: $white-ter;
 
 // Update some of Bulma's component variables
 $body-background-color: $very-light-orange;
@@ -73,6 +72,10 @@ input.stripBox[type="checkbox"]:checked + label {
   cursor: default;
 }
 
+.headerText{
+  color: $white-ter;
+}
+
 
 // Import only what you need from Bulma
 @import "node_modules/bulma/bulma.sass";
@@ -84,4 +87,8 @@ input.stripBox[type="checkbox"]:checked + label {
     position: sticky;
     top: 1rem;
   }
+}
+
+.noMargin{
+  margin: 0 !important;
 }
