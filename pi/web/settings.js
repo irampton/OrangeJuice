@@ -142,12 +142,12 @@ function drawHomekit() {
                           ${service.name}
                         </p>
                          <div class="card-header-icon">
-                            M
+                            <i class="fa-solid fa-gear"></i>
                         </div>
                       </header>
                       <div class="card-content">
                         <div class="content is-flex is-flex-wrap-wrap">
-                            ${service.strips.map( v => systemConfig.stripConfig[v] ).reduce( ( acc, v ) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 my-1">${v.name}</span>`, "" )}
+                            ${service.strips.map( v => systemConfig.stripConfig[v] ).reduce( ( acc, v ) => acc + `<span class="tag ${typeClass[v.type]} is-medium px-2 py-1 m-1">${v.name}</span>`, "" )}
                         </div>
                         <div class="content">
                             ${generateInput( {
@@ -183,7 +183,7 @@ function drawButtons() {
                           Button: ${index}
                         </p>
                          <div class="card-header-icon">
-                            M
+                            <i class="fa-solid fa-gear"></i>
                         </div>
                       </header>
                       <div class="card-content">`;

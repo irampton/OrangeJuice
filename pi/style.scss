@@ -76,6 +76,19 @@ input.stripBox[type="checkbox"]:checked + label {
   color: $white-ter;
 }
 
+input[type=color]{
+  width: 2rem;
+  height: 2rem;
+  border-radius: 100%;
+  background-color: $white-ter;
+  border: gray 1px solid;
+  padding: 3px;
+}
+
+input[type=color]::-moz-color-swatch {
+  border: gray 1px solid;
+  border-radius: 100%;
+}
 
 // Import only what you need from Bulma
 @import "node_modules/bulma/bulma.sass";
@@ -91,4 +104,8 @@ input.stripBox[type="checkbox"]:checked + label {
 
 .noMargin{
   margin: 0 !important;
+}
+
+.vaMiddle{
+  vertical-align: middle;
 }

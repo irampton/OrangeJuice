@@ -35,6 +35,18 @@ input.stripBox[type="checkbox"]:checked + label {
 .headerText {
   color: #FFFCFA; }
 
+input[type=color] {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 100%;
+  background-color: #FFFCFA;
+  border: gray 1px solid;
+  padding: 3px; }
+
+input[type=color]::-moz-color-swatch {
+  border: gray 1px solid;
+  border-radius: 100%; }
+
 /*! bulma.io v0.9.4 | MIT License | github.com/jgthms/bulma */
 /* Bulma Utilities */
 .button, .input, .textarea, .select select, .file-cta,
@@ -7922,3 +7934,6 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
 
 .noMargin {
   margin: 0 !important; }
+
+.vaMiddle {
+  vertical-align: middle; }
