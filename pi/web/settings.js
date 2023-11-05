@@ -117,9 +117,10 @@ function drawScripts() {
                                 <div class="level-right">
                                     <div class="level-item">
                                         <span class="tag is-info mr-4">${ledScripts[key][s]?.options.length}</span>
-                                        <span class="tag is-link mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "number" ).length}</span>
-                                        <span class="tag is-warning mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "color" ).length}</span>
-                                        <span class="tag is-danger mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "checkbox" ).length}</span>
+                                        <span class="tag is-primary mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "select" ).length}</span>
+                                        <span class="tag is-link mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "checkbox" ).length}</span>
+                                        <span class="tag is-warning mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "color" || o.type === "colorArray" ).length}</span>
+                                        <span class="tag is-danger mx-1">${ledScripts[key][s]?.options.filter( o => o.type === "number" ).length}</span>
                                     </div>
                                 </div>
                             </div>`;
@@ -142,7 +143,7 @@ function drawHomekit() {
                           ${service.name}
                         </p>
                          <div class="card-header-icon">
-                            <i class="fa-solid fa-gear"></i>
+                            <i class="fa-solid fa-gear is-disabled"></i>
                         </div>
                       </header>
                       <div class="card-content">
