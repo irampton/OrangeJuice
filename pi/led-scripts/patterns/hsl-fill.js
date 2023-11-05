@@ -3,6 +3,8 @@ const { Color } = require( '@orangejedi/yacml' );
 module.exports = {
     'id': "hsl-fill",
     'name': "HSL Fill",
+    //Not used anywhere, but could be useful for behind-the-scenes stuff
+    'hide': true,
     'options': [
         { 'id': "hue", 'name': "Hue", 'type': "number", 'default': 0 },
         { 'id': "saturation", 'name': "Saturation", 'type': "number", 'default': 0 },

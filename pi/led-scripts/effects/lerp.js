@@ -2,31 +2,42 @@ const { Color } = require( '@orangejedi/yacml' );
 const { randomNum, randomInt } = require( '../led-scripts-helper' );
 
 module.exports = {
-    'id': "lerp-random",
-    'name': "Lerp (Random)",
-    'animate': true,
-    'options': [
-        { 'id': "speed", 'name': "Speed", 'type': "number", 'default': 4 },
-        { 'id': "minTime", 'name': "Min Hold Time", 'type': "number", 'default': 5 },
-        { 'id': "maxTime", 'name': "Max Hold Time", 'type': "number", 'default': 10 }
+    id: "lerp",
+    name: "Lerp",
+    animate: true,
+    options: [
+        { id: "speed", name: "Speed", type: "number", default: 4 },
+        { id: "minTime", name: "Min Hold Time", type: "number", default: 5 },
+        { id: "maxTime", name: "Max Hold Time", type: "number", default: 10 },
+        { id: "order", name: "Color Order", type: "select", default: 'linear', options: [
+                { value: "linear", name: "Linear" },
+                { value: "random", name: "Random" }
+            ]
+        }
     ],
-    "Create": function ( colorArray, options ) {
+    Create: function ( colorArray, { speed, minTime, maxTime, order } ) {
         this.patternArray = [...colorArray];
         this.outputArray = new Array( colorArray.length );
-        this.minTime = Number( options.minTime );
-        this.maxTime = Number( options.maxTime );
-        this.color2 = this.patternArray[randomInt( 0, this.patternArray.length - 1 )];
+        this.minTime = Number( minTime );
+        this.maxTime = Number( maxTime );
+        this.colorAt = 0;
+        this.color2 = this.patternArray[this.colorAt % this.patternArray.length];
         this.newColor = () => {
             this.color1 = this.color2
-            this.color2 = this.patternArray[randomInt( 0, this.patternArray.length - 1 )];
-            let c = 0;
-            while ( this.color1 === this.color2 && c < 10 ) {
+            if ( order === "random" ) {
                 this.color2 = this.patternArray[randomInt( 0, this.patternArray.length - 1 )];
-                c++;
+                let c = 0;
+                while ( this.color1 === this.color2 && c < 10 ) {
+                    this.color2 = this.patternArray[randomInt( 0, this.patternArray.length - 1 )];
+                    c++;
+                }
+            } else {
+                this.colorAt++;
+                this.color2 = this.color2 = this.patternArray[this.colorAt % this.patternArray.length];
             }
         }
         this.newColor();
-        this.fadeSpeed = Number( options.speed );
+        this.fadeSpeed = Number( speed );
         this.fadeAt = this.fadeSpeed;
         this.steps = 24;
         this.interval = 1000 / this.steps;

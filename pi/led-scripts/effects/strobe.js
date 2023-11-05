@@ -1,24 +1,33 @@
+const { gcd } = require( "../led-scripts-helper" );
+
 module.exports = {
     'id': "strobe",
     'name': "Strobe",
     'animate': true,
     'options': [
-        { 'id': "speed", 'name': "Speed", 'type': "number", 'default': 1 }
+        { 'id': "on", 'name': "On Time", 'type': "number", 'default': 1 },
+        { 'id': "off", 'name': "Off Time", 'type': "number", 'default': 1 }
     ],
-    "Create": function ( colorArray, options ) {
-        this.colorArray = [...colorArray];
-        this.pattern = [...colorArray];
-        this.speed = options.speed;
-        this.interval = 1 / this.speed * 1000;
+    "Create": function ( colorArray, { on, off } ) {
+        this.patternArray = [...colorArray];
+        this.blankArray = new Array( this.patternArray.length ).fill( '000000' );
+        this.on = Number( on );
+        this.off = Number( off );
+        this.interval = gcd( this.on * 1000, this.off * 1000 );
+        if ( this.interval < 1000 / 24 ) {
+            this.interval = 1000 / 24;
+        }
+        this.counter = 0;
         this.step = function ( callback ) {
-            if ( this.colorArray[0] === '000000' ) {
-                this.colorArray = [...this.pattern];
-            } else {
-                for ( let i = 0; i < (this.colorArray.length); i++ ) {
-                    this.colorArray[i] = '000000';
-                }
+            this.counter += this.interval / 1000;
+            if ( this.counter > this.on ) {
+                this.counter = -1 * this.off;
             }
-            callback( this.colorArray );
+            if ( this.counter > 0 ) {
+                callback( this.patternArray );
+            } else {
+                callback( this.blankArray );
+            }
         }
     }
 }

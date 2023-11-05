@@ -25,9 +25,9 @@ socket.on( 'connect', function () {
 } );
 
 function drawSettings() {
-    let html = `<option value="off" selected>Select Pattern</option>`;
+    let html = ``;
     ledScripts.patterns.list.forEach( v => {
-        html += `<option value="${ v }">${ ledScripts.patterns[v].name }</option>`;
+        html += `<option value="${ v }" ${v === 'off' ? "selected" : ""}>${ ledScripts.patterns[v].name }</option>`;
     } );
     document.getElementById( 'pattern' ).innerHTML = html;
 

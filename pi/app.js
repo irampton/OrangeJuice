@@ -6,7 +6,7 @@ const stripConfig = config.get( "strips" );
 const buttonMap = config.get( 'buttonConfigs' );
 const matrixScripts = require( "./matrix-scripts.js" );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
-const ledScripts = require( "./led-scripts/led-scripts.js" );
+let ledScripts = require( "./led-scripts/led-scripts.js" );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
@@ -246,6 +246,19 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 };
                 callback( send );
             } );
+            socket.on( 'reloadScripts', ( callback ) => {
+                reloadLEDScripts();
+
+                function sendCallback() {
+                    if ( ledScripts.patterns?.list.length > 0 && ledScripts.effects?.list.length > 0 ) {
+                        callback( ledScripts );
+                    } else {
+                        setTimeout( sendCallback, 50 );
+                    }
+                }
+
+                sendCallback();
+            } );
         } );
     }
 
@@ -332,6 +345,14 @@ function clearAppConfigs( noClear ) {
             currentLEDs.strips[index] = blankStrip( strip );
         }
     } )
+}
+
+function reloadLEDScripts() {
+    console.log( "reloading LED scripts" );
+    let test = new RegExp( /\/led-scripts\// );
+    let loadedScripts = Object.keys( require.cache ).filter( k => test.test( k.replace( /\\/g, "/" ) ) );
+    loadedScripts.forEach( k => delete require.cache[k] );
+    ledScripts = require( "./led-scripts/led-scripts" );
 }
 
 function blankStrip( strip ) {
