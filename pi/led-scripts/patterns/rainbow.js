@@ -8,7 +8,7 @@ module.exports = {
     ],
     generate: ( numLEDs, { multiplier } ) => {
         let length = Math.floor( numLEDs * multiplier );
-        let colors = new Array( length ).map( ( v, index ) => new Color( index / length * 360 ).getHex( false ) );
+        let colors = new Array( length ).fill(0).map( ( v, index ) => new Color( index / length * 360 ).getHex( false ) );
 
         let arr = [];
         do {
