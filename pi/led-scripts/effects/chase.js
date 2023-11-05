@@ -1,13 +1,13 @@
 module.exports = {
-    'id': "chase",
-    'name': "Chase",
-    'animate': true,
-    'options': [
-        { 'id': "reverse", 'name': "Reverse", 'type': "checkbox", 'default': false },
-        { 'id': "speed", 'name': "Speed", 'type': "number", 'default': 1 },
-        { 'id': "scale", 'name': "Scale to Size", 'type': "checkbox", 'default': false },
+    id: "chase",
+    name: "Chase",
+    animate: true,
+    options: [
+        { id: "speed", name: "Speed", type: "number", default: 1 },
+        { id: "reverse", name: "Reverse", type: "checkbox", default: false },
+        { id: "scale", name: "Scale to Size", type: "checkbox", default: false },
     ],
-    "Create": function ( colorArray, { numLEDs, reverse, speed, scale } ) {
+    Create: function ( colorArray, { numLEDs, reverse, speed, scale } ) {
         this.colorArray = [...colorArray];
         this.reverse = reverse ?? false;
         this.speed = speed ?? 1;
@@ -19,13 +19,13 @@ module.exports = {
             } else {
                 this.colorArray.push( this.colorArray.shift() );
             }
-            if(this.scale){
+            if ( this.scale ) {
                 let out = [];
-                for(let i  = 0; i < this.colorArray.length; i += this.colorArray.length / numLEDs){
-                    out.push(this.colorArray[Math.floor(i)]);
+                for ( let i = 0; i < this.colorArray.length; i += this.colorArray.length / numLEDs ) {
+                    out.push( this.colorArray[Math.floor( i )] );
                 }
                 callback( out );
-            }else{
+            } else {
                 callback( this.colorArray );
             }
         }
