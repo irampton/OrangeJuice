@@ -77,6 +77,16 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             setLEDs( options );
             res.send( 'done' );
         } );
+        //preset control (for shortcut)
+        app.get( '/presets', ( req, res ) => {
+            res.send(userPresets.map( p => p.name ));
+        } );
+        app.get( '/setPreset', ( req, res ) => {
+            let preset = structuredClone(userPresets.find(p => p.name === req.headers.preset));
+            preset.trigger = "webAPI";
+            setLEDs(preset);
+            res.send( 'done' );
+        } );
 
         if ( features.matrixDisplay ) {
             app.get( '/matrixOff', ( req, res ) => {
