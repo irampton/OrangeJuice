@@ -69,7 +69,7 @@ function drawStripGroups() {
         ];
         let html = "";
         ledStripGroups.forEach( ( value, index ) => {
-            html += `<button class="button py-2 px-3 m-1 is-link is-outlined" onclick="selectGroup(${ index })" ondblclick="deleteStripGroup(${ index })"> ${ value.name }</button>`;
+            html += `<button class="button py-2 px-3 m-1 is-link-dark is-outlined" onclick="selectGroup(${ index })" ondblclick="deleteStripGroup(${ index })"> ${ value.name }</button>`;
         } );
         document.getElementById( 'stripGroups' ).innerHTML = html;
     } );

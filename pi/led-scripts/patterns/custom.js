@@ -6,9 +6,10 @@ module.exports = {
     ],
     hide: true,
     generate: ( numLEDs, { arr } ) => {
+        let array = typeof arr === "string" ? JSON.parse(arr) : arr;
         let newArr = [];
         while ( newArr.length < numLEDs ) {
-            newArr.push( ...arr );
+            newArr.push( ...array );
         }
         return newArr;
     }

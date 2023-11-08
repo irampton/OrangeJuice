@@ -24,11 +24,11 @@ function generateInput( option, superText, addClass ) {
         case "colorArray":
             let html = `<div class="mb-3">
                             <p>${ option.name }</p>
-                            <span onclick="removeFromColorArray('${ superText }-${ option.id }')" class="tag is-danger is-rounded">-</span>
+                             <i onclick="removeFromColorArray('${ superText }-${ option.id }')" class="fa-solid fa-circle-minus has-text-danger is-size-4 vaMiddle"></i>
                             <span id="${ superText }-${ option.id }">
                                 ${ option.default.map( ( v, index ) => getColorArrayElement( `${ superText }-${ option.id }-${ index }`, v ) ).join( "\n" ) }
                             </span>
-                            <span onclick="addToColorArray('${ superText }-${ option.id }')" class="tag is-success is-rounded">+</span>
+                            <i onclick="addToColorArray('${ superText }-${ option.id }')" class="fa-solid fa-circle-plus has-text-success is-size-4 vaMiddle"></i>
                        </div>`;
 
             return html;
