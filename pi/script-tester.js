@@ -8,7 +8,7 @@ const io = new Server( http );
 app.use( express.static( 'web' ) );
 
 const config = require( './config-manager' );
-const stripConfig = config.get( "strips" );
+let stripConfig = config.get( "strips" );
 let features = config.get( "features" );
 const buttonMap = config.get( 'buttonConfigs' );
 let ledScripts = require( "./led-scripts/led-scripts" );
@@ -47,7 +47,7 @@ io.on( 'connection', function ( socket ) {
         config.num = numLEDs;
 
         let colorArr = ledScripts.patterns[config.pattern].generate( Number( numLEDs ), config.patternOptions );
-        io.emit( 'newColorArr', config, colorArr );
+        writeToLEDs( config, colorArr );
 
         if ( config.effect ) {
             running.effect = new ledScripts.effects[config.effect].Create( colorArr, {
@@ -55,11 +55,11 @@ io.on( 'connection', function ( socket ) {
                 numLEDs: config.num
             } );
             running.effect.step( ( arr ) => {
-                io.emit( 'newColorArr', config, arr );
+                writeToLEDs( config, arr );
             } );
             running.effectInterval = setInterval( () => {
                 running.effect.step( ( arr ) => {
-                    io.emit( 'newColorArr', config, arr );
+                    writeToLEDs( config, arr );
                 } )
             }, running.effect.interval );
         }
@@ -86,8 +86,19 @@ io.on( 'connection', function ( socket ) {
         };
         callback( send );
     } );
+    socket.on( 'setSettings', ( item, data ) => {
+        switch ( item ){
+            case "strips":
+                stripConfig = data;
+                //config.set( "strips", stripConfig );
+                break;
+            case "homekit":
+                //config.set( "homekit", data);
+                break;
+        }
+    } );
 } );
-http.listen( port, () => console.log( `listening on port ${port}` ) );
+http.listen( port, () => console.log( `listening on port ${ port }` ) );
 
 function reloadLEDScripts() {
     console.log( "reloading LED scripts" );
@@ -95,4 +106,12 @@ function reloadLEDScripts() {
     let loadedScripts = Object.keys( require.cache ).filter( k => test.test( k.replace( /\\/g, "/" ) ) );
     loadedScripts.forEach( k => delete require.cache[k] );
     ledScripts = require( "./led-scripts/led-scripts" );
+}
+
+function writeToLEDs( config, arr ) {
+    if ( stripConfig[0].modifier ) {
+        io.emit( 'newColorArr', config, ledScripts.modifiers[stripConfig[0].modifier].modify( arr, stripConfig[0].modifierOptions ) );
+    } else {
+        io.emit( 'newColorArr', config, arr );
+    }
 }
