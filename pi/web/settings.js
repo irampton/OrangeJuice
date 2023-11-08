@@ -15,6 +15,7 @@ socket.on( 'connect', function () {
         socket.emit( 'getLEDScripts', ( data ) => {
             ledScripts = data;
             drawScripts();
+            drawModifiers();
             if ( systemConfig.features.matrixDisplay ) {
                 socket.emit( 'getMatrixScripts', ( data ) => {
                     matrixScripts = data;
@@ -41,14 +42,14 @@ function drawFeatures() {
         "matrixDisplay": "Matrix display attached"
     }
     let html = ``;
-    let list = Object.keys( systemConfig.features ).map( k => {
+    let list = Object.keys( systemConfig.features ).filter( k => k !== "hostWebControl" ).map( k => {
         return {
             id: k,
             name: featureNames[k] ?? k,
             default: systemConfig.features[k],
             type: "checkbox"
         }
-    } )
+    } );
     list.forEach( v => {
         html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">${generateInput( v, 'features', 'bigger' )}</div>`;
     } );
@@ -85,14 +86,22 @@ function drawStrips() {
                        </div>
                       </div>
                       <footer class="card-footer">
-                        <a href="#" class="card-footer-item">Edit</a>
-                        <a href="#" class="card-footer-item">Modifiers</a>
-                        <a href="#" class="card-footer-item">Delete</a>
+                        <a class="card-footer-item" onclick="editScript(${index})">Edit</a>
+                        <a class="card-footer-item" onclick="modifyScript(${index})">Modifiers</a>
+                        <a class="card-footer-item" onclick="deleteStrip(${index})">Delete</a>
                       </footer>
                     </div>
                 </div>`;
     } );
     document.getElementById( 'stripList' ).innerHTML = html;
+}
+
+function drawModifiers() {
+    let html = `<option value="" selected>None</option>`;
+    ledScripts.modifiers.list.forEach( v => {
+        html += `<option value="${v}">${ledScripts.modifiers[v].name}</option>`;
+    } );
+    document.getElementById( 'modifierModalSelect' ).innerHTML = html;
 }
 
 function drawScripts() {
@@ -134,6 +143,8 @@ function drawScripts() {
 
 function drawHomekit() {
     let html = ``;
+    document.getElementById( 'homekitUsername' ).innerText = systemConfig.homekit.username;
+    document.getElementById( 'homekitPincode' ).innerText = systemConfig.homekit.pincode;
     systemConfig.homekit.services.forEach( ( service, index ) => {
         if ( service.strips ) {
             html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
@@ -225,9 +236,115 @@ function drawMatrixDisplay() {
 function reloadScripts() {
     socket.emit( 'reloadScripts', ( data ) => {
         ledScripts = data;
+        drawScripts();
     } );
 }
 
 function jumpTo( header ) {
     document.getElementById( `${header}-section` ).scrollIntoView();
+}
+
+function editScript( index ) {
+    let strip;
+    if ( index != null ) {
+        strip = systemConfig.stripConfig[index];
+        document.getElementById( 'scriptModalTitle' ).innerHTML = `Edit #<span class="has-text-black-ter">${index}</span>`;
+        document.getElementById( 'scriptModalName' ).value = strip.name;
+        document.getElementById( 'scriptModalLength' ).value = strip.length;
+        document.getElementById( 'scriptModalType' ).value = strip.type;
+    } else {
+        //create a new script
+        document.getElementById( 'scriptModalTitle' ).innerHTML = `Add Strip`;
+        document.getElementById( 'scriptModalName' ).value = "";
+        document.getElementById( 'scriptModalLength' ).value = 16;
+        document.getElementById( 'scriptModalType' ).value = "strip";
+    }
+    document.getElementById( 'scriptModalSave' ).onclick = () => {
+        let name = document.getElementById( 'scriptModalName' ).value;
+        let length = Number( document.getElementById( 'scriptModalLength' ).value );
+        let type = document.getElementById( 'scriptModalType' ).value;
+        if ( !name || !length || !type ) {
+            alert( "You are missing something!" );
+            return;
+        }
+        let previousStrip;
+        if ( strip ) {
+            previousStrip = systemConfig.stripConfig[index - 1];
+        } else {
+            previousStrip = systemConfig.stripConfig[systemConfig.stripConfig.length - 1];
+            systemConfig.stripConfig.push( {} );
+            strip = systemConfig.stripConfig[systemConfig.stripConfig.length - 1];
+        }
+        strip.name = name;
+        strip.start = (previousStrip?.start + previousStrip?.length) || 0;
+        strip.length = length;
+        strip.type = type;
+        saveKey( 'strips', systemConfig.stripConfig );
+        drawStrips();
+        closeModal( 'scriptModal' );
+    };
+    document.getElementById( 'scriptModal' ).classList.add( 'is-active' );
+}
+
+function deleteStrip( index ) {
+    systemConfig.stripConfig.splice( index, 1 );
+    saveKey( 'stripConfig', systemConfig.stripConfig );
+    drawStrips();
+}
+
+function modifyScript( index ) {
+    let strip;
+    strip = systemConfig.stripConfig[index];
+    document.getElementById( 'scriptModalTitle' ).innerHTML = `Modifiers - ${strip.name}`;
+    document.getElementById( 'modifierModalSelect' ).value = strip.modifier || "";
+    modifierModalSelect();
+    if(strip.modifier){
+        let modifierObj = ledScripts.modifiers[strip.modifier];
+        for ( let i in modifierObj.options ) {
+          document.getElementById(`modifierModal-${modifierObj.options[i].id}`).value = strip.modifierOptions[modifierObj.options[i].id];
+        }
+    }
+    document.getElementById( 'modifierModalSave' ).onclick = () => {
+        strip.modifier = document.getElementById( 'modifierModalSelect' ).value || undefined;
+
+        let modiferOptions = {};
+        if(strip.modifier){
+            let modifierObj = ledScripts.modifiers[strip.modifier];
+            for ( let i in modifierObj.options ) {
+                modiferOptions[modifierObj.options[i].id] = document.getElementById(`modifierModal-${modifierObj.options[i].id}`).value;
+                if(modifierObj.options[i].type === "number"){
+                    modiferOptions[modifierObj.options[i].id] = Number( modiferOptions[modifierObj.options[i].id]);
+                }
+            }
+        }
+        strip.modifierOptions = modiferOptions;
+
+        saveKey( 'strips', systemConfig.stripConfig );
+        drawStrips();
+        closeModal( 'modifierModal' );
+    };
+    document.getElementById( 'modifierModal' ).classList.add( 'is-active' );
+}
+
+function modifierModalSelect() {
+    let modifier = document.getElementById( 'modifierModalSelect' ).value || undefined;
+    let settingsBody = document.getElementById( 'modifierModalSettings' );
+    if(modifier){
+        let modifierObj = ledScripts.modifiers[modifier];
+        let html = '';
+            for ( let i in modifierObj.options ) {
+                html += generateInput( modifierObj.options[i], 'modifierModal' );
+            }
+       settingsBody.innerHTML = html;
+    }else{
+        settingsBody.innerHTML = "";
+    }
+}
+
+function closeModal( id ) {
+    document.getElementById( id ).classList.remove( 'is-active' );
+}
+
+function saveKey( key, data ) {
+    socket.emit( 'setSettings', key, data );
 }

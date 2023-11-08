@@ -2,7 +2,7 @@ const config = require( './config-manager' );
 
 //grab data from config
 let features = config.get( "features" );
-const stripConfig = config.get( "strips" );
+let stripConfig = config.get( "strips" );
 const buttonMap = config.get( 'buttonConfigs' );
 const matrixScripts = require( "./matrix-scripts.js" );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
@@ -255,6 +255,17 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                     displayMatrix
                 };
                 callback( send );
+            } );
+            socket.on( 'setSettings', ( item, data ) => {
+                switch ( item ){
+                    case "strips":
+                        stripConfig = data;
+                        config.set( "strips", stripConfig );
+                        break;
+                    case "homekit":
+                        config.set( "homekit", data);
+                        break;
+                }
             } );
             socket.on( 'reloadScripts', ( callback ) => {
                 reloadLEDScripts();

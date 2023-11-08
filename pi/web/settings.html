@@ -17,7 +17,8 @@
 <body>
 <nav class="level has-background-info py-2 is-size-5">
     <p class="level-item has-text-centered is-hidden-tablet-only is-hidden-desktop mb-1">
-        <a class="title is-size-3 brand py-0 my-0 is-disabled has-text-white-ter has-text-weight-semibold" onclick="toggleMenu()">OrangeJuice</a>
+        <a class="title is-size-3 brand py-0 my-0 is-disabled has-text-white-ter has-text-weight-semibold"
+           onclick="toggleMenu()">OrangeJuice</a>
     </p>
     <p class="level-item has-text-centered">
         <a class="link headerText">Live View</a>
@@ -70,12 +71,17 @@
         <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="strips-section">
             <h3 class="title is-5">Attached Strips</h3>
             <div class="mx-1 my-2 columns is-multiline bottomDivider" id="stripList"></div>
-            <button class="button is-success px-6 ml-4 mt-1">Add Strip</button>
+            <button class="button is-success px-6 ml-4 mt-1" onclick="editScript()">Add Strip</button>
         </div>
         <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="homekit-section">
             <h3 class="title is-5">HomeKit Settings</h3>
+            <div class="block ml-3 mb-0">
+                <p>Username: <span id="homekitUsername"></span></p>
+                <p>Pincode: <span class="ml-4" id="homekitPincode"></span></p>
+            </div>
             <div class="mx-1 my-2 columns is-multiline bottomDivider" id="homekitList"></div>
             <button class="button is-success px-6 ml-4 mt-1">Add Accessory</button>
+            <button class="button is-link px-6 ml-4 mt-1">Save</button>
         </div>
         <div class="column box is-offset-one-fifth is-four-fifths-tablet" id="buttons-section">
             <h3 class="title is-5">GPIO Buttons</h3>
@@ -116,6 +122,71 @@
         </div>
     </div>
 </section>
+
+<!-- modals -->
+<div class="modal" id="scriptModal">
+    <div class="modal-background" onclick="closeModal('scriptModal')"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="scriptModalTitle"></p>
+            <button class="delete" aria-label="close" onclick="closeModal('scriptModal')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Name</label>
+                <div class="control">
+                    <input class="input" type="text" id="scriptModalName">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Type</label>
+                <div class="control">
+                    <input class="input" type="number" id="scriptModalLength">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Type</label>
+                <div class="select is-link">
+                    <select id="scriptModalType">
+                        <option value="strip">Strip</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="ring">Ring</option>
+                        <option value="strand">Strand</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" id="scriptModalSave">Save changes</button>
+            <button class="button is-danger is-outlined" onclick="closeModal('scriptModal')">Cancel</button>
+        </footer>
+    </div>
+</div>
+<div class="modal" id="modifierModal">
+    <div class="modal-background" onclick="closeModal('modifierModal')"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="modifiersTitle">Modifiers</p>
+            <button class="delete" aria-label="close" onclick="closeModal('modifierModal')"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Type</label>
+                <div class="select is-link">
+                    <select id="modifierModalSelect" onchange="modifierModalSelect()">
+                    </select>
+                </div>
+            </div>
+            <div id="modifierModalSettings">
+
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" id="modifierModalSave">Save changes</button>
+            <button class="button is-danger is-outlined" onclick="closeModal('modifierModal')">Cancel</button>
+        </footer>
+    </div>
+</div>
 
 <script src="shared.js"></script>
 <script src="settings.js"></script>
