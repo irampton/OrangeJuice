@@ -2,11 +2,11 @@ const config = require( './config-manager' );
 
 //grab data from config
 let features = config.get( "features" );
-const stripConfig = config.get( "strips" );
+let stripConfig = config.get( "strips" );
 const buttonMap = config.get( 'buttonConfigs' );
 const matrixScripts = require( "./matrix-scripts.js" );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
-const ledScripts = require( "./led-scripts/led-scripts.js" );
+let ledScripts = require( "./led-scripts/led-scripts.js" );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
@@ -76,6 +76,21 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             }
             setLEDs( options );
             res.send( 'done' );
+        } );
+        //preset control (for shortcut)
+        app.get( '/presets', ( req, res ) => {
+            res.send(userPresets.map( p => p.name ));
+        } );
+        app.get( '/setPreset', ( req, res ) => {
+            let name = req.headers?.preset || req.query?.preset;
+            try {
+                let preset = structuredClone( userPresets.find( p => p.name === name ) );
+                preset.trigger = "webAPI";
+                setLEDs( preset );
+                res.send( 'done' );
+            } catch ( e ){
+                res.status(400).send("Preset not found");
+            }
         } );
 
         if ( features.matrixDisplay ) {
@@ -236,6 +251,40 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             socket.on( 'getPresets', ( callback ) => {
                 callback( userPresets );
             } );
+            socket.on( 'getSettings', ( callback ) => {
+                let send = {
+                    features,
+                    "homekit": config.get( 'homekit' ),
+                    stripConfig,
+                    buttonMap,
+                    displayMatrix
+                };
+                callback( send );
+            } );
+            socket.on( 'setSettings', ( item, data ) => {
+                switch ( item ){
+                    case "strips":
+                        stripConfig = data;
+                        config.set( "strips", stripConfig );
+                        break;
+                    case "homekit":
+                        config.set( "homekit", data);
+                        break;
+                }
+            } );
+            socket.on( 'reloadScripts', ( callback ) => {
+                reloadLEDScripts();
+
+                function sendCallback() {
+                    if ( ledScripts.patterns?.list.length > 0 && ledScripts.effects?.list.length > 0 ) {
+                        callback( ledScripts );
+                    } else {
+                        setTimeout( sendCallback, 50 );
+                    }
+                }
+
+                sendCallback();
+            } );
         } );
     }
 
@@ -245,7 +294,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
 if ( features.weatherSensor || features.weatherFetch ) {
     require( "./weatherData.js" ).setData( weatherData, {
         useSensor: features.weatherSensor,
-        fetchOnlineData: features.weatherFetch
+        fetchOnlineData: features.weatherFetch,
+        sensorType: features.sensorType
     } );
 }
 
@@ -322,6 +372,14 @@ function clearAppConfigs( noClear ) {
             currentLEDs.strips[index] = blankStrip( strip );
         }
     } )
+}
+
+function reloadLEDScripts() {
+    console.log( "reloading LED scripts" );
+    let test = new RegExp( /\/led-scripts\// );
+    let loadedScripts = Object.keys( require.cache ).filter( k => test.test( k.replace( /\\/g, "/" ) ) );
+    loadedScripts.forEach( k => delete require.cache[k] );
+    ledScripts = require( "./led-scripts/led-scripts" );
 }
 
 function blankStrip( strip ) {

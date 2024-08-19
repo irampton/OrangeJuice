@@ -1,0 +1,121 @@
+@charset "utf-8";
+
+// Set your brand colors
+$orange: #FC7C38;
+$orange-light: #FFB187;
+$very-light-orange: #FFFCFA;
+$blue: #1B76F5;
+$light-blue: #B0D3F5;
+$sky: #3CBBFF;
+$purple: #9144E3;
+$ruby: #C9185F;
+$green: #35E68A;
+
+// Update Bulma's global variables
+$primary: $sky;
+$link: $blue;
+//$link-light: $light-blue;
+$info: $orange;
+//$info-light: $orange-light;
+$success: $green;
+$warning: $purple;
+$danger: $ruby;
+$white-ter: $very-light-orange;
+
+$fullhd: 1536px + (2 * 32px);
+
+// Update some of Bulma's component variables
+$body-background-color: $very-light-orange;
+
+//custom classes
+.brand:hover {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.big {
+  transform: scale(1.25);
+  transform-origin: 2rem .75rem;
+}
+
+.bigger{
+  transform: scale(2);
+  transform-origin: 1rem .5rem;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+
+.bottomDivider{
+  border-bottom: hsl(0, 0%, 86%) solid 1px;
+}
+
+@media screen and (min-width: 562px), print {
+  .extraSpace {
+    margin-right: .75rem;
+  }
+}
+
+.stripBox {
+  display: none;
+}
+
+.noShow {
+  display: none !important;
+}
+
+.brand {
+  cursor: default;
+}
+
+.headerText{
+  color: $white-ter;
+}
+
+input[type=color]{
+  width: 2rem;
+  height: 2rem;
+  border-radius: 100%;
+  background-color: $white-ter;
+  border: gray 1px solid;
+  padding: 3px;
+}
+
+input[type=color]::-moz-color-swatch {
+  border: gray 1px solid;
+  border-radius: 100%;
+}
+
+// Import only what you need from Bulma
+@import "node_modules/bulma/bulma.sass";
+
+@media screen and (min-width: 769px), print {
+  .sidenav {
+    width: 18.4%;
+    margin-right: 1rem;
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.noMargin{
+  margin: 0 !important;
+}
+
+.vaMiddle{
+  vertical-align: middle;
+}
+
+input.stripBox[type="checkbox"]:checked + label {
+  @extend .is-link;
+  @extend .is-active;
+}
+
+button.is-link-dark.is-outlined{
+  color: $link-dark;
+  border-color: $primary-dark;
+}
+
+button.is-link-dark.is-outlined:hover{
+  background-color: $link-dark;
+  color: $white-ter;
+}

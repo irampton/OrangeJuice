@@ -1,16 +1,16 @@
 const { Color } = require( '@orangejedi/yacml' );
-const { randomNum, randomInt } = require( '../led-scripts-helper' );
+const { randomNum } = require( '../led-scripts-helper' );
 
 module.exports = {
-    'id': "twinkle",
-    'name': "Twinkle",
-    'animate': true,
-    'options': [
-        { 'id': "speed", 'name': "Twinkle Speed", 'type': "number", 'default': 2 },
-        { 'id': "averageBrightness", 'name': "Average Brightness", 'type': "number", 'default': 70 },
-        { 'id': "twinkleBrightness", 'name': "Twinkle Brightness", 'type': "number", 'default': 100 },
-        { 'id': "minTime", 'name': "Min Hold Time", 'type': "number", 'default': 1 },
-        { 'id': "maxTime", 'name': "Max Hold Time", 'type': "number", 'default': 8 }
+    id: "twinkle",
+    name: "Twinkle",
+    animate: true,
+    options: [
+        { id: "speed", name: "Twinkle Speed", type: "number", default: 2 },
+        { id: "averageBrightness", name: "Average Brightness", type: "number", default: 70 },
+        { id: "twinkleBrightness", name: "Twinkle Brightness", type: "number", default: 100 },
+        { id: "minTime", name: "Min Dim Time", type: "number", default: 1 },
+        { id: "maxTime", name: "Max Dim Time", type: "number", default: 8 }
     ],
     "Create": function ( colorArray, { speed, averageBrightness, twinkleBrightness, minTime, maxTime } ) {
         this.speed = speed ?? 2;

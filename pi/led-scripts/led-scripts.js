@@ -27,7 +27,7 @@ fs.readdir( path.join( __dirname, "patterns" ), ( err, files ) => {
             }
         }
     } );
-    scripts.patterns.list.sort( ( a, b ) => scripts.patterns[a].name.localeCompare( scripts.patterns[b].name, 'en', { sensitivity: 'base' } ) );
+    scripts.patterns.list.sort( ( a, b ) => scripts.patterns[a].name === "Off" ? -1 : scripts.patterns[a].name.localeCompare( scripts.patterns[b].name, 'en', { sensitivity: 'base' } ) );
 } );
 
 fs.readdir( path.join( __dirname, "effects" ), ( err, files ) => {

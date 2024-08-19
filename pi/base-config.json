@@ -1,14 +1,14 @@
 {
   "features": {
-    "homekit": false,
-    "weatherSensor": false,
-    "weatherFetch": false,
-    "gpioButtons": false,
-    "gpioButtonsOnWeb": false,
     "hostWebControl": true,
     "webAPIs": true,
-    "ioStatsUpdate": false,
-    "matrixDisplay": false
+    "matrixDisplay": false,
+    "homekit": false,
+    "gpioButtons": false,
+    "gpioButtonsOnWeb": false,
+    "weatherSensor": false,
+    "weatherFetch": false,
+    "ioStatsUpdate": false
   },
   "strips": [
     {

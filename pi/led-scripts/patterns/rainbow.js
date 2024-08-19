@@ -1,21 +1,19 @@
 const { Color } = require( '@orangejedi/yacml' );
 
 module.exports = {
-    'id': "rainbow",
-    'name': "Rainbow",
-    'options': [
-        { 'id': "multiplier", 'name': "Multiply Length", 'type': "number", 'default': 1 },
-        { 'id': "useNumLEDs", 'name': "Don't Use Strip Length", 'type': "checkbox", 'default': false }
+    id: "rainbow",
+    name: "Rainbow",
+    options: [
+        { id: "multiplier", name: "Multiply Length", type: "number", default: 1 }
     ],
-    'generate': ( numLEDs, options ) => {
+    generate: ( numLEDs, { multiplier } ) => {
+        let length = Math.floor( numLEDs * multiplier );
+        let colors = new Array( length ).fill(0).map( ( v, index ) => new Color( index / length * 360 ).getHex( false ) );
+
         let arr = [];
-        let length = ( !options.useNumLEDs ? numLEDs : 1 ) * options.multiplier;
-        for ( let i = 0; i < length; i++ ) {
-            arr.push( new Color( i / length * 360 ).getHex( false ) );
-        }
-        while ( arr.length < numLEDs ) {
-            arr.push( ...arr );
-        }
+        do {
+            arr.push( ...colors );
+        } while ( arr.length < numLEDs )
         return arr;
     }
 };
