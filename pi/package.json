@@ -1,6 +1,6 @@
 {
   "name": "orangejuice-2.0",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@orangejedi/yacml": "^1.0.1",
+    "@simontaga/rpi-ws281x-native":  "^1.0.5",
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.2",
     "hap-nodejs": "^0.11.1",
@@ -22,7 +23,6 @@
     "oled-rpi-i2c-bus": "^1.1.4",
     "onoff": "^6.0.3",
     "request": "^2.88.2",
-    "rpi-ws281x-native": "^1.0.4",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {

@@ -1,11 +1,11 @@
-const ws281x = require( 'rpi-ws281x-native' );
+const ws281x = require( '@simontaga/rpi-ws281x-native' );
 
 module.exports = function ( numPixels ) {
     let channels = ws281x.init( {
         dma: 10,
         freq: 800000,
         channels: [
-            { count: numPixels, gpio: 18, invert: false, brightness: 255, stripType: 'ws2812' }
+            { count: numPixels, gpio: 18, invert: false, brightness: 255, stripType: ws281x.stripType.WS2812 }
         ]
     } );
     let ledChannel = channels[0];
