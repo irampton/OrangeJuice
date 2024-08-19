@@ -82,10 +82,15 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             res.send(userPresets.map( p => p.name ));
         } );
         app.get( '/setPreset', ( req, res ) => {
-            let preset = structuredClone(userPresets.find(p => p.name === req.headers.preset));
-            preset.trigger = "webAPI";
-            setLEDs(preset);
-            res.send( 'done' );
+            let name = req.headers?.preset || req.query?.preset;
+            try {
+                let preset = structuredClone( userPresets.find( p => p.name === name ) );
+                preset.trigger = "webAPI";
+                setLEDs( preset );
+                res.send( 'done' );
+            } catch ( e ){
+                res.status(400).send("Preset not found");
+            }
         } );
 
         if ( features.matrixDisplay ) {
@@ -289,7 +294,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
 if ( features.weatherSensor || features.weatherFetch ) {
     require( "./weatherData.js" ).setData( weatherData, {
         useSensor: features.weatherSensor,
-        fetchOnlineData: features.weatherFetch
+        fetchOnlineData: features.weatherFetch,
+        sensorType: features.sensorType
     } );
 }
 

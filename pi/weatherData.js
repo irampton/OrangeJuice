@@ -1,23 +1,37 @@
-const sensorLib = require( 'node-dht-sensor' );
+const DHT11 = require( 'node-dht-sensor' );
+const AHT20 = require( "aht20" );
 const request = require( "request" );
 const cheerio = require( "cheerio" );
 
-// Setup sensor, warn if failed
-const sensorType = 11; // 11 for DHT11, 22 for DHT22 and AM2302
-const sensorPin = 4;  // The GPIO pin number for sensor signal
-if ( !sensorLib.initialize( sensorType, sensorPin ) ) {
-    console.warn( 'Failed to initialize sensor' );
-}
 
 //assign data to the passed by reference object
 module.exports = {
     setData
 };
 
-function setData( weatherData, { useSensor, fetchOnlineData } ) {
-    if ( useSensor ) {
-        getDHT11Data( weatherData );
-        setInterval( () => getDHT11Data( weatherData ), 2000 );
+let sensor;
+let type;
+
+function setData( weatherData, { useSensor, fetchOnlineData, sensorType } ) {
+   if ( useSensor ) {
+        type = sensorType;
+        if ( sensorType === "AHT20" ) {
+            sensor = new AHT20( 1 );
+            console.log("set up");
+        } else if ( sensorType === "DHT11" ) {
+            // Setup sensor, warn if failed
+            const sensorType = 11; // 11 for DHT11, 22 for DHT22 and AM2302
+            const sensorPin = 4;  // The GPIO pin number for sensor signal
+            if ( !DHT11.initialize( sensorType, sensorPin ) ) {
+                console.warn( 'Failed to initialize sensor' );
+            }
+            sensor = DHT11;
+        }
+        weatherData.indoor = {
+            temperature: "",
+            humidity: ""
+        }
+        setInterval( () => getIndoorData( weatherData ), 2000 );
     }
     if ( fetchOnlineData ) {
         getOutdoorData( weatherData );
@@ -25,8 +39,15 @@ function setData( weatherData, { useSensor, fetchOnlineData } ) {
     }
 }
 
-function getDHT11Data( weatherData ) {
-    weatherData.indoor = sensorLib.read();
+async function getIndoorData( weatherData ) {
+    switch ( type ) {
+        case "AHT20":
+            weatherData.indoor = await sensor.readData() ?? {};
+            break;
+        case "DHT11":
+            weatherData.indoor = sensor.read();
+            break;
+    }
 }
 
 function getOutdoorData( weatherData ) {
