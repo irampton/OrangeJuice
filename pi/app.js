@@ -2,6 +2,7 @@ const config = require( './config-manager' );
 
 //grab data from config
 let features = config.get( "features" );
+let controllersConfig = config.get( "controllers" );
 let stripConfig = config.get( "strips" );
 const buttonMap = config.get( 'buttonConfigs' );
 const matrixScripts = require( "./matrix-scripts.js" );
@@ -18,18 +19,60 @@ let weatherData = {
     "indoor": {},
     "outdoor": {}
 };
-let numPixels = 0;
+let numPixels = new Array( controllersConfig.length ).fill( 0 );
 let currentLEDs = {
     "strips": []
 };
 stripConfig.forEach( ( strip, index ) => {
-    numPixels += strip.length;
-    currentLEDs.strips.push( blankStrip( { "id": index, "name": strip.name, "length": strip.length } ) );
+    numPixels[strip.controller] += strip.length;
+    currentLEDs.strips.push( blankStrip( {
+        "id": index,
+        "name": strip.name,
+        "length": strip.length,
+        "controller": strip.controller
+    } ) );
 } );
 
-//Load in needed modules
-const ledControlModule = require( "./led-control.js" );
-const ledControl = new ledControlModule( numPixels );
+let controllers = [];
+//set up controllers
+try {
+    let setGPIO = false;
+    controllersConfig.forEach( ( c, i ) => {
+        //only 2 GPIO pins can be used at a time.
+        switch ( c.type ) {
+            case "GPIO":
+                if ( setGPIO === "next" ) {
+                    setGPIO = true;
+                } else if ( setGPIO ) {
+                    throw "Only 2 GPIO pins can be used. They must be next to each other in the config file.";
+                } else {
+                    let arr = [
+                        {
+                            numPixels: numPixels[i],
+                            pin: c.pin
+                        }
+                    ]
+                    if ( controllersConfig[i + 1]?.type === "GPIO" ) {
+                        setGPIO = "next";
+                        arr.push( {
+                            numPixels: numPixels[i + 1],
+                            pin: controllersConfig[i + 1].pin
+                        } );
+                    } else {
+                        setGPIO = true;
+                    }
+                    controllers.push( ...new (require( "./led-pin-controller" ))( arr ) );
+                }
+                break;
+            case "ESP32":
+                controllers.push( new (require( "./led-esp32-controller" ))( numPixels[i], c.url ) );
+                break;
+        }
+    } );
+} catch ( e ) {
+    console.error( `Failed to initialize LED controllers: ${e}` );
+    process.exit( 1 );
+}
 
 //catch all errors
 process.on( 'uncaughtException', function ( err ) {
@@ -79,7 +122,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
         } );
         //preset control (for shortcut)
         app.get( '/presets', ( req, res ) => {
-            res.send(userPresets.map( p => p.name ));
+            res.send( userPresets.map( p => p.name ) );
         } );
         app.get( '/setPreset', ( req, res ) => {
             let name = req.headers?.preset || req.query?.preset;
@@ -88,8 +131,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 preset.trigger = "webAPI";
                 setLEDs( preset );
                 res.send( 'done' );
-            } catch ( e ){
-                res.status(400).send("Preset not found");
+            } catch ( e ) {
+                res.status( 400 ).send( "Preset not found" );
             }
         } );
 
@@ -262,13 +305,13 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 callback( send );
             } );
             socket.on( 'setSettings', ( item, data ) => {
-                switch ( item ){
+                switch ( item ) {
                     case "strips":
                         stripConfig = data;
                         config.set( "strips", stripConfig );
                         break;
                     case "homekit":
-                        config.set( "homekit", data);
+                        config.set( "homekit", data );
                         break;
                 }
             } );
@@ -387,6 +430,7 @@ function blankStrip( strip ) {
         "id": strip.id,
         "name": strip.name,
         "length": strip.length,
+        "controller": strip.controller,
         "arr": newLEDarr( strip.length, "000000" ),
         "trigger": "",
         "effect": {},
@@ -496,17 +540,19 @@ function setLEDs( options ) {
 
 //function that handles all writing to the LEDs
 function drawLEDs() {
-    let arr = [];
-    currentLEDs.strips.forEach( ( strip ) => {
+    let arr = new Array( controllers.length ).fill( 0 ).map( e => [] );
+    currentLEDs.strips.forEach( strip => {
         let tempArr = strip.arr;
         if ( stripConfig[strip.id].modifier ) {
             tempArr = ledScripts.modifiers[stripConfig[strip.id].modifier].modify( strip.arr, stripConfig[strip.id].modifierOptions );
         }
         for ( let i = 0; i < stripConfig[strip.id].length; i++ ) {
-            arr.push( tempArr[i] );
+            arr[strip.controller].push( tempArr[i] );
         }
     } );
-    ledControl.updateLEDs( arr );
+    controllers.forEach( ( c, i ) => {
+        c.updateLEDs( arr[i] );
+    } );
 }
 
 function changeMatrix( options ) {

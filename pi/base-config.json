@@ -10,6 +10,12 @@
     "weatherFetch": false,
     "ioStatsUpdate": false
   },
+  "controllers": [
+    {
+      "type": "GPIO",
+      "pin": 18
+    }
+  ],
   "strips": [
     {
       "name": "Test",
