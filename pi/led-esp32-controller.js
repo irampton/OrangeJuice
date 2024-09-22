@@ -4,6 +4,7 @@ module.exports = function ( numPixels, url ) {
     const self = this;
     this.url = url;
     this.numPixels = numPixels;
+    this.previousArr = [];
 
     function connect() {
         return new Promise( ( resolve, reject ) => {
@@ -41,6 +42,9 @@ module.exports = function ( numPixels, url ) {
     }
 
     this.updateLEDs = async ( arr ) => {
+        if ( arraysEqual( arr, this.previousArr ) ) {
+            return;
+        }
         try {
             await ensureConnection();
 
@@ -50,15 +54,23 @@ module.exports = function ( numPixels, url ) {
             self.ws.send( payload, function ack( err ) {
                 if ( err ) {
                     //console.error( 'Error sending data:', err );
-                } else {
-                    //console.log( 'Data sent successfully' );
                 }
             } );
         } catch ( err ) {
             console.error( `Failed to update LEDs via websocket @${this.url}` );
         }
+
+        this.previousArr = structuredClone( arr );
     }
 
     // Initial connection
     connect().catch( err => console.error( `Initial connection to WebSocket @${this.url} failed` ) );
+}
+
+function arraysEqual( arr1, arr2 ) {
+    if ( arr1.length !== arr2.length ) return false;
+    for ( let i = 0; i < arr1.length; i++ ) {
+        if ( arr1[i] !== arr2[i] ) return false;
+    }
+    return true;
 }
