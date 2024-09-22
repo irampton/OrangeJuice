@@ -15,7 +15,7 @@
     "@simontaga/rpi-ws281x-native":  "^1.0.5",
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.2",
-    "hap-nodejs": "^0.11.1",
+    "hap-nodejs": "^1.1.0",
     "moment": "^2.29.4",
     "node-dht-sensor": "^0.4.3",
     "oled-font-5x7": "^1.0.3",

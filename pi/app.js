@@ -382,7 +382,15 @@ if ( features.gpioButtons ) {
 //set up homekit
 if ( features.homekit ) {
     const HomeKit = require( './homekit.js' );
-    const homekit = new HomeKit( "hap.orangejuice.light", config, setLEDs, { weatherData } );
+    const homeKitConfig = config.get( "homekit" );
+    let rewrite = false;
+    homeKitConfig.forEach( ( cfg, i ) => {
+        new HomeKit( { number: i, ...cfg }, setLEDs, { weatherData } );
+        if ( !(cfg.username || cfg.pincode) ) {
+            rewrite = true;
+        }
+    } )
+    config.set( 'homekit', homeKitConfig );
 }
 
 //set up matrix

@@ -143,11 +143,18 @@ function drawScripts() {
 
 function drawHomekit() {
     let html = ``;
-    document.getElementById( 'homekitUsername' ).innerText = systemConfig.homekit.username;
-    document.getElementById( 'homekitPincode' ).innerText = systemConfig.homekit.pincode;
-    systemConfig.homekit.services.forEach( ( service, index ) => {
-        if ( service.strips ) {
-            html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+    systemConfig.homekit.forEach( cfg => {
+        html += `
+             <h3 class="title is-6 ml-2">${cfg.name}</h3>
+             <div class="block ml-3 mb-0">
+                <p>Username: <span>${cfg.username}</span></p>
+                <p>Pincode: <span class="ml-4">${cfg.pincode}</span></p>
+            </div>
+            <div class="mx-1 my-2 columns">
+        `;
+        cfg.services.forEach( ( service, index ) => {
+            if ( service.strips ) {
+                html += `<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
                     <div class="card">
                      <header class="card-header">
                         <p class="card-header-title">
@@ -163,25 +170,28 @@ function drawHomekit() {
                         </div>
                         <div class="content">
                             ${generateInput( {
-                type: "checkbox",
-                id: "temperature",
-                name: "Temperature",
-                default: service.temperature
-            }, `homekit-${service.subtype}` )}
+                    type: "checkbox",
+                    id: "temperature",
+                    name: "Temperature",
+                    default: service.temperature
+                }, `homekit-${service.subtype}` )}
                         </div>
                          <div class="content">
                             ${generateInput( {
-                type: "checkbox",
-                id: "hueAndSat",
-                name: "Hue and Saturation",
-                default: service.hueAndSat
-            }, `homekit-${service.subtype}` )}
+                    type: "checkbox",
+                    id: "hueAndSat",
+                    name: "Hue and Saturation",
+                    default: service.hueAndSat
+                }, `homekit-${service.subtype}` )}
                        </div>
                       </div>
                     </div>
                 </div>`;
-        }
-    } );
+            }
+        } );
+        html += "</div>";
+    } )
+
     document.getElementById( 'homekitList' ).innerHTML = html;
 }
 
@@ -298,22 +308,22 @@ function modifyScript( index ) {
     document.getElementById( 'scriptModalTitle' ).innerHTML = `Modifiers - ${strip.name}`;
     document.getElementById( 'modifierModalSelect' ).value = strip.modifier || "";
     modifierModalSelect();
-    if(strip.modifier){
+    if ( strip.modifier ) {
         let modifierObj = ledScripts.modifiers[strip.modifier];
         for ( let i in modifierObj.options ) {
-          document.getElementById(`modifierModal-${modifierObj.options[i].id}`).value = strip.modifierOptions[modifierObj.options[i].id];
+            document.getElementById( `modifierModal-${modifierObj.options[i].id}` ).value = strip.modifierOptions[modifierObj.options[i].id];
         }
     }
     document.getElementById( 'modifierModalSave' ).onclick = () => {
         strip.modifier = document.getElementById( 'modifierModalSelect' ).value || undefined;
 
         let modiferOptions = {};
-        if(strip.modifier){
+        if ( strip.modifier ) {
             let modifierObj = ledScripts.modifiers[strip.modifier];
             for ( let i in modifierObj.options ) {
-                modiferOptions[modifierObj.options[i].id] = document.getElementById(`modifierModal-${modifierObj.options[i].id}`).value;
-                if(modifierObj.options[i].type === "number"){
-                    modiferOptions[modifierObj.options[i].id] = Number( modiferOptions[modifierObj.options[i].id]);
+                modiferOptions[modifierObj.options[i].id] = document.getElementById( `modifierModal-${modifierObj.options[i].id}` ).value;
+                if ( modifierObj.options[i].type === "number" ) {
+                    modiferOptions[modifierObj.options[i].id] = Number( modiferOptions[modifierObj.options[i].id] );
                 }
             }
         }
@@ -329,14 +339,14 @@ function modifyScript( index ) {
 function modifierModalSelect() {
     let modifier = document.getElementById( 'modifierModalSelect' ).value || undefined;
     let settingsBody = document.getElementById( 'modifierModalSettings' );
-    if(modifier){
+    if ( modifier ) {
         let modifierObj = ledScripts.modifiers[modifier];
         let html = '';
-            for ( let i in modifierObj.options ) {
-                html += generateInput( modifierObj.options[i], 'modifierModal' );
-            }
-       settingsBody.innerHTML = html;
-    }else{
+        for ( let i in modifierObj.options ) {
+            html += generateInput( modifierObj.options[i], 'modifierModal' );
+        }
+        settingsBody.innerHTML = html;
+    } else {
         settingsBody.innerHTML = "";
     }
 }

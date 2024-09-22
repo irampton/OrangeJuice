@@ -1,6 +1,6 @@
-const ws281x = require( 'rpi-ws281x-native' );
+const ws281x = require('@simontaga/rpi-ws281x-native');
 
-const numPixels = 400;
+const numPixels = 1000;
 
 //let x = ws281x.init({count: numPixels, gpio: 18, invert: false, brightness: 255, stripType: "ws2812"});
 

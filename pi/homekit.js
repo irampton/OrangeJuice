@@ -1,15 +1,11 @@
 const hap = require( "hap-nodejs" );
-module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
-    let config = configManager.get( 'homekit' );
+module.exports = function ( config, setLEDs, { weatherData } ) {
     const Accessory = hap.Accessory;
     const Characteristic = hap.Characteristic;
     const CharacteristicEventTypes = hap.CharacteristicEventTypes;
     const Service = hap.Service;
 
-// optionally set a different storage location with code below
-// hap.HAPStorage.setCustomStoragePath("...");
-
-    const accessoryUuid = hap.uuid.generate( id );
+    const accessoryUuid = hap.uuid.generate( config.name );
     const accessory = new Accessory( config.name, accessoryUuid );
 
     function createTemperatureSensor( name, subtype ) {
@@ -39,13 +35,9 @@ module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
         let currentSat = 0;
         let currentMode = "static";
 
-// 'On' characteristic is required for the light service
         const onCharacteristic = lightService.getCharacteristic( Characteristic.On );
-// 'Brightness' characteristic is optional for the light service; 'getCharacteristic' will automatically add it to the service!
         const brightnessCharacteristic = lightService.getCharacteristic( Characteristic.Brightness );
 
-
-// with the 'on' function we can add event handlers for different events, mainly the 'get' and 'set' event
         onCharacteristic.on( CharacteristicEventTypes.GET, callback => {
             callback( undefined, currentLightState );
         } );
@@ -72,6 +64,8 @@ module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
             } );
             colorCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentColorTemp = 1000000 / value;
+                currentHue = 0;
+                currentSat = 0;
                 sendToLights( "temperature" );
                 callback();
             } );
@@ -85,6 +79,7 @@ module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
             } );
             hueCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentHue = value;
+                currentColorTemp = 0;
                 sendToLights( "hueAndSat" );
                 callback();
             } );
@@ -94,6 +89,7 @@ module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
             } );
             satCharacteristic.on( CharacteristicEventTypes.SET, ( value, callback ) => {
                 currentSat = value;
+                currentColorTemp = 0;
                 sendToLights( "hueAndSat" );
                 callback();
             } );
@@ -133,27 +129,27 @@ module.exports = function ( id, configManager, setLEDs, { weatherData } ) {
                 accessory.addService( createLight( v.name, v.subtype, v.strips, v.temperature, v.hueAndSat ) );
                 break;
         }
-        console.log( `Added ${v.name} to HomeKit` );
+        console.log( `Added ${ v.name } to HomeKit accessory: ${ config.name }` );
     } )
 
     //set a random username/password if once isn't set
     if ( !config.username ) {
-        config.username = `${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}:${randomInt( 16, 255 ).toString( 16 )}`;
-        configManager.set( 'homekit', config );
+        config.username = `${ randomInt( 16, 255 ).toString( 16 ) }:${ randomInt( 16, 255 ).toString( 16 ) }:${ randomInt( 16, 255 ).toString( 16 ) }:${ randomInt( 16, 255 ).toString( 16 ) }:${ randomInt( 16, 255 ).toString( 16 ) }:${ randomInt( 16, 255 ).toString( 16 ) }`;
     }
     if ( !config.pincode ) {
-        config.pincode = `${randomInt( 100, 999 )}-${randomInt( 10, 99 )}-${randomInt( 100, 999 )}`;
-        configManager.set( 'homekit', config );
+        config.pincode = `${ randomInt( 100, 999 ) }-${ randomInt( 10, 99 ) }-${ randomInt( 100, 999 ) }`;
     }
     // once everything is set up, we publish the accessory. Publish should always be the last step!
     accessory.publish( {
         username: config.username,
         pincode: config.pincode,
-        port: 47129,
+        port: 47129 + config.number,
         category: hap.Categories.LIGHTBULB, // value here defines the symbol shown in the pairing screen
     } );
 
-    console.log( `Accessory setup finished!\nHomeKit Username: ${config.username}\nHomeKit Pin: ${config.pincode}` );
+    console.log( `Accessory setup finished on HomeKit accessory: ${ config.name }!\nHomeKit username: ${ config.username }\nHomeKit pin: ${ config.pincode }` );
+
+    return config
 }
 
 function createConfig( state, brightness, special, strips ) {
@@ -203,11 +199,11 @@ function createConfig( state, brightness, special, strips ) {
         "patternOptions": {},
         "effect": "",
         "strips": strips,
-        //"transition": 'fade',
-        "transitionOptions": { "time": 25 }
+        "transition": 'fade',
+        "transitionOptions": { "time": 100 }
     }
 }
 
 function randomInt( low, high ) {
-    return Math.floor( Math.random() * (high - low) ) + low;
+    return Math.floor( Math.random() * ( high - low ) ) + low;
 }
