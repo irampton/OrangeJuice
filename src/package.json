@@ -12,9 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "@orangejedi/yacml": "^1.0.1",
-    "@simontaga/rpi-ws281x-native":  "^1.0.5",
-    "cheerio": "^1.0.0-rc.12",
-    "express": "^4.18.2",
+    "@simontaga/rpi-ws281x-native": "^1.0.5",
+    "cheerio": "^1.0.0",
+    "express": "^4.21.0",
     "hap-nodejs": "^1.1.0",
     "moment": "^2.29.4",
     "node-dht-sensor": "^0.4.3",
@@ -23,10 +23,6 @@
     "oled-rpi-i2c-bus": "^1.1.4",
     "onoff": "^6.0.3",
     "request": "^2.88.2",
-    "socket.io": "^4.7.2"
-  },
-  "devDependencies": {
-    "bulma": "^0.9.4",
-    "node-sass": "^9.0.0"
+    "socket.io": "^4.8.0"
   }
 }

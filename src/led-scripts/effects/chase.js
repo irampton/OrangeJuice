@@ -5,7 +5,7 @@ module.exports = {
     options: [
         { id: "speed", name: "Speed", type: "number", default: 1 },
         { id: "reverse", name: "Reverse", type: "checkbox", default: false },
-        { id: "scale", name: "Scale to Size", type: "checkbox", default: false },
+        { id: "scale", name: "Scale to Size", type: "number", default: 0 },
     ],
     Create: function ( colorArray, { numLEDs, reverse, speed, scale } ) {
         this.colorArray = [...colorArray];
@@ -21,7 +21,7 @@ module.exports = {
             }
             if ( this.scale ) {
                 let out = [];
-                for ( let i = 0; i < this.colorArray.length; i += this.colorArray.length / numLEDs ) {
+                for ( let i = 0; i < this.colorArray.length; i += this.colorArray.length / (numLEDs * this.scale) ) {
                     out.push( this.colorArray[Math.floor( i )] );
                 }
                 callback( out );

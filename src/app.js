@@ -1,19 +1,20 @@
 const config = require( './config-manager' );
+let ledScripts = require( "./led-scripts/led-scripts.js" );
+const matrixScripts = require( "./led-scripts/matrix-scripts.js" );
+const processSubgroups = require("./subgroups.js");
 
 //grab data from config
 let features = config.get( "features" );
 let controllersConfig = config.get( "controllers" );
 let stripConfig = config.get( "strips" );
 const buttonMap = config.get( 'buttonConfigs' );
-const matrixScripts = require( "./matrix-scripts.js" );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
-let ledScripts = require( "./led-scripts/led-scripts.js" );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
 
 //general
-let globalBrightness = 20;
+let globalMatrixBrightness = 20;
 let connectedSystemStats = { "cpu": "100" };
 let weatherData = {
     "indoor": {},
@@ -61,11 +62,11 @@ try {
                     } else {
                         setGPIO = true;
                     }
-                    controllers.push( ...new (require( "./led-pin-controller" ))( arr ) );
+                    controllers.push( ...new (require( "./controllers/led-pin-controller" ))( arr ) );
                 }
                 break;
             case "ESP32":
-                controllers.push( new (require( "./led-esp32-controller" ))( numPixels[i], c.url ) );
+                controllers.push( new (require( "./controllers/led-esp32-controller" ))( numPixels[i], c.url ) );
                 break;
         }
     } );
@@ -335,7 +336,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
 }
 
 if ( features.weatherSensor || features.weatherFetch ) {
-    require( "./weatherData.js" ).setData( weatherData, {
+    require( "./connections/weatherData.js" ).setData( weatherData, {
         useSensor: features.weatherSensor,
         fetchOnlineData: features.weatherFetch,
         sensorType: features.sensorType
@@ -343,7 +344,7 @@ if ( features.weatherSensor || features.weatherFetch ) {
 }
 
 if ( features.gpioButtons ) {
-    const GPIO = require( "./GPIO-control" );
+    const GPIO = require( "./connections/GPIO-control" );
 
     //set up physical buttons
     buttonMap.forEach( ( config, index ) => {
@@ -367,21 +368,21 @@ if ( features.gpioButtons ) {
         } )
     } );
     GPIO.initDial( 0, () => {
-        globalBrightness++;
-        if ( globalBrightness > 100 ) {
-            globalBrightness = 100;
+        globalMatrixBrightness++;
+        if ( globalMatrixBrightness > 100 ) {
+            globalMatrixBrightness = 100;
         }
     }, () => {
-        globalBrightness--;
-        if ( globalBrightness < 0 ) {
-            globalBrightness = 0;
+        globalMatrixBrightness--;
+        if ( globalMatrixBrightness < 0 ) {
+            globalMatrixBrightness = 0;
         }
     } );
 }
 
 //set up homekit
 if ( features.homekit ) {
-    const HomeKit = require( './homekit.js' );
+    const HomeKit = require( './connections/homekit.js' );
     const homeKitConfig = config.get( "homekit" );
     let rewrite = false;
     homeKitConfig.forEach( ( cfg, i ) => {
@@ -466,7 +467,7 @@ function writeConfigToStrips( stripIndex, options ) {
     //clear strip config completely
     currentLEDs.strips[stripIndex] = blankStrip( currentLEDs.strips[stripIndex] );
     //generate pattern
-    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate( stripConfig[stripIndex].length, options.patternOptions );
+    currentLEDs.strips[stripIndex].arr = ledScripts.patterns[options.pattern].generate( stripConfig[stripIndex].configuredLength ?? stripConfig[stripIndex].length, options.patternOptions );
     //set trigger
     currentLEDs.strips[stripIndex].trigger = options.trigger;
     if ( options.transition ) {
@@ -486,15 +487,18 @@ function writeConfigToStrips( stripIndex, options ) {
     }
     //if there is an effect, apply & set it up
     if ( options.effect ) {
+        //create the new effect
         currentLEDs.strips[stripIndex].effect = new ledScripts.effects[options.effect].Create(
             currentLEDs.strips[stripIndex].arr,
             {
                 ...options.effectOptions,
-                numLEDs: stripConfig[stripIndex].length
+                numLEDs: stripConfig[stripIndex].configuredLength ?? stripConfig[stripIndex].length
             } );
+        //run the effect once
         currentLEDs.strips[stripIndex].effect.step( ( arr ) => {
             currentLEDs.strips[stripIndex].arr = arr;
-        } )
+        } );
+        //set the effect to run continuously
         currentLEDs.strips[stripIndex].effectTimout = setInterval( () => {
             currentLEDs.strips[stripIndex].effect.step( ( arr ) => {
                 currentLEDs.strips[stripIndex].arr = arr;
@@ -511,7 +515,7 @@ function writeConfigToStrips( stripIndex, options ) {
         if ( !drawOnInterval ) {
             drawOnInterval = setInterval( () => {
                 drawLEDs()
-            }, 1000 / 24 );
+            }, 1000 / 24 ); // 24 times a second
         }
     } else {
         clearInterval( drawOnInterval );
@@ -554,6 +558,9 @@ function drawLEDs() {
         if ( stripConfig[strip.id].modifier ) {
             tempArr = ledScripts.modifiers[stripConfig[strip.id].modifier].modify( strip.arr, stripConfig[strip.id].modifierOptions );
         }
+        if (stripConfig[strip.id].subgroups){
+            tempArr = processSubgroups(tempArr, stripConfig[strip.id]);
+        }
         for ( let i = 0; i < stripConfig[strip.id].length; i++ ) {
             arr[strip.controller].push( tempArr[i] );
         }
@@ -571,7 +578,7 @@ function changeMatrix( options ) {
         matrixScripts[options.id].generate( options.strip, setLEDs, {
             connectedSystemStats,
             weatherData,
-            globalBrightness
+            globalBrightness: globalMatrixBrightness
         } );
     }
 

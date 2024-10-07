@@ -1,7 +1,7 @@
 .idea
-desktop/node_modules
-pi/node_modules
-pi/test*.js
-pi/config.json
-desktop/config.json
-pi/config_old.json
+desktop-app/node_modules
+src/node_modules
+src/test*.js
+src/config.json
+desktop-app/config.json
+src/config_*.json
