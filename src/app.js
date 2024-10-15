@@ -89,7 +89,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
     const port = 7974;
 
     if ( features.hostWebControl ) {
-        app.use( express.static( 'web' ) );
+        app.use( express.static( 'vue/dist' ) );
     }
 
     if ( features.webAPIs ) {

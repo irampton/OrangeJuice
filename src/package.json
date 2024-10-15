@@ -3,10 +3,6 @@
   "version": "1.1.0",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "css-build": "node-sass style.scss web/lib/bulma.custom.css",
-    "css-watch": "npm run css-build -- --watch"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -23,6 +19,7 @@
     "oled-rpi-i2c-bus": "^1.1.4",
     "onoff": "^6.0.3",
     "request": "^2.88.2",
-    "socket.io": "^4.8.0"
+    "socket.io": "^4.8.0",
+    "ws": "^8.18.0"
   }
 }

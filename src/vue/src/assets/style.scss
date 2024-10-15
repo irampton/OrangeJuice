@@ -11,21 +11,21 @@ $purple: #9144E3;
 $ruby: #C9185F;
 $green: #35E68A;
 
-// Update Bulma's global variables
-$primary: $sky;
-$link: $blue;
-//$link-light: $light-blue;
-$info: $orange;
-//$info-light: $orange-light;
-$success: $green;
-$warning: $purple;
-$danger: $ruby;
-$white-ter: $very-light-orange;
-
 $fullhd: 1536px + (2 * 32px);
 
-// Update some of Bulma's component variables
-$body-background-color: $very-light-orange;
+@use "bulma/sass" with (
+  // Update Bulma's global variables
+  $primary: $sky,
+  $link: $blue,
+  //$link-light: $light-blue,
+  $info: $orange,
+  //$info-light: $orange-light,
+  $success: $green,
+  $warning: $purple,
+  $danger: $ruby,
+  $white-ter: $very-light-orange,
+  $body-background-color: $very-light-orange
+);
 
 //custom classes
 .brand:hover {
@@ -38,14 +38,14 @@ $body-background-color: $very-light-orange;
   transform-origin: 2rem .75rem;
 }
 
-.bigger{
+.bigger {
   transform: scale(2);
   transform-origin: 1rem .5rem;
   margin-left: .5rem;
   margin-right: .5rem;
 }
 
-.bottomDivider{
+.bottomDivider {
   border-bottom: hsl(0, 0%, 86%) solid 1px;
 }
 
@@ -67,15 +67,15 @@ $body-background-color: $very-light-orange;
   cursor: default;
 }
 
-.headerText{
-  color: $white-ter;
+.headerText {
+  color: $very-light-orange;
 }
 
-input[type=color]{
+input[type=color] {
   width: 2rem;
   height: 2rem;
   border-radius: 100%;
-  background-color: $white-ter;
+  background-color: $very-light-orange;
   border: gray 1px solid;
   padding: 3px;
 }
@@ -84,9 +84,6 @@ input[type=color]::-moz-color-swatch {
   border: gray 1px solid;
   border-radius: 100%;
 }
-
-// Import only what you need from Bulma
-@import "node_modules/bulma/bulma.sass";
 
 @media screen and (min-width: 769px), print {
   .sidenav {
@@ -97,25 +94,15 @@ input[type=color]::-moz-color-swatch {
   }
 }
 
-.noMargin{
+.noMargin {
   margin: 0 !important;
 }
 
-.vaMiddle{
+.vaMiddle {
   vertical-align: middle;
 }
 
 input.stripBox[type="checkbox"]:checked + label {
   @extend .is-link;
   @extend .is-active;
-}
-
-button.is-link-dark.is-outlined{
-  color: $link-dark;
-  border-color: $primary-dark;
-}
-
-button.is-link-dark.is-outlined:hover{
-  background-color: $link-dark;
-  color: $white-ter;
 }
