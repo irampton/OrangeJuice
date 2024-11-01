@@ -3,7 +3,11 @@ const app = express();
 const port = 7974;
 const http = require( 'http' ).createServer( app );
 const { Server } = require( "socket.io" );
-const io = new Server( http );
+const io = new Server( http,{
+    cors: {
+        origin: '*',
+    }
+} );
 
 app.use( express.static( 'web' ) );
 

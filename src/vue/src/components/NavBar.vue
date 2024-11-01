@@ -25,6 +25,12 @@
 <script>
 export default {
   name: "NavBar.vue",
+  props: {
+    currentPage: {
+      type: String,
+      default: ""
+    }
+  },
   data(){
     return {
       menuOpen: true

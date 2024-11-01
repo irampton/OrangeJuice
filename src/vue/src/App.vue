@@ -1,18 +1,26 @@
 <template>
-  <NavBar/>
+  <NavBar :currentPage="currentPage"/>
+  <div>
+    <Home v-if="currentPage === PAGES.home"/>
+  </div>
 </template>
 
 <script>
-import NavBar from './components/NavBar.vue'
+import { PAGES } from '@/mixins/CONSTANTS';
+import NavBar from '@/components/NavBar.vue';
+import Home from '@/pages/Home.vue';
 
 export default {
   components: {
-    NavBar
+    NavBar,
+    Home
   },
   data() {
-    return {}
-  },
-  mounted() {
+    return {
+      PAGES,
+      currentPage: PAGES.home,
+      ledScripts: {}
+    }
   }
 }
 </script>
