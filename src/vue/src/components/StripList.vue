@@ -42,6 +42,12 @@ export default {
   watch: {
     stripConfig() {
       this.checked = new Array( this.stripConfig.length ).fill( false );
+    },
+    modelValue: {
+      deep: true,
+      handler() {
+        this.checked = this.checked.map( ( c, i ) => this.modelValue.includes( i ) );
+      }
     }
   }
 }

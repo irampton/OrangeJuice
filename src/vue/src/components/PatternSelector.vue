@@ -40,7 +40,8 @@ export default {
   data() {
     return {
       selectedPattern: "",
-      selectedOptions: []
+      selectedOptions: [],
+      noUpdate: false
     }
   },
   computed: {
@@ -67,11 +68,26 @@ export default {
     selectedOptions: {
       deep: true,
       handler() {
+        this.noUpdate = true;
         const value = {
           id: this.selectedPattern,
           options: Object.fromEntries( this.selectedOptions.map( o => [ o.id, o.value ] ) )
         };
         this.$emit( 'update:modelValue', value );
+        this.$nextTick( () => this.noUpdate = false );
+      }
+    },
+    modelValue: {
+      deep: true,
+      handler() {
+        if ( this.noUpdate || !( this.modelValue.id && this.patterns[this.modelValue.id] ) ) {
+          return;
+        }
+        this.selectedPattern = this.modelValue.id;
+        this.selectedOptions = this.patterns[this.selectedPattern].options.map( o => ( {
+          ...o,
+          value: this.modelValue.options[o.id]
+        } ) );
       }
     }
   }

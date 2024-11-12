@@ -39,7 +39,8 @@ export default {
   data() {
     return {
       selectedEffect: "",
-      selectedOptions: []
+      selectedOptions: [],
+      noUpdate: false
     }
   },
   computed: {
@@ -71,11 +72,29 @@ export default {
     selectedOptions: {
       deep: true,
       handler() {
+        this.noUpdate = true;
         const value = {
           id: this.selectedEffect,
           options: Object.fromEntries( this.selectedOptions.map( o => [ o.id, o.value ] ) )
         };
         this.$emit( 'update:modelValue', value );
+        this.$nextTick( () => this.noUpdate = false );
+      }
+    },
+    modelValue: {
+      deep: true,
+      handler() {
+        if(this.modelValue.id === 'none'){
+          this.selectedEffect = this.modelValue.id;
+        }
+        if ( this.noUpdate || !( this.modelValue.id && this.effects[this.modelValue.id] ) ) {
+          return;
+        }
+        this.selectedEffect = this.modelValue.id;
+        this.selectedOptions = this.effects[this.selectedEffect].options.map( o => ( {
+          ...o,
+          value: this.modelValue.options[o.id]
+        } ) );
       }
     }
   }

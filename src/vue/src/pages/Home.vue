@@ -14,7 +14,13 @@
     <button class="button is-primary is-large is-fullwidth" @click="setLEDs">Set Pattern & Effect</button>
     <div class="columns is-mobile is-multiline mt-3">
       <div class="column box is-full">
-        <PresetSelector/>
+        <PresetSelector
+            :selectedConfig="currentConfig"
+            :selectedPattern="selectedPattern"
+            :selectedEffect="selectedEffect"
+            :selectedStrips="selectedStrips"
+            :socket="socket"
+        />
       </div>
       <!-- TODO add matrix selector -->
     </div>
@@ -41,43 +47,34 @@ export default {
       selectedStrips: []
     }
   },
-  methods: {
-    setLEDs() {
+  computed: {
+    currentConfig() {
       const isEffect = this.selectedEffect.id !== 'none';
-      const ledConfig = {
-        "trigger": "website",
+      return {
         "pattern": this.selectedPattern.id,
         "patternOptions": this.selectedPattern.options,
         "effect": isEffect ? this.selectedEffect.id : undefined,
         "effectOptions": isEffect ? this.selectedEffect.options : undefined,
         "strips": this.selectedStrips
       }
-      console.log( JSON.parse( JSON.stringify( ledConfig ) ) );
+    }
+  },
+  methods: {
+    setLEDs() {
+      const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
+      ledConfig.trigger = "website";
       this.socket.emit( 'setLEDs', ledConfig );
     }
   },
-  mounted() {
-    this.socket = io();
+  created() {
+    this.socket = io( 'http://localhost:7974/' );
     this.socket.on( 'connect', () => {
       this.socket.emit( 'getLEDScripts', ( data ) => {
         this.ledScripts = data;
       } );
       this.socket.emit( 'getStripConfig', ( data ) => {
         this.ledStripConfig = data;
-        //todo
       } );
-      this.socket.emit( 'getMatrixScripts', ( data ) => {
-        //matrixScripts = data;
-        //todo
-      } );
-      this.socket.emit( 'getFeatures', ( data ) => {
-        if ( !data.matrixDisplay ) {
-          //todo
-          //document.getElementById( "matrixSettings" ).classList.add( "noShow" );
-        }
-      } );
-      //drawPresets();
-      //todo
     } );
   }
 }
