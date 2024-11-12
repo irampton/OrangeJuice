@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { HELPER } from "@/mixins/HELPER.js";
 export default {
   name: "BaseDropdown",
   props: {
@@ -34,16 +35,7 @@ export default {
   },
   computed: {
     colorClass: function () {
-      switch ( this.color ) {
-        case 'primary':
-        case 'secondary':
-        case 'danger':
-        case 'info':
-        case 'action':
-          return `is-${ this.color }`;
-        default:
-          return "";
-      }
+      return HELPER.colorClass(this.color);
     }
   },
   methods: {

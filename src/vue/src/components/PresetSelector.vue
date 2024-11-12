@@ -25,11 +25,11 @@
     </button>
   </div>
 
-  <BasePopup name="Preset Name" ref="namePopup" saveText="Add">
+  <BasePopup name="Preset Name" ref="namePopup" saveText="Add" saveColor="success">
     <BaseTextInput v-model="nameText"/>
   </BasePopup>
 
-  <BasePopup name="Delete Preset" ref="deletePopup" saveText="Delete">
+  <BasePopup name="Delete Preset" ref="deletePopup" saveText="Delete" saveColor="danger">
     <!--TODO make button delete color -->
     Are you sure you want to to delete {{ this.presets[this.selectedPreset]?.name }}?
   </BasePopup>

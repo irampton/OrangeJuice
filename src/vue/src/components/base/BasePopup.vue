@@ -12,7 +12,7 @@
         </section>
         <footer class="modal-card-foot">
           <div class="buttons">
-            <button class="button is-success" @click="() => internalClose(true)">{{ saveText }}</button>
+            <button :class="['button', saveButtonColor]" @click="() => internalClose(true)">{{ saveText }}</button>
             <button class="button" @click="() => internalClose()">Cancel</button>
           </div>
         </footer>
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { HELPER } from "@/mixins/HELPER.js";
 export default {
   name: "BasePopup",
   props: {
@@ -32,6 +33,10 @@ export default {
     saveText: {
       type: String,
       default: "Save"
+    },
+    saveColor:{
+      type: String,
+      default: "action"
     },
     modelValue: {
       type: Boolean,
@@ -45,6 +50,11 @@ export default {
       },
       reject: () => {
       }
+    }
+  },
+  computed: {
+    saveButtonColor(){
+      return HELPER.colorClass(this.saveColor);
     }
   },
   methods: {
