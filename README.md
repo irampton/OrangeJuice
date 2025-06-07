@@ -8,14 +8,14 @@ It uses a powerful system of strips, patterns, and effects to drive LED strips, 
 OrangeJuice uses the NPM module [`rpi-ws281x-native`](https://www.npmjs.com/package/rpi-ws281x-native) to write to any LEDs. 
 The module will __only__ work on a Raspberry Pi and supports the WS281x (sometimes called NEOPIXELs) standard. (Including WS2811, WS2812, WS2812b, SK6812, and SK6812W)
 
->A separate javascript file, [`script-tester.js`](./pi/script-tester.js) can be used to run/test most OrangeJuice features on any platform. 
-To support a different LED standard or microcontroller platform, [`led-pin-controller.js`](./pi/led-pin-control.js) could be re-written to use a different library and no other changes would be needed.
+>A separate javascript file, [`script-tester.js`](./src/script-tester.js) can be used to run/test most OrangeJuice features on any platform.
+To support a different LED standard or microcontroller platform, [`led-pin-controller.js`](./src/led-pin-control.js) could be re-written to use a different library and no other changes would be needed.
 
 ### Setup
 * Connect GPIO 18 to the data line on the WS281x LEDs and a GPIO ground pin the LED ground line.
 * Install NodeJS (version 14 or newer) on your Raspberry Pi. (I recommend using [`n`](https://www.npmjs.com/package/n))
-* Clone this repository (or download just [`/pi`](./pi)) to your Raspberry Pi. 
-* In `/pi` run `npm install`
+* Clone this repository (or download just [`/src`](./src)) to your Raspberry Pi.
+* In `/src` run `npm install`
 * Run `sudo node app.js` to start OrangeJuice.
 * Go to `<Raspberry Pi's IP/Hostname>:7974` in a web browser to access the web UI.
 
@@ -49,7 +49,7 @@ Then you could add a Chase effect to make the white and blue lights alternate:
 
 #### Technical Details
 
-Each pattern and effect is a separate javascript file located in [`/pi/led-scripts`](./pi/led-scripts).
+Each pattern and effect is a separate javascript file located in [`/src/led-scripts`](./src/led-scripts).
 Every file in the directory is loaded in a start-up and can be reloaded through the UI as needed.
 
 Both patterns and effects export a name, id, and a list of options that can be changed.
@@ -86,7 +86,7 @@ Enable to feature and choose a display option to get started.
 
 ### Live Weather
 OrangeJuice can pull weather info from online or a temperature sensor connected to the GPIO to display on a matrix or use elsewhere.
-Turn on the feature in the control panel to use. View or edit [`pi/weatherData.js`](./pi/weatherData.js) for more info or to localize.
+Turn on the feature in the control panel to use. View or edit [`src/weatherData.js`](./src/weatherData.js) for more info or to localize.
 
 ### Desktop App
 OrangeJuice contains a lightweight desktop app to integrate your Windows PC with OrangeJuice. 
