@@ -5,8 +5,8 @@ const processSubgroups = require("./subgroups.js");
 
 //grab data from config
 let features = config.get( "features" );
-let controllersConfig = config.get( "controllers" );
-let stripConfig = config.get( "strips" );
+let controllersConfig = config.get( "controllers" ) || [];
+let stripConfig = [];
 const buttonMap = config.get( 'buttonConfigs' );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
 const displayMatrix = config.get( "displayMatrix" );
@@ -20,64 +20,98 @@ let weatherData = {
     "indoor": {},
     "outdoor": {}
 };
-let numPixels = new Array( controllersConfig.length ).fill( 0 );
+let numPixels = [];
 let currentLEDs = {
     "strips": []
 };
-stripConfig.forEach( ( strip, index ) => {
-    numPixels[strip.controller] += strip.length;
-    currentLEDs.strips.push( blankStrip( {
-        "id": index,
-        "name": strip.name,
-        "length": strip.length,
-        "controller": strip.controller
-    } ) );
-} );
-
 let controllers = [];
-//set up controllers
-try {
-    let setGPIO = false;
-    controllersConfig.forEach( ( c, i ) => {
-        //only 2 GPIO pins can be used at a time.
-        switch ( c.type ) {
-            case "GPIO":
-                if ( setGPIO === "next" ) {
-                    setGPIO = true;
-                } else if ( setGPIO ) {
-                    throw "Only 2 GPIO pins can be used. They must be next to each other in the config file.";
-                } else {
-                    let arr = [
-                        {
-                            numPixels: numPixels[i],
-                            pin: c.pin
-                        }
-                    ]
-                    if ( controllersConfig[i + 1]?.type === "GPIO" ) {
-                        setGPIO = "next";
-                        arr.push( {
-                            numPixels: numPixels[i + 1],
-                            pin: controllersConfig[i + 1].pin
-                        } );
-                    } else {
-                        setGPIO = true;
-                    }
-                    controllers.push( ...new (require( "./controllers/led-pin-controller" ))( arr ) );
-                }
-                break;
-            case "ESP32":
-            case "WebSocket":
-                controllers.push( new (require( "./controllers/led-esp32-controller" ))( numPixels[i], c.url ) );
-                break;
-            case "Mock":
-                controllers.push( ...new (require( "./controllers/led-mock-controller" ))( numPixels[i] ) );
-                break;
-        }
+let drawOnInterval = false;
+
+function buildStripConfig( controllersList ) {
+    let strips = [];
+    controllersList.forEach( ( controller, controllerIndex ) => {
+        ( controller.strips || [] ).forEach( ( strip ) => {
+            strips.push( {
+                ...strip,
+                controller: controllerIndex
+            } );
+        } );
     } );
-} catch ( e ) {
-    console.error( `Failed to initialize LED controllers: ${e}` );
-    process.exit( 1 );
+    return strips;
 }
+
+function rebuildControllersAndStrips( controllersList, options = {} ) {
+    const { exitOnFailure = false } = options;
+    const nextControllersConfig = controllersList || controllersConfig || [];
+    const nextStripConfig = buildStripConfig( nextControllersConfig );
+    const nextNumPixels = nextControllersConfig.map( controller => {
+        return ( controller.strips || [] ).reduce( ( total, strip ) => total + ( strip.length || 0 ), 0 );
+    } );
+    const nextCurrentLEDs = {
+        "strips": nextStripConfig.map( ( strip, index ) => blankStrip( {
+            "id": index,
+            "name": strip.name,
+            "length": strip.length,
+            "controller": strip.controller
+        } ) )
+    };
+    const nextControllers = [];
+    try {
+        let setGPIO = false;
+        nextControllersConfig.forEach( ( c, i ) => {
+            //only 2 GPIO pins can be used at a time.
+            switch ( c.type ) {
+                case "GPIO":
+                    if ( setGPIO === "next" ) {
+                        setGPIO = true;
+                    } else if ( setGPIO ) {
+                        throw "Only 2 GPIO pins can be used. They must be next to each other in the config file.";
+                    } else {
+                        let arr = [
+                            {
+                                numPixels: nextNumPixels[i],
+                                pin: c.pin
+                            }
+                        ]
+                        if ( nextControllersConfig[i + 1]?.type === "GPIO" ) {
+                            setGPIO = "next";
+                            arr.push( {
+                                numPixels: nextNumPixels[i + 1],
+                                pin: nextControllersConfig[i + 1].pin
+                            } );
+                        } else {
+                            setGPIO = true;
+                        }
+                        nextControllers.push( ...new (require( "./controllers/led-pin-controller" ))( arr ) );
+                    }
+                    break;
+                case "WebSocket":
+                    nextControllers.push( new (require( "./controllers/led-esp32-controller" ))( nextNumPixels[i], c.url ) );
+                    break;
+                case "Mock":
+                    nextControllers.push( ...new (require( "./controllers/led-mock-controller" ))( nextNumPixels[i] ) );
+                    break;
+            }
+        } );
+    } catch ( e ) {
+        console.error( `Failed to initialize LED controllers: ${e}` );
+        if ( exitOnFailure ) {
+            process.exit( 1 );
+        }
+        return false;
+    }
+    controllersConfig = nextControllersConfig;
+    stripConfig = nextStripConfig;
+    numPixels = nextNumPixels;
+    currentLEDs = nextCurrentLEDs;
+    controllers = nextControllers;
+    clearInterval( drawOnInterval );
+    drawOnInterval = false;
+    drawLEDs();
+    return true;
+}
+
+rebuildControllersAndStrips( controllersConfig, { exitOnFailure: true } );
 
 //catch all errors
 process.on( 'uncaughtException', function ( err ) {
@@ -304,7 +338,6 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                     features,
                     controllers: controllersConfig,
                     "homekit": config.get( 'homekit' ),
-                    stripConfig,
                     buttonMap,
                     displayMatrix
                 };
@@ -317,12 +350,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                         config.set( "features", features );
                         break;
                     case "controllers":
-                        controllersConfig = data;
-                        config.set( "controllers", controllersConfig );
-                        break;
-                    case "strips":
-                        stripConfig = data;
-                        config.set( "strips", stripConfig );
+                        config.set( "controllers", data );
+                        rebuildControllersAndStrips( data );
                         break;
                     case "homekit":
                         config.set( "homekit", data );
@@ -417,7 +446,6 @@ if ( features.matrixDisplay ) {
 }
 
 //helper functions
-let drawOnInterval = false;
 
 function newLEDarr( size, color ) {
     let arr = [];

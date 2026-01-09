@@ -14,15 +14,14 @@
     {
       "name": "GPIO 18",
       "type": "GPIO",
-      "pin": 18
-    }
-  ],
-  "strips": [
-    {
-      "name": "Test",
-      "length": 16,
-      "type": "strip",
-      "controller": 0
+      "pin": 18,
+      "strips": [
+        {
+          "name": "Test",
+          "length": 16,
+          "type": "strip"
+        }
+      ]
     }
   ],
   "homekit": [

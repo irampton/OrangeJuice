@@ -33,8 +33,8 @@
       >
         <div class="mx-1 my-2 columns is-multiline bottomDivider">
           <div
-            v-for="(strip, index) in systemConfig.stripConfig"
-            :key="`${strip.name}-${index}`"
+            v-for="(strip, index) in stripConfig"
+            :key="`${strip.name}-${strip.controller}-${strip.controllerStripIndex}-${index}`"
             class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd"
           >
             <SettingsStripCard
@@ -422,6 +422,8 @@ export default {
       },
       modifierModal: {
         stripIndex: null,
+        controllerIndex: null,
+        controllerStripIndex: null,
         selected: "",
         options: [],
         existingValues: {}
@@ -468,6 +470,22 @@ export default {
         return [];
       }
       return Object.keys( this.systemConfig.features ).filter( key => key !== 'hostWebControl' );
+    },
+    stripConfig() {
+      if ( !this.systemConfig?.controllers ) {
+        return [];
+      }
+      const strips = [];
+      this.systemConfig.controllers.forEach( ( controller, controllerIndex ) => {
+        ( controller.strips || [] ).forEach( ( strip, stripIndex ) => {
+          strips.push( {
+            ...strip,
+            controller: controllerIndex,
+            controllerStripIndex: stripIndex
+          } );
+        } );
+      } );
+      return strips;
     },
     navGroups() {
       return [
@@ -530,7 +548,7 @@ export default {
       return this.displayMatrix?.strip ?? "";
     },
     matrixStripName() {
-      const strip = this.systemConfig?.stripConfig?.[this.displayMatrix?.strip];
+      const strip = this.stripConfig?.[this.displayMatrix?.strip];
       return strip?.name || "";
     },
     matrixDefaultName() {
@@ -553,7 +571,7 @@ export default {
       if ( this.modifierModal.stripIndex === null || this.modifierModal.stripIndex === undefined ) {
         return "Modifiers";
       }
-      const strip = this.systemConfig?.stripConfig?.[this.modifierModal.stripIndex];
+      const strip = this.stripConfig?.[this.modifierModal.stripIndex];
       return `Modifiers - ${ strip?.name || 'Strip' }`;
     },
     controllerOptions() {
@@ -585,6 +603,21 @@ export default {
     }
   },
   methods: {
+    getStripEntry( index ) {
+      const strip = this.stripConfig?.[index];
+      if ( !strip ) {
+        return null;
+      }
+      const controllerIndex = strip.controller;
+      const controller = this.systemConfig?.controllers?.[controllerIndex];
+      const controllerStripIndex = strip.controllerStripIndex;
+      const controllerStrip = controller?.strips?.[controllerStripIndex];
+      return {
+        strip: controllerStrip || strip,
+        controllerIndex,
+        controllerStripIndex
+      };
+    },
     isWebSocketController( controller ) {
       return controller?.type === "WebSocket" || controller?.type === "ESP32";
     },
@@ -623,7 +656,7 @@ export default {
       }
       return controller;
     },
-    normalizeControllers( controllers, strips ) {
+    normalizeControllers( controllers ) {
       const controllersWithIndex = controllers.map( ( controller, index ) => ( {
         controller: this.normalizeControllerType( controller ),
         originalIndex: index
@@ -637,11 +670,7 @@ export default {
         if ( !this.gpioPinsSingle.includes( pin ) ) {
           return { error: "GPIO pin must be one of the supported single-pin channels." };
         }
-        const indexMap = {};
-        controllersWithIndex.forEach( ( entry, newIndex ) => {
-          indexMap[entry.originalIndex] = newIndex;
-        } );
-        return { controllers: controllersWithIndex.map( entry => entry.controller ), indexMap };
+        return { controllers: controllersWithIndex.map( entry => entry.controller ) };
       }
       if ( gpioControllers.length === 2 ) {
         const primary = gpioControllers.find( entry => this.gpioPinsPrimary.includes( Number( entry.controller?.pin ) ) );
@@ -659,17 +688,9 @@ export default {
         } else {
           reordered = remaining.slice( 0, insertAt ).concat( ordered, remaining.slice( insertAt ) );
         }
-        const indexMap = {};
-        reordered.forEach( ( entry, newIndex ) => {
-          indexMap[entry.originalIndex] = newIndex;
-        } );
-        return { controllers: reordered.map( entry => entry.controller ), indexMap };
+        return { controllers: reordered.map( entry => entry.controller ) };
       }
-      const indexMap = {};
-      controllersWithIndex.forEach( ( entry, newIndex ) => {
-        indexMap[entry.originalIndex] = newIndex;
-      } );
-      return { controllers: controllersWithIndex.map( entry => entry.controller ), indexMap };
+      return { controllers: controllersWithIndex.map( entry => entry.controller ) };
     },
     ensureGpioPinSelection() {
       if ( this.controllerModal.type !== "GPIO" ) {
@@ -719,12 +740,13 @@ export default {
     openStripModal( index = null ) {
       this.editStripIndex = index;
       if ( index !== null && index !== undefined ) {
-        const strip = this.systemConfig.stripConfig[index];
+        const entry = this.getStripEntry( index );
+        const strip = entry?.strip;
         this.stripModal = {
           name: strip.name,
           length: strip.length,
           type: strip.type,
-          controller: strip.controller ?? 0
+          controller: entry?.controllerIndex ?? 0
         };
       } else {
         const defaultController = this.controllerOptions[0]?.id ?? null;
@@ -757,17 +779,41 @@ export default {
       }
       const index = this.editStripIndex;
       const isEdit = index !== null && index !== undefined;
-      const strip = isEdit
-        ? this.systemConfig.stripConfig[index]
-        : {};
-      strip.name = name;
-      strip.length = length;
-      strip.type = type;
-      strip.controller = controller;
-      if ( !isEdit ) {
-        this.systemConfig.stripConfig.push( strip );
+      const controllers = this.systemConfig.controllers || [];
+      const targetController = controllers[controller];
+      if ( !targetController ) {
+        window.alert( "Please select a controller." );
+        return false;
       }
-      this.saveKey( 'strips', this.systemConfig.stripConfig );
+      if ( !targetController.strips ) {
+        targetController.strips = [];
+      }
+      if ( isEdit ) {
+        const entry = this.getStripEntry( index );
+        if ( !entry ) {
+          window.alert( "Strip not found." );
+          return false;
+        }
+        const updatedStrip = {
+          ...entry.strip,
+          name,
+          length,
+          type
+        };
+        if ( entry.controllerIndex === controller ) {
+          controllers[entry.controllerIndex].strips.splice( entry.controllerStripIndex, 1, updatedStrip );
+        } else {
+          controllers[entry.controllerIndex].strips.splice( entry.controllerStripIndex, 1 );
+          targetController.strips.push( updatedStrip );
+        }
+      } else {
+        targetController.strips.push( {
+          name,
+          length,
+          type
+        } );
+      }
+      this.saveKey( 'controllers', controllers );
       return true;
     },
     submitStripModal() {
@@ -814,11 +860,15 @@ export default {
         window.alert( "Controller pin is required." );
         return false;
       }
+      const existingController = this.editControllerIndex !== null && this.editControllerIndex !== undefined
+        ? this.systemConfig.controllers?.[this.editControllerIndex]
+        : null;
       const controller = {
         name,
         type,
         ...( type === "WebSocket" ? { url } : {} ),
-        ...( type === "GPIO" ? { pin } : {} )
+        ...( type === "GPIO" ? { pin } : {} ),
+        strips: existingController?.strips ? existingController.strips.slice() : []
       };
       const index = this.editControllerIndex;
       const isEdit = index !== null && index !== undefined;
@@ -831,30 +881,14 @@ export default {
       } else {
         controllers.push( controller );
       }
-      const normalized = this.normalizeControllers( controllers, this.systemConfig.stripConfig );
+      const normalized = this.normalizeControllers( controllers );
       if ( normalized.error ) {
         window.alert( normalized.error );
         return false;
       }
       const updatedControllers = normalized.controllers || controllers;
-      const indexMap = normalized.indexMap || {};
-      const updatedStrips = ( this.systemConfig.stripConfig || [] ).map( strip => {
-        if ( strip.controller === undefined || strip.controller === null ) {
-          return strip;
-        }
-        const newIndex = indexMap[strip.controller];
-        if ( newIndex === undefined ) {
-          return strip;
-        }
-        return {
-          ...strip,
-          controller: newIndex
-        };
-      } );
       this.systemConfig.controllers = updatedControllers;
-      this.systemConfig.stripConfig = updatedStrips;
       this.saveKey( 'controllers', this.systemConfig.controllers );
-      this.saveKey( 'strips', this.systemConfig.stripConfig );
       return true;
     },
     submitControllerModal() {
@@ -867,51 +901,44 @@ export default {
       if ( index === null || index === undefined ) {
         return;
       }
-      const hasAttachedStrips = ( this.systemConfig.stripConfig || [] )
-        .some( strip => strip?.controller === index );
+      const hasAttachedStrips = ( this.systemConfig.controllers?.[index]?.strips || [] ).length > 0;
       if ( hasAttachedStrips ) {
         window.alert( "This controller still has strips attached." );
         return;
       }
       const controllers = ( this.systemConfig.controllers || [] ).slice();
       controllers.splice( index, 1 );
-      const normalized = this.normalizeControllers( controllers, this.systemConfig.stripConfig );
+      const normalized = this.normalizeControllers( controllers );
       if ( normalized.error ) {
         window.alert( normalized.error );
         return;
       }
       const updatedControllers = normalized.controllers || controllers;
-      const indexMap = normalized.indexMap || {};
-      const defaultControllerIndex = updatedControllers.length ? 0 : null;
-      const updatedStrips = ( this.systemConfig.stripConfig || [] ).map( strip => {
-        if ( strip.controller === undefined || strip.controller === null ) {
-          return strip;
-        }
-        const newIndex = indexMap[strip.controller];
-        if ( newIndex === undefined ) {
-          return {
-            ...strip,
-            controller: defaultControllerIndex
-          };
-        }
-        return {
-          ...strip,
-          controller: newIndex
-        };
-      } );
       this.systemConfig.controllers = updatedControllers;
-      this.systemConfig.stripConfig = updatedStrips;
       this.saveKey( 'controllers', this.systemConfig.controllers );
-      this.saveKey( 'strips', this.systemConfig.stripConfig );
       this.$refs.controllerModal.internalClose();
     },
     deleteStrip( index ) {
-      this.systemConfig.stripConfig.splice( index, 1 );
-      this.saveKey( 'strips', this.systemConfig.stripConfig );
+      const entry = this.getStripEntry( index );
+      if ( !entry ) {
+        return;
+      }
+      const controller = this.systemConfig.controllers?.[entry.controllerIndex];
+      if ( !controller?.strips ) {
+        return;
+      }
+      controller.strips.splice( entry.controllerStripIndex, 1 );
+      this.saveKey( 'controllers', this.systemConfig.controllers );
     },
     openModifierModal( index ) {
-      const strip = this.systemConfig.stripConfig[index];
+      const entry = this.getStripEntry( index );
+      const strip = entry?.strip;
+      if ( !strip ) {
+        return;
+      }
       this.modifierModal.stripIndex = index;
+      this.modifierModal.controllerIndex = entry.controllerIndex;
+      this.modifierModal.controllerStripIndex = entry.controllerStripIndex;
       this.modifierModal.selected = strip.modifier || "";
       this.modifierModal.existingValues = strip.modifierOptions || {};
       this.updateModifierOptions();
@@ -940,7 +967,11 @@ export default {
       } );
     },
     saveModifier() {
-      const strip = this.systemConfig.stripConfig[this.modifierModal.stripIndex];
+      const controller = this.systemConfig.controllers?.[this.modifierModal.controllerIndex];
+      const strip = controller?.strips?.[this.modifierModal.controllerStripIndex];
+      if ( !strip ) {
+        return;
+      }
       strip.modifier = this.modifierModal.selected || undefined;
       let modifierOptions = {};
       if ( strip.modifier ) {
@@ -953,13 +984,13 @@ export default {
         } );
       }
       strip.modifierOptions = modifierOptions;
-      this.saveKey( 'strips', this.systemConfig.stripConfig );
+      this.saveKey( 'controllers', this.systemConfig.controllers );
     },
     stripsForService( service ) {
       return service.strips
         .map( index => ({
           index,
-          ...this.systemConfig.stripConfig[index]
+          ...this.stripConfig[index]
         }) );
     },
     buttonStrips( config ) {
@@ -969,7 +1000,7 @@ export default {
       }
       return strips.map( index => ({
         index,
-        ...this.systemConfig.stripConfig[index]
+        ...this.stripConfig[index]
       }) );
     },
     patternName( id ) {
