@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Script Tester</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .light {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        body {
+            color: white;
+            background-color: black;
+        }
+
+        #selectorRow {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        #selectorRow select,
+        #selectorRow input {
+            margin-left: 6px;
+        }
+
+        #selectorRow .block {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<h1>Script Tester</h1>
+<div id="controls">
+    <label for="number">Number:</label> <input id="number" type="number" value="16"/>
+    <button style="margin-left: 1%" onclick="setNumLEDs()">Update Length</button>
+    <button style="margin-left: 1%" onclick="reload()">Reload</button>
+</div>
+<div id="selectorRow">
+    <div>
+        <h3>Pattern</h3>
+        <div class="select is-danger">
+            <select id="pattern" onchange="changePattern()">
+            </select>
+        </div>
+        <div class="block ml-1 mt-3" id="patternOptions"></div>
+    </div>
+    <div>
+        <h3>Effect</h3>
+        <div class="select is-danger">
+            <select id="effect" onchange="changeEffect()">
+            </select>
+        </div>
+        <div class="block ml-1 mt-3" id="effectOptions"></div>
+    </div>
+    <div>
+        <button onclick="display()" style="margin-top: 22px">Set Pattern & Effect</button>
+    </div>
+</div>
+<br><br><br>
+<div id="lights"></div>
+
+<script>
+    function generateInput( option, superText, addClass ) {
+        switch ( option.type ) {
+            case "checkbox":
+                return `<div class="block ml-2">
+                        <label class="checkbox" for="${ superText }-${ option.id }">
+                           <input id="${ superText }-${ option.id }" name="${ superText }-${ option.id }" type="checkbox" class="${ addClass ?? "big" }" ${ option.default ? "checked" : "" }>
+                           ${ option.name }
+                        </label>
+                    </div>`;
+            case "color":
+                return `<div class="field is-horizontal">
+                        <label class="pt-3">${ option.name }</label>
+                        <input id="${ superText }-${ option.id }" type="${ option.type }" value="${ option.default }" class="big m-2 ml-3">
+                    </div>`;
+            case "select":
+                return `<div class="mb-3">
+                        <span>${ option.name }</span>
+                        <div class="select ${ addClass }" style="vertical-align: middle;">
+                            <select id="${ superText }-${ option.id }">
+                                ${ option.options.map( o => `<option value="${ o.value }" ${ o.value === option.default ? "selected" : "" }>${ o.name }</option>` ).join( "\n" ) }
+                            </select>
+                        </div>
+                    </div>`;
+            case "colorArray":
+                let html = `<div class="mb-3">
+                            <p>${ option.name }</p>
+                             <i onclick="removeFromColorArray('${ superText }-${ option.id }')" class="fa-solid fa-circle-minus has-text-danger is-size-4 vaMiddle"></i>
+                            <span id="${ superText }-${ option.id }">
+                                ${ option.default.map( ( v, index ) => getColorArrayElement( `${ superText }-${ option.id }-${ index }`, v ) ).join( "\n" ) }
+                            </span>
+                            <i onclick="addToColorArray('${ superText }-${ option.id }')" class="fa-solid fa-circle-plus has-text-success is-size-4 vaMiddle"></i>
+                       </div>`;
+
+                return html;
+            default:
+                return `<div class="field is-horizontal">
+                        <label class="pt-2">${ option.name }</label>
+                        <div class="control">
+                            <input id="${ superText }-${ option.id }" type="${ option.type }" value="${ option.default }" class="input ml-2">
+                        </div>
+                    </div>`;
+        }
+    }
+
+    function properCase( string ) {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 ).toLowerCase();
+    }
+
+    function addToColorArray( id, color ) {
+        let arrHolder = document.getElementById( id );
+        let span = document.createElement( "span" );
+        span.innerHTML += getColorArrayElement( `${ id }-${ arrHolder.children.length }`, color )
+        arrHolder.appendChild( span );
+    }
+
+    function getColorArrayElement( id, color ) {
+        return `<input id="${ id }" style="vertical-align: middle" type="color" value="#${ color ?? "000000" }" class="big m-2 ml-3">`;
+    }
+
+    function removeFromColorArray( id ) {
+        let arrHolder = document.getElementById( id );
+        arrHolder.children[arrHolder.children.length - 1].remove();
+    }
+
+    let menuOn = window.innerWidth > 768;
+
+    function toggleMenu(){
+        menuOn = !menuOn;
+        updateMenu();
+    }
+
+
+    function updateMenu(){
+        if(menuOn){
+            for(let item of document.getElementsByClassName('headerText')){
+                item.classList.remove('noShow');
+                item.parentElement.classList.remove('noMargin');
+            }
+        }else{
+            for(let item of document.getElementsByClassName('headerText')){
+                item.classList.add('noShow');
+                item.parentElement.classList.add('noMargin');
+            }
+        }
+    }
+    updateMenu();
+
+    window.addEventListener('resize', function(event) {
+        menuOn = window.innerWidth > 768;
+        updateMenu();
+    }, true);
+</script>
+<script>
+    const socket = io();
+
+    let ledScripts;
+    let rows = 16;
+
+    socket.on( 'connect', function () {
+        socket.emit( 'getLEDScripts', ( data ) => {
+            ledScripts = data;
+            drawSettings();
+        } );
+    } );
+
+    socket.on( 'newColorArr', ( config, colorArr ) => {
+        let html = "";
+        for ( let i = 0; i < config.num; i++ ) {
+            html += `<div class="light" id="led-${i}" style="background-color: #${colorArr[i]}; left: ${(i % rows) * 60}px; margin-top: ${Math.floor( i / rows ) * 60}px"></div>`;
+        }
+        document.getElementById( "lights" ).innerHTML = html;
+    } );
+
+    function setNumLEDs() {
+        socket.emit( 'setNumLEDs', Number( document.getElementById( 'number' ).value ) );
+    }
+
+    function reload() {
+        socket.emit( 'reloadScripts', ( data ) => {
+            ledScripts = data;
+            drawSettings();
+        } );
+    }
+
+    function drawSettings() {
+        let html = ``;
+        ledScripts.patterns.list.forEach( v => {
+            html += `<option value="${ v }" ${ v === 'off' ? "selected" : "" }>${ ledScripts.patterns[v].name }</option>`;
+        } );
+        document.getElementById( 'pattern' ).innerHTML = html;
+
+        html = `<option value="" selected>No Effect</option>`;
+        ledScripts.effects.list.forEach( v => {
+            html += `<option value="${ v }">${ ledScripts.effects[v].name }</option>`;
+        } );
+        document.getElementById( 'effect' ).innerHTML = html;
+        changePattern();
+        changeEffect();
+    }
+
+    function changePattern() {
+        let html = '';
+        const pattern = ledScripts.patterns[document.getElementById( 'pattern' ).value];
+        if ( pattern ) {
+            for ( let i in pattern.options ) {
+                html += generateInput( pattern.options[i], 'pattern' );
+            }
+        }
+        document.getElementById( 'patternOptions' ).innerHTML = html;
+    }
+
+    function changeEffect() {
+        let html = '';
+        const effect = ledScripts.effects[document.getElementById( 'effect' ).value];
+        if ( effect ) {
+            for ( let i in effect.options ) {
+                html += generateInput( effect.options[i], 'effect' );
+            }
+        }
+        document.getElementById( 'effectOptions' ).innerHTML = html;
+    }
+
+    function display() {
+        let config = getConfig();
+        if ( !config.pattern ) {
+            alert( "you are missing something" );
+            return;
+        }
+        socket.emit( 'setLEDs', config );
+    }
+
+    function getConfig() {
+        let config = {
+            "pattern": document.getElementById( "pattern" ).value,
+            "patternOptions": {},
+            "effect": document.getElementById( "effect" ).value,
+            "effectOptions": {},
+            "num": Number( document.getElementById( 'number' ).value ) || rows
+        }
+
+        ledScripts.patterns[config.pattern].options.forEach( ( value ) => {
+            config.patternOptions[value.id] = document.getElementById( `pattern-${ value.id }` ).value;
+            if ( value.type === "color" ) {
+                config.patternOptions[value.id] = config.patternOptions[value.id].replace( "#", "" )
+            }
+            if ( value.type === 'colorArray' ) {
+                config.patternOptions[value.id] = [];
+                for ( let i = 0; i < document.getElementById( `pattern-${ value.id }` ).children.length; i++ ) {
+                    config.patternOptions[value.id].push( document.getElementById( `pattern-${ value.id }-${ i }` ).value.replace( "#", "" ) );
+                }
+            }
+            if ( value.type === "checkbox" ) {
+                config.patternOptions[value.id] = document.getElementById( `pattern-${ value.id }` ).checked;
+            }
+            if ( value.type === "number" ) {
+                config.patternOptions[value.id] = Number( config.patternOptions[value.id] );
+            }
+        } );
+        if ( config.effect ) {
+            ledScripts.effects[config.effect].options.forEach( ( value ) => {
+                config.effectOptions[value.id] = document.getElementById( `effect-${ value.id }` ).value;
+                if ( value.type === "color" ) {
+                    config.effectOptions[value.id] = config.effectOptions[value.id].replace( "#", "" )
+                }
+                if ( value.type === "checkbox" ) {
+                    config.effectOptions[value.id] = document.getElementById( `effect-${ value.id }` ).checked;
+                }
+                if ( value.type === "number" ) {
+                    config.effectOptions[value.id] = Number( config.effectOptions[value.id] );
+                }
+            } );
+        }
+
+        return config;
+    }
+</script>
+</body>
+</html>

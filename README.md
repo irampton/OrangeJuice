@@ -8,7 +8,7 @@ It uses a powerful system of strips, patterns, and effects to drive LED strips, 
 OrangeJuice uses the NPM module [`rpi-ws281x-native`](https://www.npmjs.com/package/rpi-ws281x-native) to write to any LEDs. 
 The module will __only__ work on a Raspberry Pi and supports the WS281x (sometimes called NEOPIXELs) standard. (Including WS2811, WS2812, WS2812b, SK6812, and SK6812W)
 
->A separate javascript file, [`script-tester.js`](./src/script-tester.js) can be used to run/test most OrangeJuice features on any platform.
+>A separate javascript file, [`script-tester.js`](src/led-scripts/testing/script-tester.js) can be used to run/test most OrangeJuice features on any platform.
 To support a different LED standard or microcontroller platform, [`led-pin-controller.js`](./src/led-pin-control.js) could be re-written to use a different library and no other changes would be needed.
 
 ### Setup
