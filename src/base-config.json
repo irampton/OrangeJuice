@@ -21,7 +21,8 @@
       "name": "Test",
       "start": 0,
       "length": 16,
-      "type": "strip"
+      "type": "strip",
+      "controller": 0
     }
   ],
   "homekit": [
