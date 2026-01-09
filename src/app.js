@@ -69,6 +69,9 @@ try {
             case "WebSocket":
                 controllers.push( new (require( "./controllers/led-esp32-controller" ))( numPixels[i], c.url ) );
                 break;
+            case "Mock":
+                controllers.push( ...new (require( "./controllers/led-mock-controller" ))( numPixels[i] ) );
+                break;
         }
     } );
 } catch ( e ) {

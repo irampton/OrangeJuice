@@ -291,6 +291,10 @@
           />
         </div>
       </div>
+      <template #footer>
+        <button class="button is-success" @click="submitStripModal">Save changes</button>
+        <button class="button" @click="$refs.scriptModal.internalClose()">Cancel</button>
+      </template>
     </BasePopup>
 
     <BasePopup
@@ -340,7 +344,7 @@
         >
           Delete
         </button>
-        <button class="button is-success" @click="$refs.controllerModal.internalClose(true)">Save changes</button>
+        <button class="button is-success" @click="submitControllerModal">Save changes</button>
         <button class="button" @click="$refs.controllerModal.internalClose()">Cancel</button>
       </template>
     </BasePopup>
@@ -447,7 +451,8 @@ export default {
       ],
       controllerTypeOptions: [
         { id: "WebSocket", name: "WebSocket" },
-        { id: "GPIO", name: "GPIO" }
+        { id: "GPIO", name: "GPIO" },
+        { id: "Mock", name: "Mock" }
       ],
       gpioPinsSingle: [ 12, 18, 40, 52, 21, 31, 10, 38 ],
       gpioPinsPrimary: [ 12, 18, 40, 52 ],
@@ -586,6 +591,9 @@ export default {
     controllerTypeName( controller ) {
       if ( this.isWebSocketController( controller ) ) {
         return "WebSocket";
+      }
+      if ( controller?.type === "Mock" ) {
+        return "Mock";
       }
       return controller?.type || "Unknown";
     },
@@ -728,7 +736,6 @@ export default {
         };
       }
       this.$refs.scriptModal.open()
-        .then( () => this.saveStrip() )
         .catch( () => {} );
     },
     saveStrip() {
@@ -738,15 +745,15 @@ export default {
       const controller = Number( this.stripModal.controller );
       if ( !this.controllerOptions.length ) {
         window.alert( "You must create a controller first." );
-        return;
+        return false;
       }
       if ( !name || !length || !type || Number.isNaN( controller ) ) {
         window.alert( "You are missing something!" );
-        return;
+        return false;
       }
       if ( controller < 0 || controller >= this.controllerOptions.length ) {
         window.alert( "Please select a controller." );
-        return;
+        return false;
       }
       const index = this.editStripIndex;
       const isEdit = index !== null && index !== undefined;
@@ -761,6 +768,12 @@ export default {
         this.systemConfig.stripConfig.push( strip );
       }
       this.saveKey( 'strips', this.systemConfig.stripConfig );
+      return true;
+    },
+    submitStripModal() {
+      if ( this.saveStrip() ) {
+        this.$refs.scriptModal.internalClose();
+      }
     },
     openControllerModal( index = null ) {
       this.editControllerIndex = index;
@@ -782,7 +795,6 @@ export default {
       }
       this.ensureGpioPinSelection();
       this.$refs.controllerModal.open()
-        .then( () => this.saveController() )
         .catch( () => {} );
     },
     saveController() {
@@ -792,20 +804,21 @@ export default {
       const pin = Number( this.controllerModal.pin );
       if ( !name || !type ) {
         window.alert( "You are missing something!" );
-        return;
+        return false;
       }
       if ( type === "WebSocket" && !url ) {
         window.alert( "Controller URL is required." );
-        return;
+        return false;
       }
       if ( type === "GPIO" && ( !pin || Number.isNaN( pin ) ) ) {
         window.alert( "Controller pin is required." );
-        return;
+        return false;
       }
       const controller = {
         name,
         type,
-        ...( type === "WebSocket" ? { url } : { pin } )
+        ...( type === "WebSocket" ? { url } : {} ),
+        ...( type === "GPIO" ? { pin } : {} )
       };
       const index = this.editControllerIndex;
       const isEdit = index !== null && index !== undefined;
@@ -821,7 +834,7 @@ export default {
       const normalized = this.normalizeControllers( controllers, this.systemConfig.stripConfig );
       if ( normalized.error ) {
         window.alert( normalized.error );
-        return;
+        return false;
       }
       const updatedControllers = normalized.controllers || controllers;
       const indexMap = normalized.indexMap || {};
@@ -842,6 +855,12 @@ export default {
       this.systemConfig.stripConfig = updatedStrips;
       this.saveKey( 'controllers', this.systemConfig.controllers );
       this.saveKey( 'strips', this.systemConfig.stripConfig );
+      return true;
+    },
+    submitControllerModal() {
+      if ( this.saveController() ) {
+        this.$refs.controllerModal.internalClose();
+      }
     },
     deleteController() {
       const index = this.editControllerIndex;
