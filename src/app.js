@@ -307,6 +307,10 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             } );
             socket.on( 'setSettings', ( item, data ) => {
                 switch ( item ) {
+                    case "features":
+                        features = data;
+                        config.set( "features", features );
+                        break;
                     case "strips":
                         stripConfig = data;
                         config.set( "strips", stripConfig );
