@@ -22,7 +22,6 @@
             :socket="socket"
         />
       </div>
-      <!-- TODO add matrix selector -->
     </div>
   </section>
 </template>
