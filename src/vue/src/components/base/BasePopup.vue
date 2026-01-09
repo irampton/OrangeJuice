@@ -12,8 +12,10 @@
         </section>
         <footer class="modal-card-foot">
           <div class="buttons">
-            <button :class="['button', saveButtonColor]" @click="() => internalClose(true)">{{ saveText }}</button>
-            <button class="button" @click="() => internalClose()">Cancel</button>
+            <slot name="footer">
+              <button :class="['button', saveButtonColor]" @click="() => internalClose(true)">{{ saveText }}</button>
+              <button class="button" @click="() => internalClose()">Cancel</button>
+            </slot>
           </div>
         </footer>
       </div>

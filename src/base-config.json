@@ -12,6 +12,7 @@
   },
   "controllers": [
     {
+      "name": "GPIO 18",
       "type": "GPIO",
       "pin": 18
     }
@@ -19,7 +20,6 @@
   "strips": [
     {
       "name": "Test",
-      "start": 0,
       "length": 16,
       "type": "strip",
       "controller": 0

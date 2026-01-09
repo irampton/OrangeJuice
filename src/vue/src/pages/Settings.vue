@@ -41,6 +41,7 @@
               :strip="strip"
               :index="index"
               :typeClass="typeClass"
+              :controller-label="controllerLabel(systemConfig.controllers?.[strip.controller], strip.controller)"
               @edit="openStripModal"
               @modify="openModifierModal"
               @delete="deleteStrip"
@@ -48,6 +49,44 @@
           </div>
         </div>
         <button class="button is-success px-6 ml-4 mt-1" @click="openStripModal()">Add Strip</button>
+      </SettingsSection>
+
+      <SettingsSection
+        v-if="systemConfig"
+        section-id="controllers-section"
+        title="Controllers"
+      >
+        <div class="mx-1 my-2 columns is-multiline bottomDivider">
+          <div
+            v-for="(controller, index) in (systemConfig.controllers || [])"
+            :key="`${controller.name || controller.type}-${index}`"
+            class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd"
+          >
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title">{{ controllerLabel(controller, index) }}</p>
+                <div class="card-header-icon">
+                  {{ index }}
+                </div>
+              </header>
+                <div class="card-content">
+                  <div class="content">
+                  Type: {{ controllerTypeName(controller) }}
+                  </div>
+                  <div v-if="isWebSocketController(controller)" class="content">
+                    URL: {{ controller.url }}
+                  </div>
+                  <div v-else-if="controller.type === 'GPIO'" class="content">
+                    Pin: {{ controller.pin }}
+                  </div>
+              </div>
+              <footer class="card-footer">
+                <a class="card-footer-item" @click.prevent="openControllerModal(index)">Edit</a>
+              </footer>
+            </div>
+          </div>
+        </div>
+        <button class="button is-success px-6 ml-4 mt-1" @click="openControllerModal()">Add Controller</button>
       </SettingsSection>
 
       <SettingsSection
@@ -242,6 +281,68 @@
           />
         </div>
       </div>
+      <div class="field">
+        <label class="label">Controller</label>
+        <div class="control">
+          <BaseDropdown
+            :options="controllerOptions"
+            color="link"
+            v-model="stripModal.controller"
+          />
+        </div>
+      </div>
+    </BasePopup>
+
+    <BasePopup
+      ref="controllerModal"
+      :name="controllerModalTitle"
+      save-text="Save changes"
+      save-color="success"
+    >
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <BaseTextInput v-model="controllerModal.name" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Type</label>
+        <div class="control">
+          <BaseDropdown
+            :options="controllerTypeOptions"
+            color="link"
+            v-model="controllerModal.type"
+          />
+        </div>
+      </div>
+      <div v-if="controllerModal.type === 'WebSocket'" class="field">
+        <label class="label">URL</label>
+        <div class="control">
+          <BaseTextInput v-model="controllerModal.url" />
+        </div>
+      </div>
+      <div v-else-if="controllerModal.type === 'GPIO'" class="field">
+        <label class="label">Pin</label>
+        <div v-if="gpioPinOptions.length" class="control">
+          <BaseDropdown
+            :options="gpioPinOptions"
+            color="link"
+            v-model="controllerModal.pin"
+          />
+        </div>
+        <p v-else class="help is-danger">No valid GPIO pins are available for the current controller setup.</p>
+      </div>
+      <template #footer>
+        <button
+          v-if="editControllerIndex !== null && editControllerIndex !== undefined"
+          class="button is-danger"
+          @click="deleteController"
+        >
+          Delete
+        </button>
+        <button class="button is-success" @click="$refs.controllerModal.internalClose(true)">Save changes</button>
+        <button class="button" @click="$refs.controllerModal.internalClose()">Cancel</button>
+      </template>
     </BasePopup>
 
     <BasePopup
@@ -302,10 +403,18 @@ export default {
       ledScripts: {},
       matrixScripts: {},
       editStripIndex: null,
+      editControllerIndex: null,
       stripModal: {
         name: "",
         length: 16,
-        type: "strip"
+        type: "strip",
+        controller: 0
+      },
+      controllerModal: {
+        name: "",
+        type: "WebSocket",
+        url: "",
+        pin: 18
       },
       modifierModal: {
         stripIndex: null,
@@ -335,7 +444,14 @@ export default {
         { id: "matrix", name: "Matrix" },
         { id: "ring", name: "Ring" },
         { id: "strand", name: "Strand" }
-      ]
+      ],
+      controllerTypeOptions: [
+        { id: "WebSocket", name: "WebSocket" },
+        { id: "GPIO", name: "GPIO" }
+      ],
+      gpioPinsSingle: [ 12, 18, 40, 52, 21, 31, 10, 38 ],
+      gpioPinsPrimary: [ 12, 18, 40, 52 ],
+      gpioPinsSecondary: [ 13, 19, 41, 45, 53 ]
     }
   },
   computed: {
@@ -356,6 +472,7 @@ export default {
           items: [
             { id: 'features', label: 'Features' },
             { id: 'strips', label: 'Strips' },
+            { id: 'controllers', label: 'Controllers' },
             { id: 'homekit', label: 'HomeKit' }
           ]
         },
@@ -421,15 +538,145 @@ export default {
       }
       return `Edit #${ this.editStripIndex }`;
     },
+    controllerModalTitle() {
+      if ( this.editControllerIndex === null || this.editControllerIndex === undefined ) {
+        return "Add Controller";
+      }
+      return `Edit Controller #${ this.editControllerIndex }`;
+    },
     modifierModalTitle() {
       if ( this.modifierModal.stripIndex === null || this.modifierModal.stripIndex === undefined ) {
         return "Modifiers";
       }
       const strip = this.systemConfig?.stripConfig?.[this.modifierModal.stripIndex];
       return `Modifiers - ${ strip?.name || 'Strip' }`;
+    },
+    controllerOptions() {
+      if ( !this.systemConfig?.controllers ) {
+        return [];
+      }
+      return this.systemConfig.controllers.map( ( controller, index ) => ( {
+        id: index,
+        name: this.controllerLabel( controller, index )
+      } ) );
+    },
+    gpioPinOptions() {
+      if ( this.controllerModal.type !== "GPIO" ) {
+        return [];
+      }
+      const otherController = this.otherGpioController();
+      let pins = this.gpioPinsSingle;
+      if ( otherController ) {
+        const otherPin = Number( otherController.pin );
+        if ( this.gpioPinsPrimary.includes( otherPin ) ) {
+          pins = this.gpioPinsSecondary;
+        } else if ( this.gpioPinsSecondary.includes( otherPin ) ) {
+          pins = this.gpioPinsPrimary;
+        } else {
+          pins = [];
+        }
+      }
+      return pins.map( pin => ( { id: pin, name: `${pin}` } ) );
     }
   },
   methods: {
+    isWebSocketController( controller ) {
+      return controller?.type === "WebSocket" || controller?.type === "ESP32";
+    },
+    controllerTypeName( controller ) {
+      if ( this.isWebSocketController( controller ) ) {
+        return "WebSocket";
+      }
+      return controller?.type || "Unknown";
+    },
+    controllerLabel( controller, index ) {
+      if ( index === null || index === undefined ) {
+        return "Unassigned";
+      }
+      const name = controller?.name?.trim();
+      if ( name ) {
+        return name;
+      }
+      if ( controller?.type === "GPIO" ) {
+        return `GPIO ${ controller?.pin ?? index }`;
+      }
+      if ( this.isWebSocketController( controller ) ) {
+        return controller?.url ? `WebSocket ${ controller.url }` : "WebSocket";
+      }
+      return `Controller ${ index }`;
+    },
+    otherGpioController() {
+      return ( this.systemConfig?.controllers || [] )
+        .find( ( controller, index ) => controller?.type === "GPIO" && index !== this.editControllerIndex );
+    },
+    normalizeControllerType( controller ) {
+      if ( this.isWebSocketController( controller ) ) {
+        return { ...controller, type: "WebSocket" };
+      }
+      return controller;
+    },
+    normalizeControllers( controllers, strips ) {
+      const controllersWithIndex = controllers.map( ( controller, index ) => ( {
+        controller: this.normalizeControllerType( controller ),
+        originalIndex: index
+      } ) );
+      const gpioControllers = controllersWithIndex.filter( entry => entry.controller?.type === "GPIO" );
+      if ( gpioControllers.length > 2 ) {
+        return { error: "Only 2 GPIO controllers can be used." };
+      }
+      if ( gpioControllers.length === 1 ) {
+        const pin = Number( gpioControllers[0].controller?.pin );
+        if ( !this.gpioPinsSingle.includes( pin ) ) {
+          return { error: "GPIO pin must be one of the supported single-pin channels." };
+        }
+        const indexMap = {};
+        controllersWithIndex.forEach( ( entry, newIndex ) => {
+          indexMap[entry.originalIndex] = newIndex;
+        } );
+        return { controllers: controllersWithIndex.map( entry => entry.controller ), indexMap };
+      }
+      if ( gpioControllers.length === 2 ) {
+        const primary = gpioControllers.find( entry => this.gpioPinsPrimary.includes( Number( entry.controller?.pin ) ) );
+        const secondary = gpioControllers.find( entry => this.gpioPinsSecondary.includes( Number( entry.controller?.pin ) ) );
+        if ( !primary || !secondary ) {
+          return { error: "GPIO pins must use one primary and one secondary pin when two controllers are set." };
+        }
+        const insertIndex = Math.min( primary.originalIndex, secondary.originalIndex );
+        const remaining = controllersWithIndex.filter( entry => entry !== primary && entry !== secondary );
+        const insertAt = remaining.findIndex( entry => entry.originalIndex > insertIndex );
+        const ordered = [ primary, secondary ];
+        let reordered = [];
+        if ( insertAt === -1 ) {
+          reordered = remaining.concat( ordered );
+        } else {
+          reordered = remaining.slice( 0, insertAt ).concat( ordered, remaining.slice( insertAt ) );
+        }
+        const indexMap = {};
+        reordered.forEach( ( entry, newIndex ) => {
+          indexMap[entry.originalIndex] = newIndex;
+        } );
+        return { controllers: reordered.map( entry => entry.controller ), indexMap };
+      }
+      const indexMap = {};
+      controllersWithIndex.forEach( ( entry, newIndex ) => {
+        indexMap[entry.originalIndex] = newIndex;
+      } );
+      return { controllers: controllersWithIndex.map( entry => entry.controller ), indexMap };
+    },
+    ensureGpioPinSelection() {
+      if ( this.controllerModal.type !== "GPIO" ) {
+        return;
+      }
+      const options = this.gpioPinOptions;
+      if ( options.length === 0 ) {
+        this.controllerModal.pin = "";
+        return;
+      }
+      const current = Number( this.controllerModal.pin );
+      if ( !options.some( option => Number( option.id ) === current ) ) {
+        this.controllerModal.pin = options[0].id;
+      }
+    },
     featureLabel( key ) {
       return this.featureLabels[key] || key;
     },
@@ -468,13 +715,16 @@ export default {
         this.stripModal = {
           name: strip.name,
           length: strip.length,
-          type: strip.type
+          type: strip.type,
+          controller: strip.controller ?? 0
         };
       } else {
+        const defaultController = this.controllerOptions[0]?.id ?? null;
         this.stripModal = {
           name: "",
           length: 16,
-          type: "strip"
+          type: "strip",
+          controller: defaultController
         };
       }
       this.$refs.scriptModal.open()
@@ -485,26 +735,156 @@ export default {
       const name = this.stripModal.name?.trim();
       const length = Number( this.stripModal.length );
       const type = this.stripModal.type;
-      if ( !name || !length || !type ) {
+      const controller = Number( this.stripModal.controller );
+      if ( !this.controllerOptions.length ) {
+        window.alert( "You must create a controller first." );
+        return;
+      }
+      if ( !name || !length || !type || Number.isNaN( controller ) ) {
         window.alert( "You are missing something!" );
+        return;
+      }
+      if ( controller < 0 || controller >= this.controllerOptions.length ) {
+        window.alert( "Please select a controller." );
         return;
       }
       const index = this.editStripIndex;
       const isEdit = index !== null && index !== undefined;
-      const previousStrip = isEdit
-        ? this.systemConfig.stripConfig[index - 1]
-        : this.systemConfig.stripConfig[this.systemConfig.stripConfig.length - 1];
       const strip = isEdit
         ? this.systemConfig.stripConfig[index]
         : {};
       strip.name = name;
-      strip.start = ( previousStrip?.start || 0 ) + ( previousStrip?.length || 0 );
       strip.length = length;
       strip.type = type;
+      strip.controller = controller;
       if ( !isEdit ) {
         this.systemConfig.stripConfig.push( strip );
       }
       this.saveKey( 'strips', this.systemConfig.stripConfig );
+    },
+    openControllerModal( index = null ) {
+      this.editControllerIndex = index;
+      if ( index !== null && index !== undefined ) {
+        const controller = this.systemConfig.controllers[index];
+        this.controllerModal = {
+          name: controller?.name || "",
+          type: this.isWebSocketController( controller ) ? "WebSocket" : ( controller?.type || "WebSocket" ),
+          url: controller?.url || "",
+          pin: controller?.pin ?? 18
+        };
+      } else {
+        this.controllerModal = {
+          name: "",
+          type: "WebSocket",
+          url: "",
+          pin: 18
+        };
+      }
+      this.ensureGpioPinSelection();
+      this.$refs.controllerModal.open()
+        .then( () => this.saveController() )
+        .catch( () => {} );
+    },
+    saveController() {
+      const name = this.controllerModal.name?.trim();
+      const type = this.controllerModal.type;
+      const url = this.controllerModal.url?.trim();
+      const pin = Number( this.controllerModal.pin );
+      if ( !name || !type ) {
+        window.alert( "You are missing something!" );
+        return;
+      }
+      if ( type === "WebSocket" && !url ) {
+        window.alert( "Controller URL is required." );
+        return;
+      }
+      if ( type === "GPIO" && ( !pin || Number.isNaN( pin ) ) ) {
+        window.alert( "Controller pin is required." );
+        return;
+      }
+      const controller = {
+        name,
+        type,
+        ...( type === "WebSocket" ? { url } : { pin } )
+      };
+      const index = this.editControllerIndex;
+      const isEdit = index !== null && index !== undefined;
+      if ( !this.systemConfig.controllers ) {
+        this.systemConfig.controllers = [];
+      }
+      const controllers = this.systemConfig.controllers.slice();
+      if ( isEdit ) {
+        controllers.splice( index, 1, controller );
+      } else {
+        controllers.push( controller );
+      }
+      const normalized = this.normalizeControllers( controllers, this.systemConfig.stripConfig );
+      if ( normalized.error ) {
+        window.alert( normalized.error );
+        return;
+      }
+      const updatedControllers = normalized.controllers || controllers;
+      const indexMap = normalized.indexMap || {};
+      const updatedStrips = ( this.systemConfig.stripConfig || [] ).map( strip => {
+        if ( strip.controller === undefined || strip.controller === null ) {
+          return strip;
+        }
+        const newIndex = indexMap[strip.controller];
+        if ( newIndex === undefined ) {
+          return strip;
+        }
+        return {
+          ...strip,
+          controller: newIndex
+        };
+      } );
+      this.systemConfig.controllers = updatedControllers;
+      this.systemConfig.stripConfig = updatedStrips;
+      this.saveKey( 'controllers', this.systemConfig.controllers );
+      this.saveKey( 'strips', this.systemConfig.stripConfig );
+    },
+    deleteController() {
+      const index = this.editControllerIndex;
+      if ( index === null || index === undefined ) {
+        return;
+      }
+      const hasAttachedStrips = ( this.systemConfig.stripConfig || [] )
+        .some( strip => strip?.controller === index );
+      if ( hasAttachedStrips ) {
+        window.alert( "This controller still has strips attached." );
+        return;
+      }
+      const controllers = ( this.systemConfig.controllers || [] ).slice();
+      controllers.splice( index, 1 );
+      const normalized = this.normalizeControllers( controllers, this.systemConfig.stripConfig );
+      if ( normalized.error ) {
+        window.alert( normalized.error );
+        return;
+      }
+      const updatedControllers = normalized.controllers || controllers;
+      const indexMap = normalized.indexMap || {};
+      const defaultControllerIndex = updatedControllers.length ? 0 : null;
+      const updatedStrips = ( this.systemConfig.stripConfig || [] ).map( strip => {
+        if ( strip.controller === undefined || strip.controller === null ) {
+          return strip;
+        }
+        const newIndex = indexMap[strip.controller];
+        if ( newIndex === undefined ) {
+          return {
+            ...strip,
+            controller: defaultControllerIndex
+          };
+        }
+        return {
+          ...strip,
+          controller: newIndex
+        };
+      } );
+      this.systemConfig.controllers = updatedControllers;
+      this.systemConfig.stripConfig = updatedStrips;
+      this.saveKey( 'controllers', this.systemConfig.controllers );
+      this.saveKey( 'strips', this.systemConfig.stripConfig );
+      this.$refs.controllerModal.internalClose();
     },
     deleteStrip( index ) {
       this.systemConfig.stripConfig.splice( index, 1 );
@@ -619,6 +999,9 @@ export default {
   watch: {
     'modifierModal.selected'() {
       this.updateModifierOptions();
+    },
+    'controllerModal.type'() {
+      this.ensureGpioPinSelection();
     }
   },
   created() {

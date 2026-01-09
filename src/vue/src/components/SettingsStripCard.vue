@@ -13,6 +13,9 @@
       <div class="content">
         Length: {{ strip.length }} LEDs
       </div>
+      <div v-if="controllerLabel" class="content">
+        Controller: {{ controllerLabel }}
+      </div>
       <div class="content">
         Type:
         <span :class="['ml-1 px-2 py-1 tag is-medium', typeClass[strip.type] || 'is-light']">
@@ -43,6 +46,10 @@ export default {
     typeClass: {
       type: Object,
       default: () => ({})
+    },
+    controllerLabel: {
+      type: String,
+      default: ""
     }
   }
 }

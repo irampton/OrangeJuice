@@ -66,6 +66,7 @@ try {
                 }
                 break;
             case "ESP32":
+            case "WebSocket":
                 controllers.push( new (require( "./controllers/led-esp32-controller" ))( numPixels[i], c.url ) );
                 break;
         }
@@ -298,6 +299,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             socket.on( 'getSettings', ( callback ) => {
                 let send = {
                     features,
+                    controllers: controllersConfig,
                     "homekit": config.get( 'homekit' ),
                     stripConfig,
                     buttonMap,
@@ -310,6 +312,10 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                     case "features":
                         features = data;
                         config.set( "features", features );
+                        break;
+                    case "controllers":
+                        controllersConfig = data;
+                        config.set( "controllers", controllersConfig );
                         break;
                     case "strips":
                         stripConfig = data;
