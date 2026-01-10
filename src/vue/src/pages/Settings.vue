@@ -95,22 +95,52 @@
         title="HomeKit Settings"
       >
         <div class="is-multiline bottomDivider">
-          <div v-for="config in systemConfig.homekit" :key="config.name">
-            <h3 class="title is-6 ml-2">{{ config.name }}</h3>
-            <div class="block ml-3 mb-0">
-              <p>Username: <span>{{ config.username }}</span></p>
-              <p>Pincode: <span class="ml-4">{{ config.pincode }}</span></p>
+          <div
+            v-for="(config, configIndex) in (systemConfig.homekit || [])"
+            :key="config.name || configIndex"
+            class="box mx-1 my-2"
+          >
+            <div class="level is-mobile mb-2">
+              <div class="level-left">
+                <div class="level-item">
+                  <h3 class="title is-6 mb-0">{{ config.name || `HomeKit Instance ${configIndex + 1}` }}</h3>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <button
+                    class="button is-small is-link"
+                    @click="openHomekitAccessoryModal(configIndex)"
+                  >
+                    Edit HomeKit Instance
+                  </button>
+                </div>
+                <div class="level-item">
+                  <button
+                    class="button is-small is-success"
+                    @click="openHomekitServiceModal(configIndex)"
+                  >
+                    Add Light
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="mx-1 my-2 columns">
+            <div class="block ml-3 mb-0">
+              <p>Username: <span>{{ config.username || 'Auto-generated' }}</span></p>
+              <p>Pincode: <span class="ml-4">{{ config.pincode || 'Auto-generated' }}</span></p>
+            </div>
+            <div class="mx-1 my-2 columns is-multiline">
               <div
-                v-for="(service, index) in config.services"
+                v-for="(service, index) in getHomekitServices(config)"
                 :key="service.subtype || index"
                 class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd"
               >
-                <div v-if="service.strips" class="card">
+                <div class="card">
                   <header class="card-header">
-                    <p class="card-header-title">{{ service.name }}</p>
-                    <div class="card-header-icon">Settings</div>
+                    <p class="card-header-title">
+                      {{ `${config.name || 'HomeKit Instance'}: ${service.name || `Light ${index + 1}`}` }}
+                    </p>
+                    <div class="card-header-icon">Light</div>
                   </header>
                   <div class="card-content">
                     <div class="content is-flex is-flex-wrap-wrap">
@@ -122,19 +152,21 @@
                         {{ strip.name }}
                       </span>
                     </div>
-                    <div class="content">
-                      <BaseCheckbox v-model="service.temperature" label="Temperature" />
-                    </div>
-                    <div class="content">
-                      <BaseCheckbox v-model="service.hueAndSat" label="Hue and Saturation" />
+                    <div class="content is-flex is-flex-wrap-wrap">
+                      <span v-if="service.temperature" class="tag is-warning is-light m-1">Temperature</span>
+                      <span v-if="serviceSupportsHueAndSat(service)" class="tag is-info is-light m-1">Hue & Saturation</span>
                     </div>
                   </div>
+                  <footer class="card-footer">
+                    <a class="card-footer-item" @click.prevent="openHomekitServiceModal(configIndex, index)">Edit</a>
+                  </footer>
                 </div>
               </div>
             </div>
+            <p v-if="!getHomekitServices(config).length" class="help ml-2">No lights yet.</p>
           </div>
         </div>
-        <button class="button is-success px-6 ml-4 mt-1">Add Accessory</button>
+        <button class="button is-success px-6 ml-4 mt-1" @click="openHomekitAccessoryModal()">Add HomeKit Instance</button>
         <button class="button is-link px-6 ml-4 mt-1" @click="saveHomekit">Save</button>
       </SettingsSection>
 
@@ -373,6 +405,76 @@
         />
       </div>
     </BasePopup>
+
+    <BasePopup
+      ref="homekitAccessoryModal"
+      :name="homekitAccessoryModalTitle"
+      save-text="Save changes"
+      save-color="success"
+    >
+      <div class="field">
+        <label class="label">HomeKit Instance Name</label>
+        <div class="control">
+          <BaseTextInput v-model="homekitAccessoryModal.name" />
+        </div>
+      </div>
+      <template #footer>
+        <button
+          v-if="editHomekitAccessoryIndex !== null && editHomekitAccessoryIndex !== undefined"
+          class="button is-danger"
+          @click="deleteHomekitAccessory"
+        >
+          Delete
+        </button>
+        <button class="button is-success" @click="submitHomekitAccessoryModal">Save changes</button>
+        <button class="button" @click="$refs.homekitAccessoryModal.internalClose()">Cancel</button>
+      </template>
+    </BasePopup>
+
+    <BasePopup
+      ref="homekitServiceModal"
+      :name="homekitServiceModalTitle"
+      save-text="Save changes"
+      save-color="success"
+    >
+      <div class="field">
+        <label class="label">Light Name</label>
+        <div class="control">
+          <BaseTextInput v-model="homekitServiceModal.name" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Strips</label>
+        <div class="control is-flex is-flex-wrap-wrap">
+          <BaseStripCheckbox
+            v-for="(strip, index) in stripConfig"
+            :key="`${strip.name}-${strip.controller}-${strip.controllerStripIndex}-${index}`"
+            :name="strip.name || `Strip ${index}`"
+            :model-value="homekitServiceModal.strips.includes(index)"
+            @update:modelValue="toggleHomekitStrip(index, $event)"
+          />
+          <p v-if="!stripConfig.length" class="help ml-1">No strips available.</p>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Capabilities</label>
+        <div class="control">
+          <BaseCheckbox v-model="homekitServiceModal.temperature" label="Temperature" />
+          <BaseCheckbox v-model="homekitServiceModal.hueAndSat" label="Hue & Saturation" />
+        </div>
+      </div>
+      <template #footer>
+        <button
+          v-if="editHomekitServiceIndex !== null && editHomekitServiceIndex !== undefined"
+          class="button is-danger"
+          @click="deleteHomekitService"
+        >
+          Delete
+        </button>
+        <button class="button is-success" @click="submitHomekitServiceModal">Save changes</button>
+        <button class="button" @click="$refs.homekitServiceModal.internalClose()">Cancel</button>
+      </template>
+    </BasePopup>
   </section>
 </template>
 
@@ -384,6 +486,7 @@ import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
 import BaseDropdown from '@/components/base/BaseDropdown.vue';
 import BaseNumberInput from '@/components/base/BaseNumberInput.vue';
 import BasePopup from '@/components/base/BasePopup.vue';
+import BaseStripCheckbox from '@/components/base/BaseStripCheckbox.vue';
 import BaseTextInput from '@/components/base/BaseTextInput.vue';
 import Option from '@/components/Option.vue';
 
@@ -394,6 +497,7 @@ export default {
     BaseDropdown,
     BaseNumberInput,
     BasePopup,
+    BaseStripCheckbox,
     BaseTextInput,
     Option,
     SettingsSideNav,
@@ -408,6 +512,9 @@ export default {
       matrixScripts: {},
       editStripIndex: null,
       editControllerIndex: null,
+      editHomekitAccessoryIndex: null,
+      editHomekitServiceIndex: null,
+      editHomekitServiceAccessoryIndex: null,
       stripModal: {
         name: "",
         length: 16,
@@ -427,6 +534,16 @@ export default {
         selected: "",
         options: [],
         existingValues: {}
+      },
+      homekitAccessoryModal: {
+        name: ""
+      },
+      homekitServiceModal: {
+        name: "",
+        strips: [],
+        temperature: false,
+        hueAndSat: false,
+        type: "light"
       },
       featureLabels: {
         homekit: "HomeKit",
@@ -573,6 +690,18 @@ export default {
       }
       const strip = this.stripConfig?.[this.modifierModal.stripIndex];
       return `Modifiers - ${ strip?.name || 'Strip' }`;
+    },
+    homekitAccessoryModalTitle() {
+      if ( this.editHomekitAccessoryIndex === null || this.editHomekitAccessoryIndex === undefined ) {
+        return "Add HomeKit Instance";
+      }
+      return `Edit HomeKit Instance #${ this.editHomekitAccessoryIndex }`;
+    },
+    homekitServiceModalTitle() {
+      if ( this.editHomekitServiceIndex === null || this.editHomekitServiceIndex === undefined ) {
+        return "Add Light";
+      }
+      return `Edit Light #${ this.editHomekitServiceIndex }`;
     },
     controllerOptions() {
       if ( !this.systemConfig?.controllers ) {
@@ -724,6 +853,177 @@ export default {
       if ( this.systemConfig?.homekit ) {
         this.saveKey( 'homekit', this.systemConfig.homekit );
       }
+    },
+    serviceSupportsHueAndSat( service ) {
+      return Boolean( service?.hueAndSat );
+    },
+    getHomekitServices( accessory ) {
+      if ( !accessory ) {
+        return [];
+      }
+      return accessory.services || [];
+    },
+    setHomekitServices( accessory, services ) {
+      accessory.services = services;
+    },
+    openHomekitAccessoryModal( index = null ) {
+      this.editHomekitAccessoryIndex = index;
+      const config = index !== null && index !== undefined
+        ? this.systemConfig?.homekit?.[index]
+        : null;
+      this.homekitAccessoryModal = {
+        name: config?.name || ""
+      };
+      this.$refs.homekitAccessoryModal.open()
+        .catch( () => {} );
+    },
+    saveHomekitAccessory() {
+      const name = this.homekitAccessoryModal.name?.trim();
+      if ( !name ) {
+        window.alert( "HomeKit instance name is required." );
+        return false;
+      }
+      if ( !this.systemConfig.homekit ) {
+        this.systemConfig.homekit = [];
+      }
+      const accessories = this.systemConfig.homekit.slice();
+      const index = this.editHomekitAccessoryIndex;
+      const isEdit = index !== null && index !== undefined;
+      const existing = isEdit ? accessories[index] : null;
+      const accessory = {
+        ...( existing || {} ),
+        name,
+        services: this.getHomekitServices( existing ).slice()
+      };
+      if ( isEdit ) {
+        accessories.splice( index, 1, accessory );
+      } else {
+        accessories.push( accessory );
+      }
+      this.systemConfig.homekit = accessories;
+      this.saveHomekit();
+      return true;
+    },
+    submitHomekitAccessoryModal() {
+      if ( this.saveHomekitAccessory() ) {
+        this.$refs.homekitAccessoryModal.internalClose();
+      }
+    },
+    deleteHomekitAccessory() {
+      const index = this.editHomekitAccessoryIndex;
+      if ( index === null || index === undefined ) {
+        return;
+      }
+      if ( !window.confirm( "Delete this HomeKit accessory?" ) ) {
+        return;
+      }
+      const accessories = ( this.systemConfig.homekit || [] ).slice();
+      accessories.splice( index, 1 );
+      this.systemConfig.homekit = accessories;
+      this.saveHomekit();
+      this.$refs.homekitAccessoryModal.internalClose();
+    },
+    openHomekitServiceModal( accessoryIndex, serviceIndex = null ) {
+      this.editHomekitServiceAccessoryIndex = accessoryIndex;
+      this.editHomekitServiceIndex = serviceIndex;
+      const accessory = this.systemConfig?.homekit?.[accessoryIndex];
+      if ( !accessory ) {
+        window.alert( "HomeKit instance not found." );
+        return;
+      }
+      const service = serviceIndex !== null && serviceIndex !== undefined
+        ? this.getHomekitServices( accessory )[serviceIndex]
+        : null;
+      this.homekitServiceModal = {
+        name: service?.name || "",
+        strips: Array.isArray( service?.strips ) ? service.strips.slice() : [],
+        temperature: Boolean( service?.temperature ),
+        hueAndSat: Boolean( service?.hueAndSat ),
+        type: service?.type || "light"
+      };
+      this.$refs.homekitServiceModal.open()
+        .catch( () => {} );
+    },
+    toggleHomekitStrip( stripIndex, enabled ) {
+      const strips = this.homekitServiceModal.strips.slice();
+      const index = strips.indexOf( stripIndex );
+      if ( enabled && index === -1 ) {
+        strips.push( stripIndex );
+      }
+      if ( !enabled && index !== -1 ) {
+        strips.splice( index, 1 );
+      }
+      this.homekitServiceModal.strips = strips;
+    },
+    saveHomekitService() {
+      const name = this.homekitServiceModal.name?.trim();
+      if ( !name ) {
+        window.alert( "Service name is required." );
+        return false;
+      }
+      const accessoryIndex = this.editHomekitServiceAccessoryIndex;
+      const accessory = this.systemConfig?.homekit?.[accessoryIndex];
+      if ( !accessory ) {
+        window.alert( "HomeKit instance not found." );
+        return false;
+      }
+      const services = this.getHomekitServices( accessory ).slice();
+      const strips = [ ...new Set( this.homekitServiceModal.strips.map( value => Number( value ) ) ) ]
+        .filter( value => Number.isFinite( value ) );
+      const temperature = Boolean( this.homekitServiceModal.temperature );
+      const hueAndSat = Boolean( this.homekitServiceModal.hueAndSat );
+      const index = this.editHomekitServiceIndex;
+      const isEdit = index !== null && index !== undefined;
+      const existing = isEdit ? services[index] : null;
+      const service = {
+        ...( existing || {} ),
+        name,
+        strips,
+        temperature,
+        hueAndSat,
+        type: existing?.type || this.homekitServiceModal.type || "light"
+      };
+      if ( service.hue ) {
+        delete service.hue;
+      }
+      if ( service.saturation ) {
+        delete service.saturation;
+      }
+      if ( isEdit ) {
+        services.splice( index, 1, service );
+      } else {
+        services.push( service );
+      }
+      this.setHomekitServices( accessory, services );
+      this.saveHomekit();
+      return true;
+    },
+    submitHomekitServiceModal() {
+      if ( this.saveHomekitService() ) {
+        this.$refs.homekitServiceModal.internalClose();
+      }
+    },
+    deleteHomekitService() {
+      const accessoryIndex = this.editHomekitServiceAccessoryIndex;
+      const serviceIndex = this.editHomekitServiceIndex;
+      if ( accessoryIndex === null || accessoryIndex === undefined ) {
+        return;
+      }
+      if ( serviceIndex === null || serviceIndex === undefined ) {
+        return;
+      }
+      if ( !window.confirm( "Delete this HomeKit service?" ) ) {
+        return;
+      }
+      const accessory = this.systemConfig?.homekit?.[accessoryIndex];
+      const services = this.getHomekitServices( accessory ).slice();
+      if ( !services.length ) {
+        return;
+      }
+      services.splice( serviceIndex, 1 );
+      this.setHomekitServices( accessory, services );
+      this.saveHomekit();
+      this.$refs.homekitServiceModal.internalClose();
     },
     saveKey( key, data ) {
       if ( this.socket ) {
@@ -987,11 +1287,21 @@ export default {
       this.saveKey( 'controllers', this.systemConfig.controllers );
     },
     stripsForService( service ) {
-      return service.strips
-        .map( index => ({
+      const strips = Array.isArray( service?.strips ) ? service.strips : [];
+      return strips.map( index => {
+        const strip = this.stripConfig?.[index];
+        if ( !strip ) {
+          return {
+            index,
+            name: `Strip ${ index }`,
+            type: "strip"
+          };
+        }
+        return {
           index,
-          ...this.stripConfig[index]
-        }) );
+          ...strip
+        };
+      } );
     },
     buttonStrips( config ) {
       const strips = ( config.strips || [] ).slice();

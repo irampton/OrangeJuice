@@ -119,7 +119,8 @@ module.exports = function ( config, setLEDs, { weatherData } ) {
         return lightService;
     }
 
-    config.services.forEach( v => {
+    const services = config.services || [];
+    services.forEach( v => {
         switch ( v.type ) {
             case "temperature sensor":
                 accessory.addService( createTemperatureSensor( v.name, v.subtype ) );
