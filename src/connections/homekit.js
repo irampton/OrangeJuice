@@ -150,7 +150,16 @@ module.exports = function ( config, setLEDs, { weatherData } ) {
 
     console.log( `Accessory setup finished on HomeKit accessory: ${ config.name }!\nHomeKit username: ${ config.username }\nHomeKit pin: ${ config.pincode }` );
 
-    return config
+    function destroy() {
+        try {
+            accessory.unpublish();
+        } catch ( err ) {
+            console.warn( `Failed to unpublish HomeKit accessory: ${ config.name }`, err );
+        }
+        accessory.removeAllListeners();
+    }
+
+    return { config, destroy };
 }
 
 function createConfig( state, brightness, special, strips ) {

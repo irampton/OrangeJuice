@@ -32,6 +32,7 @@ let controllerUpdates = [];
 let drawOnInterval = false;
 let drawTimeout = null;
 let drawOnTimeout = false;
+let homekitInstances = [];
 
 function buildStripConfig( controllersList ) {
     let strips = [];
@@ -214,7 +215,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             drawLEDs,
             writeConfigToStrips,
             reloadLEDScripts,
-            rebuildControllersAndStrips
+            rebuildControllersAndStrips,
+            setHomekitConfig: setupHomekit
         } );
     }
 
@@ -266,19 +268,35 @@ if ( features.gpioButtons ) {
     } );
 }
 
-//set up homekit
-if ( features.homekit ) {
-    const HomeKit = require( './connections/homekit.js' );
-    const homeKitConfig = config.get( "homekit" );
-    let rewrite = false;
-    homeKitConfig.forEach( ( cfg, i ) => {
-        new HomeKit( { number: i, ...cfg }, setLEDs, { weatherData } );
-        if ( !(cfg.username || cfg.pincode) ) {
-            rewrite = true;
-        }
-    } )
-    config.set( 'homekit', homeKitConfig );
+function destroyHomekitInstances() {
+    if ( !homekitInstances.length ) {
+        return;
+    }
+    homekitInstances.forEach( instance => {
+        instance?.destroy?.();
+    } );
+    homekitInstances = [];
 }
+
+function setupHomekit( homeKitConfig ) {
+    const nextConfig = homeKitConfig || [];
+    if ( !features.homekit ) {
+        config.set( 'homekit', nextConfig );
+        return nextConfig;
+    }
+    destroyHomekitInstances();
+    const HomeKit = require( './connections/homekit.js' );
+    const rebuiltConfig = nextConfig.map( ( cfg, i ) => {
+        const instance = new HomeKit( { number: i, ...cfg }, setLEDs, { weatherData } );
+        homekitInstances.push( instance );
+        return instance?.config ?? cfg;
+    } );
+    config.set( 'homekit', rebuiltConfig );
+    return rebuiltConfig;
+}
+
+//set up homekit
+setupHomekit( config.get( "homekit" ) );
 
 //set up matrix
 let matrixInterval;

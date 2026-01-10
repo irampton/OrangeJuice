@@ -23,7 +23,8 @@ function registerWebSockets( http, {
     drawLEDs,
     writeConfigToStrips,
     reloadLEDScripts,
-    rebuildControllersAndStrips
+    rebuildControllersAndStrips,
+    setHomekitConfig
 } ) {
     const { Server } = require( "socket.io" );
     const io = new Server( http );
@@ -164,7 +165,11 @@ function registerWebSockets( http, {
                     setControllersConfig( data );
                     break;
                 case "homekit":
-                    config.set( "homekit", data );
+                    if ( setHomekitConfig ) {
+                        setHomekitConfig( data );
+                    } else {
+                        config.set( "homekit", data );
+                    }
                     break;
             }
         } );
