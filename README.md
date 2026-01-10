@@ -4,9 +4,13 @@
 OrangeJuice designed run on a Raspberry Pi to control individually addressable RGB LEDs. 
 It uses a powerful system of strips, patterns, and effects to drive LED strips, strands, rings, and matrices.
 
+Documentation lives in [`docs`](./docs).
+
 ### Supported Platforms
 OrangeJuice uses the NPM module [`rpi-ws281x-native`](https://www.npmjs.com/package/rpi-ws281x-native) to write to any LEDs. 
 The module will __only__ work on a Raspberry Pi and supports the WS281x (sometimes called NEOPIXELs) standard. (Including WS2811, WS2812, WS2812b, SK6812, and SK6812W)
+
+GPIO controllers only work on Raspberry Pi hardware, but WebSocket controllers can be used from any PC to drive ESP32 (or similar) devices over the network.
 
 >A separate javascript file, [`script-tester.js`](src/led-scripts/testing/script-tester.js) can be used to run/test most OrangeJuice features on any platform.
 To support a different LED standard or microcontroller platform, [`led-pin-controller.js`](./src/led-pin-control.js) could be re-written to use a different library and no other changes would be needed.
@@ -16,11 +20,11 @@ To support a different LED standard or microcontroller platform, [`led-pin-contr
 * Install NodeJS (version 14 or newer) on your Raspberry Pi. (I recommend using [`n`](https://www.npmjs.com/package/n))
 * Clone this repository (or download just [`/src`](./src)) to your Raspberry Pi.
 * In `/src` run `npm install`
+* In `/src` run `npm run build:web` to generate the web UI.
 * Run `sudo node app.js` to start OrangeJuice.
 * Go to `<Raspberry Pi's IP/Hostname>:7974` in a web browser to access the web UI.
-
-OrangeJuice automatically creates one strip of 16 LEDs. 
-Use the settings on the control page to turn on those 16 LEDs, or go to the settings page and edit the strips to match your LED setup.
+* Add an LED strip with the settings page
+* Use the controls on the home page to turn on your lights!
 
 ## How it works
 
@@ -68,11 +72,8 @@ OrangeJuice integrates easily with Apple's HomeKit using [`hap-nodejs`](https://
 Set up is easy:
 
 * Turn on HomeKit in the settings webpage
-* ~~Add a strip (or set of strips) to the HomeKit Section~~*
-* Restart OrangeJuice
+* Add a strip (or set of strips) to the HomeKit Section of settings
 * Pair OrangeJuice to HomeKit using the username and pincode in the HomeKit section on the settings page
-
-*This feature is not fully implemented. Edit the config file manually instead.
 
 <sub>OrangeJuice is not an officially certified HomeKit accessory</sub>
 
@@ -82,7 +83,9 @@ Enable the feature and edit the appropriate parts of the config file to use.
 
 ### Matrix Display
 OrangeJuice support displaying numbers and text (like a clock) on a 32x8 LED matrix.
-Enable to feature and choose a display option to get started.
+Enable the feature in the config file to get started.
+
+Full documentation coming soon.
 
 ### Live Weather
 OrangeJuice can pull weather info from online or a temperature sensor connected to the GPIO to display on a matrix or use elsewhere.
