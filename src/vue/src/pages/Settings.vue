@@ -1055,7 +1055,7 @@ export default {
     }
   },
   created() {
-    this.socket = io( 'http://localhost:7974/' );
+    this.socket = io(window.location.origin);
     this.socket.on( 'connect', () => {
       this.socket.emit( 'getSettings', ( data ) => {
         this.systemConfig = data;

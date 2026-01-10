@@ -27,7 +27,10 @@ let currentLEDs = {
     "strips": []
 };
 let controllers = [];
+let controllerUpdates = [];
 let drawOnInterval = false;
+let drawTimeout = null;
+let drawOnTimeout = false;
 
 function buildStripConfig( controllersList ) {
     let strips = [];
@@ -107,6 +110,7 @@ function rebuildControllersAndStrips( controllersList, options = {} ) {
     numPixels = nextNumPixels;
     currentLEDs = nextCurrentLEDs;
     controllers = nextControllers;
+    controllerUpdates = new Array( nextControllers.length ).fill( true );
     clearInterval( drawOnInterval );
     drawOnInterval = false;
     drawLEDs();
@@ -579,9 +583,6 @@ function setLEDs( options ) {
 }
 
 //function that handles all writing to the LEDs
-let drawTimeout = null;
-let drawOnTimeout = false;
-
 function drawLEDs() {
     if ( drawTimeout ) {
         drawOnTimeout = true;
