@@ -1,21 +1,11 @@
 function registerWebAPIs( app, {
     setLEDs,
+    turnAllLightsOff,
     userPresets,
-    stripConfig,
 } ) {
     //web listeners
     app.get( '/lightsOff', ( req, res ) => {
-        const allStripIds = ( stripConfig || [] ).map( ( strip, index ) => index );
-        let options = {
-            "trigger": 'GET',
-            "pattern": 'off',
-            "patternOptions": {},
-            "effect": "",
-            "strips": allStripIds,
-            "transition": 'fade',
-            "transitionOptions": { "time": .7 }
-        }
-        setLEDs( options );
+        turnAllLightsOff();
         res.send( 'done' );
     } );
     //preset control (for shortcut)

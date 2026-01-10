@@ -48,6 +48,9 @@ function buildStripConfig( controllersList ) {
 
 function rebuildControllersAndStrips( controllersList, options = {} ) {
     const { exitOnFailure = false } = options;
+    if ( stripConfig.length ) {
+        turnAllLightsOff();
+    }
     const nextControllersConfig = controllersList || controllersConfig || [];
     const nextStripConfig = buildStripConfig( nextControllersConfig );
     const nextNumPixels = nextControllersConfig.map( controller => {
@@ -114,7 +117,11 @@ function rebuildControllersAndStrips( controllersList, options = {} ) {
     controllerUpdates = new Array( nextControllers.length ).fill( true );
     clearInterval( drawOnInterval );
     drawOnInterval = false;
-    drawLEDs();
+    if ( stripConfig.length ) {
+        turnAllLightsOff();
+    } else {
+        drawLEDs();
+    }
     return true;
 }
 
@@ -143,8 +150,8 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
         const registerWebAPIs = require( './connections/webAPIs' );
         registerWebAPIs( app, {
             setLEDs,
+            turnAllLightsOff,
             userPresets,
-            stripConfig,
         } );
     }
 
@@ -393,6 +400,23 @@ function setStripDefaults() {
             blankStrip( strip );
         }
     } )
+}
+
+function turnAllLightsOff() {
+    if ( !stripConfig.length ) {
+        return;
+    }
+    stripConfig.forEach( ( strip, stripIndex ) => {
+        controllerUpdates[strip.controller] = true;
+        writeConfigToStrips( stripIndex, {
+            "trigger": "system",
+            "pattern": "off",
+            "patternOptions": {},
+            "effect": "",
+            "effectOptions": {}
+        } );
+    } );
+    drawLEDs();
 }
 
 function setLEDs( options ) {
