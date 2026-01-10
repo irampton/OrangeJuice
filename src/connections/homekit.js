@@ -1,4 +1,4 @@
-const hap = require( "hap-nodejs" );
+const hap = require( "@homebridge/hap-nodejs" );
 module.exports = function ( config, setLEDs, { weatherData } ) {
     const Accessory = hap.Accessory;
     const Characteristic = hap.Characteristic;

@@ -1,6 +1,7 @@
 const DHT11 = require( 'node-dht-sensor' );
 const AHT20 = require( "aht20" );
-const request = require( "request" );
+const https = require( "https" );
+const { URL } = require( "url" );
 const cheerio = require( "cheerio" );
 
 
@@ -52,7 +53,11 @@ async function getIndoorData( weatherData ) {
 
 function getOutdoorData( weatherData ) {
     let url = "https://marvin.byu.edu/Weather/cgi-bin/textbritish";
-    request( url, function ( error, response, body ) {
+    fetchText( url, ( error, body ) => {
+        if ( error ) {
+            console.warn( "Failed to fetch weather data:", error.message );
+            return;
+        }
         //console.log('body:', body);
         const $ = cheerio.load( body );
         let path = $( 'td' );
@@ -78,5 +83,27 @@ function getOutdoorData( weatherData ) {
             heatIndexText: path[28].children[0].data,
             heatIndex: Number( path[28].children[0].data.match( /\d+/g )[0] )
         }
+    } );
+}
+
+function fetchText( url, callback ) {
+    const requestUrl = new URL( url );
+    const req = https.get( requestUrl, ( res ) => {
+        if ( res.statusCode !== 200 ) {
+            res.resume();
+            callback( new Error( `HTTP ${res.statusCode}` ) );
+            return;
+        }
+        res.setEncoding( "utf8" );
+        let data = "";
+        res.on( "data", ( chunk ) => {
+            data += chunk;
+        } );
+        res.on( "end", () => {
+            callback( null, data );
+        } );
+    } );
+    req.on( "error", ( error ) => {
+        callback( error );
     } );
 }
