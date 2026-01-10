@@ -8,19 +8,22 @@
       <a :class="['link headerText', menuOpen ? '' : 'noShow']">Live View</a>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
-      <a
-          :class="linkClass('home')"
-          @click.prevent="navigate('home')"
-      >Control</a>
+      <RouterLink
+          to="/"
+          :class="linkClass()"
+          active-class="is-underlined"
+          exact-active-class="is-underlined"
+      >Control</RouterLink>
     </p>
     <p :class="['level-item has-text-centered is-hidden-mobile', menuOpen ? '' : 'noMargin']">
       <a class="title is-size-3 brand py-4 is-disabled has-text-white-ter has-text-weight-semibold">OrangeJuice</a>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
-      <a
-          :class="linkClass('settings')"
-          @click.prevent="navigate('settings')"
-      >Settings</a>
+      <RouterLink
+          to="/settings"
+          :class="linkClass()"
+          active-class="is-underlined"
+      >Settings</RouterLink>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
       <a href="https://github.com/irampton/OrangeJuice" target="_blank" :class="['link headerText', menuOpen ? '' : 'noShow']">GitHub</a>
@@ -31,28 +34,18 @@
 <script>
 export default {
   name: "NavBar.vue",
-  props: {
-    currentPage: {
-      type: String,
-      default: ""
-    }
-  },
   data(){
     return {
       menuOpen: true
     }
   },
   methods: {
-    linkClass( page ) {
+    linkClass() {
       return [
         'link',
         'headerText',
-        this.menuOpen ? '' : 'noShow',
-        this.currentPage === page ? 'is-underlined' : ''
+        this.menuOpen ? '' : 'noShow'
       ];
-    },
-    navigate( page ) {
-      this.$emit( 'navigate', page );
     },
     toggleMenu() {
       this.menuOpen = !this.menuOpen;

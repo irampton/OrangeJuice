@@ -2,6 +2,7 @@ const config = require( './config-manager' );
 let ledScripts = require( "./led-scripts/led-scripts.js" );
 const matrixScripts = require( "./led-scripts/matrix-scripts.js" );
 const processSubgroups = require( "./subgroups.js" );
+const path = require( 'path' );
 
 //grab data from config
 let features = config.get( "features" );
@@ -132,8 +133,10 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
     const http = require( 'http' ).createServer( app );
     const port = 7974;
 
+    const webRoot = path.join( __dirname, 'vue/dist' );
+
     if ( features.hostWebControl ) {
-        app.use( express.static( 'vue/dist' ) );
+        app.use( express.static( webRoot ) );
     }
 
     if ( features.webAPIs ) {
@@ -221,6 +224,12 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 }
                 res.send( 'done' );
             } );
+        } );
+    }
+
+    if ( features.hostWebControl ) {
+        app.get( '*', ( req, res ) => {
+            res.sendFile( path.join( webRoot, 'index.html' ) );
         } );
     }
 

@@ -31,8 +31,6 @@ import PatternSelector from '@/components/PatternSelector.vue';
 import EffectSelector from '@/components/EffectSelector.vue';
 import StripList from '@/components/StripList.vue';
 import PresetSelector from "@/components/PresetSelector.vue";
-import { PAGES } from "@/mixins/CONSTANTS.js";
-
 export default {
   name: "Home",
   components: { PresetSelector, StripList, EffectSelector, PatternSelector },

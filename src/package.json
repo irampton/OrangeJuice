@@ -24,6 +24,7 @@
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vue": "^3.4.29",
+    "vue-router": "^4.5.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {

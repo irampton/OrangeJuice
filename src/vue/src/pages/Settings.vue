@@ -517,7 +517,7 @@ export default {
         gpioButtons: "Use GPIO buttons",
         gpioButtonsOnWeb: "Use button configs as web APIs",
         hostWebControl: "Host web control",
-        webAPIs: "Host web APIs",
+        webAPIs: "Enable REST APIs",
         ioStatsUpdate: "Listen for connected system stats",
         matrixDisplay: "Matrix display attached"
       },
