@@ -7,9 +7,9 @@ module.exports = {
     'options': [
         { 'id': "time", 'name': "Time", 'type': "number", 'default': 200 }
     ],
-    "Create": function ( colorArray, oldArr, options ) {
-        this.steps = Math.floor( options.time / 12 );
-        this.intervalTime = options.time / this.steps;
+    "Create": function ( colorArray, oldArr, options, MAX_FPS ) {
+        this.steps = Math.floor( MAX_FPS * options.time );
+        this.intervalTime = 1 / MAX_FPS * 1000;
         this.interval = null;
         this.oldRgb = oldArr.map( v => new Color( v, "hex" ) );
         this.rgb = colorArray.map( v => new Color( v, "hex" ) );

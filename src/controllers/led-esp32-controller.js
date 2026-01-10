@@ -42,9 +42,6 @@ module.exports = function ( numPixels, url ) {
     }
 
     this.updateLEDs = async ( arr ) => {
-        if ( arraysEqual( arr, this.previousArr ) ) {
-            return;
-        }
         try {
             await ensureConnection();
 
@@ -65,12 +62,4 @@ module.exports = function ( numPixels, url ) {
 
     // Initial connection
     connect().catch( err => console.error( `Initial connection to WebSocket @${this.url} failed` ) );
-}
-
-function arraysEqual( arr1, arr2 ) {
-    if ( arr1.length !== arr2.length ) return false;
-    for ( let i = 0; i < arr1.length; i++ ) {
-        if ( arr1[i] !== arr2[i] ) return false;
-    }
-    return true;
 }

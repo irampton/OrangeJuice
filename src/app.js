@@ -1,7 +1,7 @@
 const config = require( './config-manager' );
 let ledScripts = require( "./led-scripts/led-scripts.js" );
 const matrixScripts = require( "./led-scripts/matrix-scripts.js" );
-const processSubgroups = require("./subgroups.js");
+const processSubgroups = require( "./subgroups.js" );
 
 //grab data from config
 let features = config.get( "features" );
@@ -12,6 +12,8 @@ let disconnectConfigs = config.get( 'disconnectConfigs' );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
+
+const MAX_FPS = 48;
 
 //general
 let globalMatrixBrightness = 20;
@@ -141,7 +143,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 "effectOptions": { "reverse": true, "speed": 1 },
                 "strips": [1],
                 //"transition": 'fade',
-                "transitionOptions": { "time": 25 }
+                "transitionOptions": { "time": .7 }
             }
             setLEDs( options );
             res.send( 'done' );
@@ -154,7 +156,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 "effect": "",
                 "strips": [0, 1],
                 "transition": 'fade',
-                "transitionOptions": { "time": 25 }
+                "transitionOptions": { "time": .7 }
             }
             setLEDs( options );
             res.send( 'done' );
@@ -206,7 +208,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                         "effectOptions": config?.effectOptions,
                         "strips": config?.strips,
                         //"transition": 'fade',
-                        //"transitionOptions": {"time": 25}
+                        //"transitionOptions": {"time": .7}
                     }
                     setLEDs( options );
                 }
@@ -400,7 +402,7 @@ if ( features.gpioButtons ) {
                     "effectOptions": config?.effectOptions,
                     "strips": config?.strips,
                     //"transition": 'fade',
-                    //"transitionOptions": {"time": 25}
+                    //"transitionOptions": {"time": .7}
                 }
                 setLEDs( options );
             }
@@ -445,8 +447,6 @@ if ( features.matrixDisplay ) {
     }, 500 );
 }
 
-//helper functions
-
 function newLEDarr( size, color ) {
     let arr = [];
     for ( let i = 0; i < size; i++ ) {
@@ -462,6 +462,7 @@ function clearAppConfigs( noClear ) {
             clearInterval( strip.effectTimout );
             clearInterval( strip.transitionInterval );
             clearTimeout( strip.transitionTimeout );
+            controllerUpdates[stripConfig[index].controller] = true;
             currentLEDs.strips[index] = blankStrip( strip );
         }
     } )
@@ -514,14 +515,13 @@ function writeConfigToStrips( stripIndex, options ) {
     if ( options.transition ) {
         let newColorArr = currentLEDs.strips[stripIndex].arr;
         currentLEDs.strips[stripIndex].arr = oldColorArr;
-        currentLEDs.strips[stripIndex].transition = new ledScripts.transitions[options.transition].Create( newColorArr, oldColorArr, options.transitionOptions );
+        currentLEDs.strips[stripIndex].transition = new ledScripts.transitions[options.transition].Create( newColorArr, oldColorArr, options.transitionOptions, MAX_FPS );
         currentLEDs.strips[stripIndex].transition.interval = setInterval( () => {
             if ( currentLEDs.strips[stripIndex].transition ) {
                 currentLEDs.strips[stripIndex].transition.step( ( arr ) => {
                     currentLEDs.strips[stripIndex].arr = arr;
-                    if ( !drawOnInterval ) {
-                        drawLEDs();
-                    }
+                    controllerUpdates[stripConfig[stripIndex].controller] = true;
+                    drawLEDs();
                 } )
             }
         }, currentLEDs.strips[stripIndex].transition.intervalTime );
@@ -543,24 +543,10 @@ function writeConfigToStrips( stripIndex, options ) {
         currentLEDs.strips[stripIndex].effectTimout = setInterval( () => {
             currentLEDs.strips[stripIndex].effect.step( ( arr ) => {
                 currentLEDs.strips[stripIndex].arr = arr;
-                if ( !drawOnInterval ) {
-                    drawLEDs();
-                }
+                controllerUpdates[stripConfig[stripIndex].controller] = true;
+                drawLEDs();
             } )
         }, currentLEDs.strips[stripIndex].effect.interval );
-    }
-
-    //figure out how many effects are being run, and if needed, switch to interval drawing
-    const effectsList = currentLEDs.strips.filter( e => e.effect.interval < 500 );
-    if ( effectsList.length >= 2 ) {
-        if ( !drawOnInterval ) {
-            drawOnInterval = setInterval( () => {
-                drawLEDs()
-            }, 1000 / 24 ); // 24 times a second
-        }
-    } else {
-        clearInterval( drawOnInterval );
-        drawOnInterval = false;
     }
 }
 
@@ -585,6 +571,7 @@ function setLEDs( options ) {
         if ( options.trigger === "default" ) {
             currentLEDs.strips[stripIndex].default = options;
         }
+        controllerUpdates[stripConfig[stripIndex].controller] = true;
         writeConfigToStrips( stripIndex, options );
     } );
     //after all the strips are set, draw the colors to the strip
@@ -592,22 +579,38 @@ function setLEDs( options ) {
 }
 
 //function that handles all writing to the LEDs
+let drawTimeout = null;
+let drawOnTimeout = false;
+
 function drawLEDs() {
+    if ( drawTimeout ) {
+        drawOnTimeout = true;
+        return;
+    }
+    drawTimeout = setTimeout( () => {
+        drawTimeout = null;
+        if(drawOnTimeout){
+            drawOnTimeout = false;
+            drawLEDs();
+        }
+    }, 1000 / MAX_FPS ) // don't draw more than MAX_FPS times a second
     let arr = new Array( controllers.length ).fill( 0 ).map( e => [] );
     currentLEDs.strips.forEach( strip => {
         let tempArr = strip.arr;
         if ( stripConfig[strip.id].modifier ) {
             tempArr = ledScripts.modifiers[stripConfig[strip.id].modifier].modify( strip.arr, stripConfig[strip.id].modifierOptions );
         }
-        if (stripConfig[strip.id].subgroups){
-            tempArr = processSubgroups(tempArr, stripConfig[strip.id]);
+        if ( stripConfig[strip.id].subgroups ) {
+            tempArr = processSubgroups( tempArr, stripConfig[strip.id] );
         }
         for ( let i = 0; i < stripConfig[strip.id].length; i++ ) {
             arr[strip.controller].push( tempArr[i] );
         }
     } );
     controllers.forEach( ( c, i ) => {
-        c.updateLEDs( arr[i] );
+        if ( controllerUpdates[i] ) {
+            c.updateLEDs( arr[i] );
+        }
     } );
 }
 
