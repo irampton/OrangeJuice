@@ -31,12 +31,14 @@ import PatternSelector from '@/components/PatternSelector.vue';
 import EffectSelector from '@/components/EffectSelector.vue';
 import StripList from '@/components/StripList.vue';
 import PresetSelector from "@/components/PresetSelector.vue";
+import { getSocket } from "@/socket";
 export default {
   name: "Home",
   components: { PresetSelector, StripList, EffectSelector, PatternSelector },
   data() {
     return {
       socket: undefined,
+      socketConnectHandler: undefined,
       ledScripts: {},
       ledStripConfig: [],
       selectedPattern: {},
@@ -64,15 +66,24 @@ export default {
     }
   },
   created() {
-    this.socket = io(window.location.origin);
-    this.socket.on( 'connect', () => {
+    this.socket = getSocket();
+    this.socketConnectHandler = () => {
       this.socket.emit( 'getLEDScripts', ( data ) => {
         this.ledScripts = data;
       } );
       this.socket.emit( 'getStripConfig', ( data ) => {
         this.ledStripConfig = data;
       } );
-    } );
+    };
+    this.socket.on( 'connect', this.socketConnectHandler );
+    if( this.socket.connected ) {
+      this.socketConnectHandler();
+    }
+  },
+  beforeUnmount() {
+    if( this.socket && this.socketConnectHandler ) {
+      this.socket.off( 'connect', this.socketConnectHandler );
+    }
   }
 }
 </script>

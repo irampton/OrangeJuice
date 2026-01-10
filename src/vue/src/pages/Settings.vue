@@ -454,6 +454,7 @@ import BasePopup from '@/components/base/BasePopup.vue';
 import BaseStripCheckbox from '@/components/base/BaseStripCheckbox.vue';
 import BaseTextInput from '@/components/base/BaseTextInput.vue';
 import Option from '@/components/Option.vue';
+import { getSocket } from "@/socket";
 
 export default {
   name: "Settings",
@@ -472,6 +473,7 @@ export default {
   data() {
     return {
       socket: undefined,
+      socketConnectHandler: undefined,
       systemConfig: null,
       ledScripts: {},
       matrixScripts: {},
@@ -1349,8 +1351,8 @@ export default {
     }
   },
   created() {
-    this.socket = io( window.location.origin );
-    this.socket.on( 'connect', () => {
+    this.socket = getSocket();
+    this.socketConnectHandler = () => {
       this.socket.emit( 'getSettings', ( data ) => {
         this.systemConfig = data;
         this.socket.emit( 'getLEDScripts', ( scripts ) => {
@@ -1362,7 +1364,16 @@ export default {
           }
         } );
       } );
-    } );
+    };
+    this.socket.on( 'connect', this.socketConnectHandler );
+    if( this.socket.connected ) {
+      this.socketConnectHandler();
+    }
+  },
+  beforeUnmount() {
+    if( this.socket && this.socketConnectHandler ) {
+      this.socket.off( 'connect', this.socketConnectHandler );
+    }
   }
 }
 </script>
