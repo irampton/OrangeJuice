@@ -149,6 +149,8 @@ function display( preset ) {
         return;
     }
     config.trigger = 'website';
+    //config.transition = 'fade';
+    //config.transitionOptions = { "time": .7 };
     socket.emit( 'setLEDs', config );
 }
 

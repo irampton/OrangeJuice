@@ -162,8 +162,8 @@ function createConfig( state, brightness, special, strips ) {
                     "patternOptions": { "kelvin": special.temp, "brightness": brightness },
                     "effect": "",
                     "strips": strips,
-                    //"transition": 'fade',
-                    "transitionOptions": { "time": 25 }
+                    "transition": 'fade',
+                    "transitionOptions": { "time": .7 }
                 }
             case 'hsl':
                 return {
@@ -177,8 +177,8 @@ function createConfig( state, brightness, special, strips ) {
                     },
                     "effect": "",
                     "strips": strips,
-                    //"transition": 'fade',
-                    "transitionOptions": { "time": 25 }
+                    "transition": 'fade',
+                    "transitionOptions": { "time": .7 }
                 }
             case 'none':
                 return {
@@ -187,8 +187,8 @@ function createConfig( state, brightness, special, strips ) {
                     "patternOptions": { "kelvin": "3200", "brightness": brightness },
                     "effect": "",
                     "strips": strips,
-                    //"transition": 'fade',
-                    "transitionOptions": { "time": 25 }
+                    "transition": 'fade',
+                    "transitionOptions": { "time": .7 }
                 }
         }
 
@@ -200,7 +200,7 @@ function createConfig( state, brightness, special, strips ) {
         "effect": "",
         "strips": strips,
         "transition": 'fade',
-        "transitionOptions": { "time": 100 }
+        "transitionOptions": { "time": .7 }
     }
 }
 

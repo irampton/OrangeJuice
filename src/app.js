@@ -13,6 +13,8 @@ const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
 
+const MAX_FPS = 48;
+
 //general
 let globalMatrixBrightness = 20;
 let connectedSystemStats = { "cpu": "100" };
@@ -104,7 +106,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 "effectOptions": { "reverse": true, "speed": 1 },
                 "strips": [1],
                 //"transition": 'fade',
-                "transitionOptions": { "time": 25 }
+                "transitionOptions": { "time": .7 }
             }
             setLEDs( options );
             res.send( 'done' );
@@ -117,7 +119,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                 "effect": "",
                 "strips": [0, 1],
                 "transition": 'fade',
-                "transitionOptions": { "time": 25 }
+                "transitionOptions": { "time": .7 }
             }
             setLEDs( options );
             res.send( 'done' );
@@ -169,7 +171,7 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
                         "effectOptions": config?.effectOptions,
                         "strips": config?.strips,
                         //"transition": 'fade',
-                        //"transitionOptions": {"time": 25}
+                        //"transitionOptions": {"time": .7}
                     }
                     setLEDs( options );
                 }
@@ -359,7 +361,7 @@ if ( features.gpioButtons ) {
                     "effectOptions": config?.effectOptions,
                     "strips": config?.strips,
                     //"transition": 'fade',
-                    //"transitionOptions": {"time": 25}
+                    //"transitionOptions": {"time": .7}
                 }
                 setLEDs( options );
             }
@@ -472,7 +474,7 @@ function writeConfigToStrips( stripIndex, options ) {
     if ( options.transition ) {
         let newColorArr = currentLEDs.strips[stripIndex].arr;
         currentLEDs.strips[stripIndex].arr = oldColorArr;
-        currentLEDs.strips[stripIndex].transition = new ledScripts.transitions[options.transition].Create( newColorArr, oldColorArr, options.transitionOptions );
+        currentLEDs.strips[stripIndex].transition = new ledScripts.transitions[options.transition].Create( newColorArr, oldColorArr, options.transitionOptions, MAX_FPS );
         currentLEDs.strips[stripIndex].transition.interval = setInterval( () => {
             if ( currentLEDs.strips[stripIndex].transition ) {
                 currentLEDs.strips[stripIndex].transition.step( ( arr ) => {
@@ -550,7 +552,7 @@ function drawLEDs() {
             drawOnTimeout = false;
             drawLEDs();
         }
-    }, 1000 / 30 ) // don't draw more than 30 times a second
+    }, 1000 / MAX_FPS ) // don't draw more than MAX_FPS times a second
     let arr = new Array( controllers.length ).fill( 0 ).map( e => [] );
     currentLEDs.strips.forEach( strip => {
         let tempArr = strip.arr;
