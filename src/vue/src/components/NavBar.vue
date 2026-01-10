@@ -5,7 +5,11 @@
          @click="toggleMenu">OrangeJuice</a>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
-      <a :class="['link headerText', menuOpen ? '' : 'noShow']">Live View</a>
+      <RouterLink
+          to="/live-view"
+          :class="linkClass()"
+          active-class="is-underlined"
+      >Live View</RouterLink>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
       <RouterLink

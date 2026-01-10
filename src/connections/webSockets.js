@@ -24,10 +24,18 @@ function registerWebSockets( http, {
     writeConfigToStrips,
     reloadLEDScripts,
     rebuildControllersAndStrips,
-    setHomekitConfig
+    setHomekitConfig,
+    setLiveViewEnabled,
+    setLiveViewEmitter
 } ) {
     const { Server } = require( "socket.io" );
     const io = new Server( http );
+
+    if ( setLiveViewEmitter ) {
+        setLiveViewEmitter( ( payload ) => {
+            io.emit( 'liveViewUpdate', payload );
+        } );
+    }
 
     io.on( 'connection', function ( socket ) {
         console.log( 'a user connected' );
@@ -152,6 +160,11 @@ function registerWebSockets( http, {
                 displayMatrix
             };
             callback( send );
+        } );
+        socket.on( 'enableLiveView', () => {
+            if ( setLiveViewEnabled ) {
+                setLiveViewEnabled();
+            }
         } );
         socket.on( 'setSettings', ( item, data ) => {
             switch ( item ) {

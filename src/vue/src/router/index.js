@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import Home from '@/pages/Home.vue';
 import Settings from '@/pages/Settings.vue';
+import LiveView from '@/pages/LiveView.vue';
 
 const routes = [
   {
@@ -13,6 +14,11 @@ const routes = [
     path: '/settings',
     name: 'settings',
     component: Settings
+  },
+  {
+    path: '/live-view',
+    name: 'live-view',
+    component: LiveView
   }
 ];
 

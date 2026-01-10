@@ -33,6 +33,23 @@ let drawOnInterval = false;
 let drawTimeout = null;
 let drawOnTimeout = false;
 let homekitInstances = [];
+let enableLiveView = false;
+let liveViewTimeout = null;
+let emitLiveViewUpdate = null;
+
+function setLiveViewEnabled() {
+    enableLiveView = true;
+    if ( liveViewTimeout ) {
+        clearTimeout( liveViewTimeout );
+    }
+    liveViewTimeout = setTimeout( () => {
+        enableLiveView = false;
+    }, 10000 );
+}
+
+function setLiveViewEmitter( emitter ) {
+    emitLiveViewUpdate = emitter;
+}
 
 function buildStripConfig( controllersList ) {
     let strips = [];
@@ -216,7 +233,9 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
             writeConfigToStrips,
             reloadLEDScripts,
             rebuildControllersAndStrips,
-            setHomekitConfig: setupHomekit
+            setHomekitConfig: setupHomekit,
+            setLiveViewEnabled,
+            setLiveViewEmitter
         } );
     }
 
@@ -484,6 +503,12 @@ function drawLEDs() {
     controllers.forEach( ( c, i ) => {
         if ( controllerUpdates[i] ) {
             c.updateLEDs( arr[i] );
+            if ( enableLiveView && emitLiveViewUpdate ) {
+                emitLiveViewUpdate( {
+                    controllerIndex: i,
+                    colors: arr[i]
+                } );
+            }
         }
     } );
 }
