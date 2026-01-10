@@ -2,11 +2,12 @@ const config = require( './config-manager' );
 let ledScripts = require( "./led-scripts/led-scripts.js" );
 const matrixScripts = require( "./led-scripts/matrix-scripts.js" );
 const processSubgroups = require( "./subgroups.js" );
+const path = require( 'path' );
 
 //grab data from config
 let features = config.get( "features" );
-let controllersConfig = config.get( "controllers" );
-let stripConfig = config.get( "strips" );
+let controllersConfig = config.get( "controllers" ) || [];
+let stripConfig = [];
 const buttonMap = config.get( 'buttonConfigs' );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
 const displayMatrix = config.get( "displayMatrix" );
@@ -22,61 +23,127 @@ let weatherData = {
     "indoor": {},
     "outdoor": {}
 };
-let numPixels = new Array( controllersConfig.length ).fill( 0 );
+let numPixels = [];
 let currentLEDs = {
     "strips": []
 };
-stripConfig.forEach( ( strip, index ) => {
-    numPixels[strip.controller] += strip.length;
-    currentLEDs.strips.push( blankStrip( {
-        "id": index,
-        "name": strip.name,
-        "length": strip.length,
-        "controller": strip.controller
-    } ) );
-} );
-
 let controllers = [];
-let controllerUpdates = new Array( controllersConfig.length ).fill( false );
-//set up controllers
-try {
-    let setGPIO = false;
-    controllersConfig.forEach( ( c, i ) => {
-        //only 2 GPIO pins can be used at a time.
-        switch ( c.type ) {
-            case "GPIO":
-                if ( setGPIO === "next" ) {
-                    setGPIO = true;
-                } else if ( setGPIO ) {
-                    throw "Only 2 GPIO pins can be used. They must be next to each other in the config file.";
-                } else {
-                    let arr = [
-                        {
-                            numPixels: numPixels[i],
-                            pin: c.pin
-                        }
-                    ]
-                    if ( controllersConfig[i + 1]?.type === "GPIO" ) {
-                        setGPIO = "next";
-                        arr.push( {
-                            numPixels: numPixels[i + 1],
-                            pin: controllersConfig[i + 1].pin
-                        } );
-                    } else {
-                        setGPIO = true;
-                    }
-                    controllers.push( ...new (require( "./controllers/led-pin-controller" ))( arr ) );
-                }
-                break;
-            case "ESP32":
-                controllers.push( new (require( "./controllers/led-esp32-controller" ))( numPixels[i], c.url ) );
-                break;
-        }
-    } );
-} catch ( e ) {
-    console.error( `Failed to initialize LED controllers: ${e}` );
-    process.exit( 1 );
+let controllerUpdates = [];
+let drawOnInterval = false;
+let drawTimeout = null;
+let drawOnTimeout = false;
+let homekitInstances = [];
+let enableLiveView = false;
+let liveViewTimeout = null;
+let emitLiveViewUpdate = null;
+
+function setLiveViewEnabled() {
+    enableLiveView = true;
+    if ( liveViewTimeout ) {
+        clearTimeout( liveViewTimeout );
+    }
+    liveViewTimeout = setTimeout( () => {
+        enableLiveView = false;
+    }, 10000 );
 }
+
+function setLiveViewEmitter( emitter ) {
+    emitLiveViewUpdate = emitter;
+}
+
+function buildStripConfig( controllersList ) {
+    let strips = [];
+    controllersList.forEach( ( controller, controllerIndex ) => {
+        ( controller.strips || [] ).forEach( ( strip ) => {
+            strips.push( {
+                ...strip,
+                controller: controllerIndex
+            } );
+        } );
+    } );
+    return strips;
+}
+
+function rebuildControllersAndStrips( controllersList, options = {} ) {
+    const { exitOnFailure = false } = options;
+    if ( stripConfig.length ) {
+        turnAllLightsOff();
+    }
+    const nextControllersConfig = controllersList || controllersConfig || [];
+    const nextStripConfig = buildStripConfig( nextControllersConfig );
+    const nextNumPixels = nextControllersConfig.map( controller => {
+        return ( controller.strips || [] ).reduce( ( total, strip ) => total + ( strip.length || 0 ), 0 );
+    } );
+    const nextCurrentLEDs = {
+        "strips": nextStripConfig.map( ( strip, index ) => blankStrip( {
+            "id": index,
+            "name": strip.name,
+            "length": strip.length,
+            "controller": strip.controller
+        } ) )
+    };
+    const nextControllers = [];
+    try {
+        let setGPIO = false;
+        nextControllersConfig.forEach( ( c, i ) => {
+            //only 2 GPIO pins can be used at a time.
+            switch ( c.type ) {
+                case "GPIO":
+                    if ( setGPIO === "next" ) {
+                        setGPIO = true;
+                    } else if ( setGPIO ) {
+                        throw "Only 2 GPIO pins can be used. They must be next to each other in the config file.";
+                    } else {
+                        let arr = [
+                            {
+                                numPixels: nextNumPixels[i],
+                                pin: c.pin
+                            }
+                        ]
+                        if ( nextControllersConfig[i + 1]?.type === "GPIO" ) {
+                            setGPIO = "next";
+                            arr.push( {
+                                numPixels: nextNumPixels[i + 1],
+                                pin: nextControllersConfig[i + 1].pin
+                            } );
+                        } else {
+                            setGPIO = true;
+                        }
+                        nextControllers.push( ...new (require( "./controllers/led-pin-controller" ))( arr ) );
+                    }
+                    break;
+                case "WebSocket":
+                    nextControllers.push( new (require( "./controllers/led-esp32-controller" ))( nextNumPixels[i], c.url ) );
+                    break;
+                case "Mock":
+                    nextControllers.push( ...new (require( "./controllers/led-mock-controller" ))( nextNumPixels[i] ) );
+                    break;
+            }
+        } );
+    } catch ( e ) {
+        console.error( `Failed to initialize LED controllers: ${e}` );
+        if ( exitOnFailure ) {
+            process.exit( 1 );
+        }
+        return false;
+    }
+    controllersConfig = nextControllersConfig;
+    stripConfig = nextStripConfig;
+    numPixels = nextNumPixels;
+    currentLEDs = nextCurrentLEDs;
+    controllers = nextControllers;
+    controllerUpdates = new Array( nextControllers.length ).fill( true );
+    clearInterval( drawOnInterval );
+    drawOnInterval = false;
+    if ( stripConfig.length ) {
+        turnAllLightsOff();
+    } else {
+        drawLEDs();
+    }
+    return true;
+}
+
+rebuildControllersAndStrips( controllersConfig, { exitOnFailure: true } );
 
 //catch all errors
 process.on( 'uncaughtException', function ( err ) {
@@ -91,71 +158,19 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
     const http = require( 'http' ).createServer( app );
     const port = 7974;
 
+    const webRoot = path.join( __dirname, 'vue/dist' );
+
     if ( features.hostWebControl ) {
-        app.use( express.static( 'web' ) );
+        app.use( express.static( webRoot ) );
     }
 
     if ( features.webAPIs ) {
-        //web listeners
-        app.get( '/rainbowMode', ( req, res ) => {
-            let options = {
-                "trigger": 'GET',
-                "pattern": 'rainbow',
-                "patternOptions": { "multiplier": 1 },
-                "effect": "chase",
-                "effectOptions": { "reverse": true, "speed": 1 },
-                "strips": [1],
-                //"transition": 'fade',
-                "transitionOptions": { "time": .7 }
-            }
-            setLEDs( options );
-            res.send( 'done' );
+        const registerWebAPIs = require( './connections/webAPIs' );
+        registerWebAPIs( app, {
+            setLEDs,
+            turnAllLightsOff,
+            userPresets,
         } );
-        app.get( '/lightsOff', ( req, res ) => {
-            let options = {
-                "trigger": 'GET',
-                "pattern": 'off',
-                "patternOptions": {},
-                "effect": "",
-                "strips": [0, 1],
-                "transition": 'fade',
-                "transitionOptions": { "time": .7 }
-            }
-            setLEDs( options );
-            res.send( 'done' );
-        } );
-        //preset control (for shortcut)
-        app.get( '/presets', ( req, res ) => {
-            res.send( userPresets.map( p => p.name ) );
-        } );
-        app.get( '/setPreset', ( req, res ) => {
-            let name = req.headers?.preset || req.query?.preset;
-            try {
-                let preset = structuredClone( userPresets.find( p => p.name === name ) );
-                preset.trigger = "webAPI";
-                setLEDs( preset );
-                res.send( 'done' );
-            } catch ( e ) {
-                res.status( 400 ).send( "Preset not found" );
-            }
-        } );
-
-        if ( features.matrixDisplay ) {
-            app.get( '/matrixOff', ( req, res ) => {
-                let options = {
-                    "id": "off"
-                }
-                changeMatrix( options );
-                res.send( 'done' );
-            } );
-            app.get( '/matrixOn', ( req, res ) => {
-                let options = {
-                    "id": "tempe"
-                }
-                changeMatrix( { 'id': displayMatrix.default } );
-                res.send( 'done' );
-            } );
-        }
     }
 
     //set the button config to also have a web api
@@ -183,155 +198,44 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
         } );
     }
 
+    if ( features.hostWebControl ) {
+        app.get( '*', ( req, res ) => {
+            res.sendFile( path.join( webRoot, 'index.html' ) );
+        } );
+    }
+
     //websockets
     if ( features.hostWebControl || features.ioStatsUpdate ) {
-        const { Server } = require( "socket.io" );
-        const io = new Server( http );
-
-        io.on( 'connection', function ( socket ) {
-            console.log( 'a user connected' );
-            socket.on( 'disconnect', function () {
-                console.log( 'user disconnected' );
-                disconnectConfigs.forEach( ( config ) => {
-                    config.strips.forEach( ( stripIndex ) => {
-                        writeConfigToStrips( stripIndex, config );
-                    } );
-                    drawLEDs();
-                } )
-            } );
-
-            //new actually good stuff
-            socket.on( 'getStripConfig', ( callback ) => {
-                callback( stripConfig );
-            } );
-            socket.on( 'getScripts', ( callback ) => {
-                let scriptsList = {
-                    "patterns": [],
-                    "effects": []
-                };
-                ledScripts.patterns.list.forEach( ( value ) => {
-                    scriptsList.patterns.push( {
-                        'name': ledScripts.patterns[value].name,
-                        'id': ledScripts.patterns[value].id,
-                        'options': ledScripts.patterns[value].options
-                    } );
-                } );
-                ledScripts.effects.list.forEach( ( value ) => {
-                    scriptsList.effects.push( {
-                        'name': ledScripts.effects[value].name,
-                        'id': ledScripts.effects[value].id,
-                        'options': ledScripts.effects[value].options
-                    } );
-                } );
-                callback( scriptsList );
-            } );
-            socket.on( 'getLEDScripts', ( callback ) => {
-                callback( ledScripts );
-            } );
-            socket.on( 'getMatrixScripts', ( callback ) => {
-                callback( matrixScripts );
-            } );
-            socket.on( 'setLEDs', ( options ) => {
-                setLEDs( options );
-            } );
-            socket.on( 'setMatrix', ( options ) => {
-                changeMatrix( options );
-            } );
-            socket.on( 'clearAppConfigs', () => {
-                clearAppConfigs();
-                setStripDefaults();
-                drawLEDs();
-            } );
-            socket.on( 'disconnectConfig', ( method, data ) => {
-                switch ( method ) {
-                    case "replace":
-                        disconnectConfigs = data;
-                        config.set( 'disconnectConfigs', data );
-                        break;
-                    case "add":
-                        disconnectConfigs.push( data );
-                        config.set( 'disconnectConfigs', disconnectConfigs );
-                        break;
-                    case "remove":
-                        disconnectConfigs.splice( disconnectConfigs.findIndex( ( v ) => v.id = data ), 1 );
-                        config.set( 'disconnectConfigs', disconnectConfigs );
-                        break;
-                }
-            } );
-            socket.on( 'statsUpdate', ( data ) => {
-                connectedSystemStats = data;
-            } );
-            socket.on( 'startDemo', ( data ) => {
-                socket.broadcast.emit( 'startDemo' );
-            } );
-            socket.on( 'pauseDemo', ( data ) => {
-                socket.broadcast.emit( 'pauseDemo' );
-            } );
-            socket.on( 'editStripGroup', ( method, data ) => {
-                switch ( method ) {
-                    case "add":
-                        scriptGroups.push( data );
-                        break;
-                    case "remove":
-                        scriptGroups.splice( data, 1 );
-                        break;
-                }
-                config.set( 'scriptGroups', scriptGroups );
-            } );
-            socket.on( 'getStripGroups', ( callback ) => {
-                callback( scriptGroups );
-            } );
-            socket.on( 'editPresets', ( method, ledConfig, index ) => {
-                switch ( method ) {
-                    case "add":
-                        userPresets.push( ledConfig );
-                        break;
-                    case "remove":
-                        userPresets.splice( index, 1 );
-                        break;
-                    case "update":
-                        userPresets[index] = ledConfig;
-                        break;
-                }
-                config.set( 'userPresets', userPresets );
-            } );
-            socket.on( 'getPresets', ( callback ) => {
-                callback( userPresets );
-            } );
-            socket.on( 'getSettings', ( callback ) => {
-                let send = {
-                    features,
-                    "homekit": config.get( 'homekit' ),
-                    stripConfig,
-                    buttonMap,
-                    displayMatrix
-                };
-                callback( send );
-            } );
-            socket.on( 'setSettings', ( item, data ) => {
-                switch ( item ) {
-                    case "strips":
-                        stripConfig = data;
-                        config.set( "strips", stripConfig );
-                        break;
-                    case "homekit":
-                        config.set( "homekit", data );
-                        break;
-                }
-            } );
-            socket.on( 'reloadScripts', ( callback ) => {
-                reloadLEDScripts();
-
-                function sendCallback() {
-                    if ( ledScripts.patterns?.list.length > 0 && ledScripts.effects?.list.length > 0 ) {
-                        callback( ledScripts );
-                    } else {
-                        setTimeout( sendCallback, 50 );
-                    }
-                }
-
-                sendCallback();
-            } );
+        const registerWebSockets = require( "./connections/webSockets" );
+        registerWebSockets( http, {
+            getFeatures: () => features,
+            setFeatures: ( next ) => { features = next; },
+            getControllersConfig: () => controllersConfig,
+            setControllersConfig: ( next ) => { controllersConfig = next; },
+            getStripConfig: () => stripConfig,
+            getLedScripts: () => ledScripts,
+            matrixScripts,
+            buttonMap,
+            displayMatrix,
+            getScriptGroups: () => scriptGroups,
+            setScriptGroups: ( next ) => { scriptGroups = next; },
+            getUserPresets: () => userPresets,
+            setUserPresets: ( next ) => { userPresets = next; },
+            getDisconnectConfigs: () => disconnectConfigs,
+            setDisconnectConfigs: ( next ) => { disconnectConfigs = next; },
+            setConnectedSystemStats: ( next ) => { connectedSystemStats = next; },
+            config,
+            setLEDs,
+            changeMatrix,
+            clearAppConfigs,
+            setStripDefaults,
+            drawLEDs,
+            writeConfigToStrips,
+            reloadLEDScripts,
+            rebuildControllersAndStrips,
+            setHomekitConfig: setupHomekit,
+            setLiveViewEnabled,
+            setLiveViewEmitter
         } );
     }
 
@@ -383,19 +287,35 @@ if ( features.gpioButtons ) {
     } );
 }
 
-//set up homekit
-if ( features.homekit ) {
-    const HomeKit = require( './connections/homekit.js' );
-    const homeKitConfig = config.get( "homekit" );
-    let rewrite = false;
-    homeKitConfig.forEach( ( cfg, i ) => {
-        new HomeKit( { number: i, ...cfg }, setLEDs, { weatherData } );
-        if ( !(cfg.username || cfg.pincode) ) {
-            rewrite = true;
-        }
-    } )
-    config.set( 'homekit', homeKitConfig );
+function destroyHomekitInstances() {
+    if ( !homekitInstances.length ) {
+        return;
+    }
+    homekitInstances.forEach( instance => {
+        instance?.destroy?.();
+    } );
+    homekitInstances = [];
 }
+
+function setupHomekit( homeKitConfig ) {
+    const nextConfig = homeKitConfig || [];
+    if ( !features.homekit ) {
+        config.set( 'homekit', nextConfig );
+        return nextConfig;
+    }
+    destroyHomekitInstances();
+    const HomeKit = require( './connections/homekit.js' );
+    const rebuiltConfig = nextConfig.map( ( cfg, i ) => {
+        const instance = new HomeKit( { number: i, ...cfg }, setLEDs, { weatherData } );
+        homekitInstances.push( instance );
+        return instance?.config ?? cfg;
+    } );
+    config.set( 'homekit', rebuiltConfig );
+    return rebuiltConfig;
+}
+
+//set up homekit
+setupHomekit( config.get( "homekit" ) );
 
 //set up matrix
 let matrixInterval;
@@ -519,6 +439,23 @@ function setStripDefaults() {
     } )
 }
 
+function turnAllLightsOff() {
+    if ( !stripConfig.length ) {
+        return;
+    }
+    stripConfig.forEach( ( strip, stripIndex ) => {
+        controllerUpdates[strip.controller] = true;
+        writeConfigToStrips( stripIndex, {
+            "trigger": "system",
+            "pattern": "off",
+            "patternOptions": {},
+            "effect": "",
+            "effectOptions": {}
+        } );
+    } );
+    drawLEDs();
+}
+
 function setLEDs( options ) {
     //clear all other app scripts
     if ( options.trigger === "app" ) {
@@ -538,9 +475,6 @@ function setLEDs( options ) {
 }
 
 //function that handles all writing to the LEDs
-let drawTimeout = null;
-let drawOnTimeout = false;
-
 function drawLEDs() {
     if ( drawTimeout ) {
         drawOnTimeout = true;
@@ -569,6 +503,12 @@ function drawLEDs() {
     controllers.forEach( ( c, i ) => {
         if ( controllerUpdates[i] ) {
             c.updateLEDs( arr[i] );
+            if ( enableLiveView && emitLiveViewUpdate ) {
+                emitLiveViewUpdate( {
+                    controllerIndex: i,
+                    colors: arr[i]
+                } );
+            }
         }
     } );
 }

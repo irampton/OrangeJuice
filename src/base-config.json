@@ -11,24 +11,8 @@
     "ioStatsUpdate": false
   },
   "controllers": [
-    {
-      "type": "GPIO",
-      "pin": 18
-    }
-  ],
-  "strips": [
-    {
-      "name": "Test",
-      "start": 0,
-      "length": 16,
-      "type": "strip"
-    }
   ],
   "homekit": [
-    {
-      "name": "LED Lights",
-      "services": []
-    }
   ],
   "buttonConfigs": [],
   "disconnectConfigs": [],

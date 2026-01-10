@@ -1,0 +1,84 @@
+<template>
+  <Teleport to="body">
+    <div :class="['modal', isOpen ? 'is-active': '']">
+      <div class="modal-background" @click="() => internalClose()"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">{{ name }}</p>
+          <button class="delete" aria-label="close" @click="() => internalClose()"></button>
+        </header>
+        <section class="modal-card-body">
+          <slot/>
+        </section>
+        <footer class="modal-card-foot">
+          <div class="buttons">
+            <slot name="footer">
+              <button :class="['button', saveButtonColor]" @click="() => internalClose(true)">{{ saveText }}</button>
+              <button class="button" @click="() => internalClose()">Cancel</button>
+            </slot>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </Teleport>
+</template>
+
+<script>
+import { HELPER } from "@/mixins/HELPER.js";
+export default {
+  name: "BasePopup",
+  props: {
+    name: {
+      type: String,
+      default: ""
+    },
+    saveText: {
+      type: String,
+      default: "Save"
+    },
+    saveColor:{
+      type: String,
+      default: "action"
+    },
+    modelValue: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      isOpen: false,
+      resolve: () => {
+      },
+      reject: () => {
+      }
+    }
+  },
+  computed: {
+    saveButtonColor(){
+      return HELPER.colorClass(this.saveColor);
+    }
+  },
+  methods: {
+    open() {
+      this.isOpen = true;
+      return new Promise( ( res, rej ) => {
+        this.resolve = res;
+        this.reject = rej;
+      } )
+    },
+    internalClose( success = false ) {
+      this.isOpen = false;
+      if ( success ) {
+        this.resolve();
+      } else {
+        this.reject();
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

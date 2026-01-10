@@ -5,3 +5,4 @@ src/test*.js
 src/config.json
 desktop-app/config.json
 src/config_*.json
+src/persist
