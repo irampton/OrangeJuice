@@ -49,6 +49,10 @@ $fullhd: 1536px + (2 * 32px);
   border-bottom: hsl(0, 0%, 86%) solid 1px;
 }
 
+.settings-columns {
+  align-items: flex-start;
+}
+
 @media screen and (min-width: 562px), print {
   .extraSpace {
     margin-right: .75rem;
