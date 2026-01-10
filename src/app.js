@@ -140,66 +140,12 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
     }
 
     if ( features.webAPIs ) {
-        //web listeners
-        app.get( '/rainbowMode', ( req, res ) => {
-            let options = {
-                "trigger": 'GET',
-                "pattern": 'rainbow',
-                "patternOptions": { "multiplier": 1 },
-                "effect": "chase",
-                "effectOptions": { "reverse": true, "speed": 1 },
-                "strips": [1],
-                //"transition": 'fade',
-                "transitionOptions": { "time": .7 }
-            }
-            setLEDs( options );
-            res.send( 'done' );
+        const registerWebAPIs = require( './connections/webAPIs' );
+        registerWebAPIs( app, {
+            setLEDs,
+            userPresets,
+            stripConfig,
         } );
-        app.get( '/lightsOff', ( req, res ) => {
-            let options = {
-                "trigger": 'GET',
-                "pattern": 'off',
-                "patternOptions": {},
-                "effect": "",
-                "strips": [0, 1],
-                "transition": 'fade',
-                "transitionOptions": { "time": .7 }
-            }
-            setLEDs( options );
-            res.send( 'done' );
-        } );
-        //preset control (for shortcut)
-        app.get( '/presets', ( req, res ) => {
-            res.send( userPresets.map( p => p.name ) );
-        } );
-        app.get( '/setPreset', ( req, res ) => {
-            let name = req.headers?.preset || req.query?.preset;
-            try {
-                let preset = structuredClone( userPresets.find( p => p.name === name ) );
-                preset.trigger = "webAPI";
-                setLEDs( preset );
-                res.send( 'done' );
-            } catch ( e ) {
-                res.status( 400 ).send( "Preset not found" );
-            }
-        } );
-
-        if ( features.matrixDisplay ) {
-            app.get( '/matrixOff', ( req, res ) => {
-                let options = {
-                    "id": "off"
-                }
-                changeMatrix( options );
-                res.send( 'done' );
-            } );
-            app.get( '/matrixOn', ( req, res ) => {
-                let options = {
-                    "id": "tempe"
-                }
-                changeMatrix( { 'id': displayMatrix.default } );
-                res.send( 'done' );
-            } );
-        }
     }
 
     //set the button config to also have a web api
@@ -235,157 +181,33 @@ if ( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) 
 
     //websockets
     if ( features.hostWebControl || features.ioStatsUpdate ) {
-        const { Server } = require( "socket.io" );
-        const io = new Server( http );
-
-        io.on( 'connection', function ( socket ) {
-            console.log( 'a user connected' );
-            socket.on( 'disconnect', function () {
-                console.log( 'user disconnected' );
-                disconnectConfigs.forEach( ( config ) => {
-                    config.strips.forEach( ( stripIndex ) => {
-                        writeConfigToStrips( stripIndex, config );
-                    } );
-                    drawLEDs();
-                } )
-            } );
-
-            //new actually good stuff
-            socket.on( 'getStripConfig', ( callback ) => {
-                callback( stripConfig );
-            } );
-            socket.on( 'getScripts', ( callback ) => {
-                let scriptsList = {
-                    "patterns": [],
-                    "effects": []
-                };
-                ledScripts.patterns.list.forEach( ( value ) => {
-                    scriptsList.patterns.push( {
-                        'name': ledScripts.patterns[value].name,
-                        'id': ledScripts.patterns[value].id,
-                        'options': ledScripts.patterns[value].options
-                    } );
-                } );
-                ledScripts.effects.list.forEach( ( value ) => {
-                    scriptsList.effects.push( {
-                        'name': ledScripts.effects[value].name,
-                        'id': ledScripts.effects[value].id,
-                        'options': ledScripts.effects[value].options
-                    } );
-                } );
-                callback( scriptsList );
-            } );
-            socket.on( 'getLEDScripts', ( callback ) => {
-                callback( ledScripts );
-            } );
-            socket.on( 'getMatrixScripts', ( callback ) => {
-                callback( matrixScripts );
-            } );
-            socket.on( 'setLEDs', ( options ) => {
-                setLEDs( options );
-            } );
-            socket.on( 'setMatrix', ( options ) => {
-                changeMatrix( options );
-            } );
-            socket.on( 'clearAppConfigs', () => {
-                clearAppConfigs();
-                setStripDefaults();
-                drawLEDs();
-            } );
-            socket.on( 'disconnectConfig', ( method, data ) => {
-                switch ( method ) {
-                    case "replace":
-                        disconnectConfigs = data;
-                        config.set( 'disconnectConfigs', data );
-                        break;
-                    case "add":
-                        disconnectConfigs.push( data );
-                        config.set( 'disconnectConfigs', disconnectConfigs );
-                        break;
-                    case "remove":
-                        disconnectConfigs.splice( disconnectConfigs.findIndex( ( v ) => v.id = data ), 1 );
-                        config.set( 'disconnectConfigs', disconnectConfigs );
-                        break;
-                }
-            } );
-            socket.on( 'statsUpdate', ( data ) => {
-                connectedSystemStats = data;
-            } );
-            socket.on( 'startDemo', ( data ) => {
-                socket.broadcast.emit( 'startDemo' );
-            } );
-            socket.on( 'pauseDemo', ( data ) => {
-                socket.broadcast.emit( 'pauseDemo' );
-            } );
-            socket.on( 'editStripGroup', ( method, data ) => {
-                switch ( method ) {
-                    case "add":
-                        scriptGroups.push( data );
-                        break;
-                    case "remove":
-                        scriptGroups.splice( data, 1 );
-                        break;
-                }
-                config.set( 'scriptGroups', scriptGroups );
-            } );
-            socket.on( 'getStripGroups', ( callback ) => {
-                callback( scriptGroups );
-            } );
-            socket.on( 'editPresets', ( method, ledConfig, index ) => {
-                switch ( method ) {
-                    case "add":
-                        userPresets.push( ledConfig );
-                        break;
-                    case "remove":
-                        userPresets.splice( index, 1 );
-                        break;
-                    case "update":
-                        userPresets[index] = ledConfig;
-                        break;
-                }
-                config.set( 'userPresets', userPresets );
-            } );
-            socket.on( 'getPresets', ( callback ) => {
-                callback( userPresets );
-            } );
-            socket.on( 'getSettings', ( callback ) => {
-                let send = {
-                    features,
-                    controllers: controllersConfig,
-                    "homekit": config.get( 'homekit' ),
-                    buttonMap,
-                    displayMatrix
-                };
-                callback( send );
-            } );
-            socket.on( 'setSettings', ( item, data ) => {
-                switch ( item ) {
-                    case "features":
-                        features = data;
-                        config.set( "features", features );
-                        break;
-                    case "controllers":
-                        config.set( "controllers", data );
-                        rebuildControllersAndStrips( data );
-                        break;
-                    case "homekit":
-                        config.set( "homekit", data );
-                        break;
-                }
-            } );
-            socket.on( 'reloadScripts', ( callback ) => {
-                reloadLEDScripts();
-
-                function sendCallback() {
-                    if ( ledScripts.patterns?.list.length > 0 && ledScripts.effects?.list.length > 0 ) {
-                        callback( ledScripts );
-                    } else {
-                        setTimeout( sendCallback, 50 );
-                    }
-                }
-
-                sendCallback();
-            } );
+        const registerWebSockets = require( "./connections/webSockets" );
+        registerWebSockets( http, {
+            getFeatures: () => features,
+            setFeatures: ( next ) => { features = next; },
+            getControllersConfig: () => controllersConfig,
+            setControllersConfig: ( next ) => { controllersConfig = next; },
+            getStripConfig: () => stripConfig,
+            getLedScripts: () => ledScripts,
+            matrixScripts,
+            buttonMap,
+            displayMatrix,
+            getScriptGroups: () => scriptGroups,
+            setScriptGroups: ( next ) => { scriptGroups = next; },
+            getUserPresets: () => userPresets,
+            setUserPresets: ( next ) => { userPresets = next; },
+            getDisconnectConfigs: () => disconnectConfigs,
+            setDisconnectConfigs: ( next ) => { disconnectConfigs = next; },
+            setConnectedSystemStats: ( next ) => { connectedSystemStats = next; },
+            config,
+            setLEDs,
+            changeMatrix,
+            clearAppConfigs,
+            setStripDefaults,
+            drawLEDs,
+            writeConfigToStrips,
+            reloadLEDScripts,
+            rebuildControllersAndStrips
         } );
     }
 
