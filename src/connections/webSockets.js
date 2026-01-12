@@ -112,7 +112,7 @@ function registerWebSockets( http, {
         socket.on( 'statsUpdate', ( data ) => {
             setConnectedSystemStats( data );
         } );
-        socket.on( 'editStripGroup', ( method, data ) => {
+        socket.on( 'editStripGroup', ( method, data, index ) => {
             const next = [ ...getScriptGroups() ];
             switch ( method ) {
                 case "add":
@@ -120,6 +120,11 @@ function registerWebSockets( http, {
                     break;
                 case "remove":
                     next.splice( data, 1 );
+                    break;
+                case "update":
+                    if ( index !== null && index !== undefined ) {
+                        next.splice( index, 1, data );
+                    }
                     break;
             }
             setScriptGroups( next );
