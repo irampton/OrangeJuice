@@ -35,8 +35,20 @@ export default {
     }
   },
   methods: {
+    stripIdKey( id ) {
+      if ( Array.isArray( id ) ) {
+        return `${ id[0] }.${ id[1] }`;
+      }
+      return `${ id }`;
+    },
+    stripKeyForIndex( strip, index ) {
+      return this.stripIdKey( strip?.id ?? index );
+    },
     checkEvent() {
-      this.$emit( 'update:modelValue', this.checked.map( ( c, i ) => c ? i : false ).filter( c => c !== false ) );
+      const selected = this.checked
+          .map( ( checked, index ) => checked ? ( this.stripConfig[index]?.id ?? index ) : false )
+          .filter( value => value !== false );
+      this.$emit( 'update:modelValue', selected );
     }
   },
   watch: {
@@ -46,7 +58,8 @@ export default {
     modelValue: {
       deep: true,
       handler() {
-        this.checked = this.checked.map( ( c, i ) => this.modelValue.includes( i ) );
+        const selectedKeys = new Set( ( this.modelValue || [] ).map( id => this.stripIdKey( id ) ) );
+        this.checked = this.checked.map( ( c, i ) => selectedKeys.has( this.stripKeyForIndex( this.stripConfig[i], i ) ) );
       }
     }
   }

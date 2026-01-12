@@ -3,7 +3,6 @@ function registerWebSockets( http, {
     setFeatures,
     getControllersConfig,
     setControllersConfig,
-    getStripConfig,
     getLedScripts,
     matrixScripts,
     buttonMap,
@@ -23,7 +22,7 @@ function registerWebSockets( http, {
     drawLEDs,
     writeConfigToStrips,
     reloadLEDScripts,
-    rebuildControllersAndStrips,
+    rebuildControllers,
     setHomekitConfig,
     setLiveViewEnabled,
     setLiveViewEmitter
@@ -50,9 +49,6 @@ function registerWebSockets( http, {
         } );
 
         //new actually good stuff
-        socket.on( 'getStripConfig', ( callback ) => {
-            callback( getStripConfig() );
-        } );
         socket.on( 'getScripts', ( callback ) => {
             const ledScripts = getLedScripts();
             let scriptsList = {
@@ -174,7 +170,7 @@ function registerWebSockets( http, {
                     break;
                 case "controllers":
                     config.set( "controllers", data );
-                    rebuildControllersAndStrips( data );
+                    rebuildControllers( data );
                     setControllersConfig( data );
                     break;
                 case "homekit":

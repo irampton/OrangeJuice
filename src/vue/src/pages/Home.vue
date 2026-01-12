@@ -59,6 +59,20 @@ export default {
     }
   },
   methods: {
+    buildStripConfig( controllers ) {
+      const strips = [];
+      ( controllers || [] ).forEach( ( controller, controllerIndex ) => {
+        ( controller.strips || [] ).forEach( ( strip, stripIndex ) => {
+          strips.push( {
+            ...strip,
+            id: [controllerIndex, stripIndex],
+            controller: controllerIndex,
+            controllerStripIndex: stripIndex
+          } );
+        } );
+      } );
+      return strips;
+    },
     setLEDs() {
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
       ledConfig.trigger = "website";
@@ -71,8 +85,8 @@ export default {
       this.socket.emit( 'getLEDScripts', ( data ) => {
         this.ledScripts = data;
       } );
-      this.socket.emit( 'getStripConfig', ( data ) => {
-        this.ledStripConfig = data;
+      this.socket.emit( 'getSettings', ( data ) => {
+        this.ledStripConfig = this.buildStripConfig( data?.controllers );
       } );
     };
     this.socket.on( 'connect', this.socketConnectHandler );
