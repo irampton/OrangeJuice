@@ -9,18 +9,31 @@ module.exports = {
         { id: "speed", name: "Color Shift Speed", type: "number", default: 4 },
         { id: "speedVariation", name: "Shift Speed Variation", type: "number", default: 0 },
         { id: "spinSpeed", name: "Spin Speed", type: "number", default: 1 },
-        { id: "reverse", name: "Reverse", type: "checkbox", default: false }
+        { id: "reverse", name: "Reverse", type: "checkbox", default: false },
+        {
+            id: "colorCount",
+            name: "Colors On Ring",
+            type: "select",
+            default: 2,
+            options: [
+                { value: 2, name: "2" },
+                { value: 3, name: "3" },
+                { value: 4, name: "4" }
+            ]
+        }
     ],
-    Create: function ( colorArray, { numLEDs, speed, speedVariation, spinSpeed, reverse } ) {
+    Create: function ( colorArray, { numLEDs, speed, speedVariation, spinSpeed, reverse, colorCount } ) {
         this.patternArray = colorArray.length ? [...colorArray] : [ '#000000' ];
         this.numLEDs = Number( numLEDs ) || this.patternArray.length || 1;
         this.outputArray = new Array( this.numLEDs );
-        this.steps = 24;
+        this.steps = 30;
         this.interval = 1000 / this.steps;
         this.reverse = reverse ?? false;
         this.spinSpeed = Number( spinSpeed ) || 0;
         this.baseSpeed = Math.max( 0.05, Number( speed ) || 0.05 );
         this.speedVariation = Math.max( 0, Number( speedVariation ) || 0 );
+        this.colorCount = Math.min( 4, Math.max( 2, Number( colorCount ) || 2 ) );
+        this.minAnchorDistance = this.colorCount === 2 ? 4 : 2;
         this.offset = 0;
 
         this.pickColor = ( exclude ) => {
@@ -36,14 +49,90 @@ module.exports = {
             return color;
         };
 
-        this.buildGradient = ( colorA, colorB ) => {
+        this.distCW = ( from, to ) => {
+            return to >= from ? ( to - from ) : ( this.numLEDs - ( from - to ) );
+        };
+
+        this.ringMinDist = ( a, b ) => {
+            const cw = this.distCW( a, b );
+            const ccw = this.numLEDs - cw;
+            return Math.min( cw, ccw );
+        };
+
+        this.pickColors = ( count, exclude ) => {
+            const picked = [];
+            let guard = 0;
+            while ( picked.length < count && guard < 50 ) {
+                const candidate = this.pickColor();
+                if ( candidate === exclude ) {
+                    guard++;
+                    continue;
+                }
+                if ( !picked.includes( candidate ) || this.patternArray.length < count ) {
+                    picked.push( candidate );
+                }
+                guard++;
+            }
+            while ( picked.length < count ) {
+                picked.push( this.patternArray[picked.length % this.patternArray.length] );
+            }
+            return picked;
+        };
+
+        this.pickAnchors = ( count ) => {
+            let minDist = this.minAnchorDistance;
+            if ( this.numLEDs < count * minDist ) {
+                minDist = Math.max( 1, Math.floor( this.numLEDs / count ) );
+            }
+            let positions = [];
+            while ( positions.length < count && minDist > 0 ) {
+                positions = [];
+                let guard = 0;
+                while ( positions.length < count && guard < 300 ) {
+                    const candidate = randomInt( 0, this.numLEDs );
+                    let ok = true;
+                    for ( let i = 0; i < positions.length; i++ ) {
+                        if ( this.ringMinDist( candidate, positions[i] ) < minDist ) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if ( ok ) {
+                        positions.push( candidate );
+                    }
+                    guard++;
+                }
+                if ( positions.length < count ) {
+                    minDist -= 1;
+                }
+            }
+            if ( positions.length < count ) {
+                positions = [];
+                for ( let i = 0; i < count; i++ ) {
+                    positions.push( Math.floor( ( i * this.numLEDs ) / count ) );
+                }
+            }
+            positions.sort( ( a, b ) => a - b );
+            return positions;
+        };
+
+        this.buildGradient = ( colors, positions ) => {
             const out = new Array( this.numLEDs );
             for ( let i = 0; i < this.numLEDs; i++ ) {
-                const t = i / this.numLEDs;
-                const amt = t < 0.5 ? t * 2 : ( t - 0.5 ) * 2;
-                const from = t < 0.5 ? colorA : colorB;
-                const to = t < 0.5 ? colorB : colorA;
-                out[i] = new Color( from, 'hex' ).lerp( new Color( to, 'hex' ), amt ).getHex( false );
+                out[i] = colors[0];
+            }
+            for ( let i = 0; i < positions.length; i++ ) {
+                const next = ( i + 1 ) % positions.length;
+                const a = positions[i];
+                const b = positions[next];
+                const steps = this.distCW( a, b );
+                for ( let s = 0; s <= steps; s++ ) {
+                    const led = ( a + s ) % this.numLEDs;
+                    const amt = steps === 0 ? 0 : ( s / steps );
+                    out[led] = new Color( colors[i], 'hex' )
+                        .lerp( new Color( colors[next], 'hex' ), amt )
+                        .getHex( false );
+                }
             }
             return out;
         };
@@ -56,11 +145,12 @@ module.exports = {
             return Math.max( 0.05, this.baseSpeed + delta );
         };
 
-        this.color1 = this.pickColor();
-        this.color2 = this.pickColor( this.color1 );
-        this.currentGradient = this.buildGradient( this.color1, this.color2 );
-        this.color2 = this.pickColor( this.color1 );
-        this.targetGradient = this.buildGradient( this.color1, this.color2 );
+        this.currentColors = this.pickColors( this.colorCount );
+        this.currentAnchors = this.pickAnchors( this.colorCount );
+        this.targetColors = this.pickColors( this.colorCount );
+        this.targetAnchors = this.pickAnchors( this.colorCount );
+        this.currentGradient = this.buildGradient( this.currentColors, this.currentAnchors );
+        this.targetGradient = this.buildGradient( this.targetColors, this.targetAnchors );
         this.fadeProgress = 0;
         this.shiftDuration = this.nextDuration();
         this.fadeStep = 1 / ( this.shiftDuration * this.steps );
@@ -70,10 +160,12 @@ module.exports = {
             this.fadeProgress += this.fadeStep;
             if ( this.fadeProgress >= 1 ) {
                 this.fadeProgress = 0;
-                this.color1 = this.color2;
+                this.currentColors = this.targetColors;
+                this.currentAnchors = this.targetAnchors;
                 this.currentGradient = this.targetGradient;
-                this.color2 = this.pickColor( this.color1 );
-                this.targetGradient = this.buildGradient( this.color1, this.color2 );
+                this.targetColors = this.pickColors( this.colorCount );
+                this.targetAnchors = this.pickAnchors( this.colorCount );
+                this.targetGradient = this.buildGradient( this.targetColors, this.targetAnchors );
                 this.shiftDuration = this.nextDuration();
                 this.fadeStep = 1 / ( this.shiftDuration * this.steps );
             }
