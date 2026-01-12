@@ -8,7 +8,10 @@
         v-for="(strip, i) in stripConfig"
         :key="i"
         :name="strip.name"
+        :disabled="strip.disabled"
+        :label-class="strip.labelClass"
         v-model="checked[i]"
+        @dblclick="stripDblClick(strip)"
         @change="checkEvent"/>
   </div>
 </template>
@@ -19,6 +22,7 @@ import BaseStripCheckbox from "@/components/base/BaseStripCheckbox.vue";
 export default {
   name: "StripList",
   components: { BaseStripCheckbox },
+  emits: ['update:modelValue', 'edit'],
   props: {
     stripConfig: {
       type: Array,
@@ -37,6 +41,9 @@ export default {
   methods: {
     stripIdKey( id ) {
       if ( Array.isArray( id ) ) {
+        if ( id[0] === "sharedRender" ) {
+          return `sharedRender.${ id[1] }`;
+        }
         return `${ id[0] }.${ id[1] }`;
       }
       return `${ id }`;
@@ -49,6 +56,9 @@ export default {
           .map( ( checked, index ) => checked ? ( this.stripConfig[index]?.id ?? index ) : false )
           .filter( value => value !== false );
       this.$emit( 'update:modelValue', selected );
+    },
+    stripDblClick( strip ) {
+      this.$emit( 'edit', strip );
     }
   },
   watch: {

@@ -23,6 +23,7 @@ let weatherData = {
     "outdoor": {}
 };
 let currentLEDs = [];
+let virtualStrips = [];
 let controllers = [];
 let controllerUpdates = [];
 let drawOnInterval = false;
@@ -47,8 +48,131 @@ function setLiveViewEmitter( emitter ) {
     emitLiveViewUpdate = emitter;
 }
 
+function markControllersUpdated( stripConfiguration, stripIndex ) {
+    if ( stripConfiguration?.controllers?.length ) {
+        stripConfiguration.controllers.forEach( controller => {
+            controllerUpdates[controller] = true;
+        } );
+        return;
+    }
+    if ( stripConfiguration?.controller !== undefined ) {
+        controllerUpdates[stripConfiguration.controller] = true;
+        return;
+    }
+    if ( Array.isArray( stripIndex ) ) {
+        controllerUpdates[stripIndex[0]] = true;
+    }
+}
+
+function clearStripEffects( strip ) {
+    if ( strip.effect ) {
+        clearInterval( strip.effectTimout );
+        strip.effect = {};
+        strip.effectTimout = null;
+    }
+    if ( strip.transition ) {
+        clearInterval( strip.transition.interval );
+        strip.transition = null;
+    }
+}
+
+function resetVirtualStrips() {
+    virtualStrips.forEach( vStrip => clearStripEffects( vStrip ) );
+    virtualStrips = [];
+}
+
+function stripIndexTextKey( stripId ) {
+    return `${ stripId[0] }.${ stripId[1] }`;
+}
+
+function resetVirtualStripSegments( vStrip ) {
+    vStrip.segments.forEach( segment => {
+        segment.enabled = true;
+    } );
+}
+
+function buildVirtualStrip( groupIndex, strips ) {
+    const segments = [];
+    let totalLength = 0;
+    const controllersSet = new Set();
+    ( strips || [] ).forEach( ( stripId ) => {
+        const controllerIndex = stripId[0];
+        const stripIndex = stripId[1];
+        const stripConfiguration = controllersConfig?.[controllerIndex]?.strips?.[stripIndex];
+        if ( !stripConfiguration ) {
+            return;
+        }
+        const length = stripConfiguration.configuredLength ?? stripConfiguration.length ?? 0;
+        segments.push( {
+            id: stripId,
+            controller: controllerIndex,
+            stripIndex,
+            offset: totalLength,
+            length,
+            enabled: true
+        } );
+        totalLength += length;
+        controllersSet.add( controllerIndex );
+        const target = currentLEDs?.[controllerIndex]?.[stripIndex];
+        if ( target ) {
+            clearStripEffects( target );
+        }
+    } );
+
+    const vStrip = blankStrip( {
+        id: [ "sharedRender", groupIndex ],
+        name: `Shared ${ groupIndex }`,
+        length: totalLength,
+        controller: null
+    } );
+
+    vStrip.type = "sharedRender";
+    vStrip.group = groupIndex;
+    vStrip.strips = strips;
+    vStrip.segments = segments;
+    vStrip.controllers = Array.from( controllersSet );
+    vStrip.applyToStrips = ( arr ) => {
+        vStrip.segments.forEach( segment => {
+            if ( !segment.enabled ) {
+                return;
+            }
+            const colors = arr.slice( segment.offset, segment.offset + segment.length );
+            const target = currentLEDs?.[segment.controller]?.[segment.stripIndex];
+            if ( target ) {
+                target.arr = colors;
+                target.trigger = vStrip.trigger || target.trigger;
+            }
+        } );
+    };
+
+    return vStrip;
+}
+
+function disableVirtualStripSegments( stripId, keepGroup = null ) {
+    const key = stripIndexTextKey( stripId );
+    virtualStrips.forEach( ( vStrip ) => {
+        if ( keepGroup !== null && vStrip.group === keepGroup ) {
+            return;
+        }
+        let enabledCount = 0;
+        vStrip.segments.forEach( segment => {
+            if ( stripIndexTextKey( segment.id ) === key ) {
+                segment.enabled = false;
+            }
+            if ( segment.enabled ) {
+                enabledCount += 1;
+            }
+        } );
+        if ( enabledCount === 0 ) {
+            clearStripEffects( vStrip );
+        }
+    } );
+    virtualStrips = virtualStrips.filter( vStrip => vStrip.segments.some( segment => segment.enabled ) );
+}
+
 function rebuildControllers( controllersList, options = {} ) {
     const { exitOnFailure = false } = options;
+    resetVirtualStrips();
     const hasExistingStrips = currentLEDs.some( controller => controller.length );
     if ( hasExistingStrips ) {
         turnAllLightsOff();
@@ -57,7 +181,7 @@ function rebuildControllers( controllersList, options = {} ) {
     const nextCurrentLEDs = nextControllersConfig.map( ( controller, controllerIndex ) => {
         const strips = controller?.strips || [];
         return strips.map( ( strip, stripIndex ) => blankStrip( {
-            "id": [controllerIndex, stripIndex],
+            "id": [ controllerIndex, stripIndex ],
             "name": strip.name,
             "length": strip.length,
             "controller": controllerIndex,
@@ -66,7 +190,7 @@ function rebuildControllers( controllersList, options = {} ) {
     } );
     const nextNumPixels = nextControllersConfig.map( controller => {
         const strips = controller?.strips || [];
-        return strips.reduce( ( total, strip ) => total + ( strip.length || 0 ), 0 );
+        return strips.reduce( ( total, strip ) => total + (strip.length || 0), 0 );
     } );
     const nextControllers = [];
     try {
@@ -331,15 +455,13 @@ function newLEDarr( size, color ) {
 }
 
 function clearAppConfigs( noClear ) {
-    noClear = noClear.map( s => `${ s[0] }.${ s[1] }` ) ?? [];
+    noClear = noClear.map( s => stripIndexTextKey(s) ) ?? [];
     currentLEDs.forEach( ( controller, cIndex ) => {
         controller.forEach( ( strip, sIndex ) => {
-            if ( strip.trigger === "app" && !noClear.includes( `${ cIndex }.${ sIndex }` ) ) {
-                clearInterval( strip.effectTimout );
-                clearInterval( strip.transitionInterval );
-                clearTimeout( strip.transitionTimeout );
+            if ( strip.trigger === "app" && !noClear.includes( stripIndexTextKey([cIndex, sIndex]) ) ) {
+                clearStrip( strip );
+                disableVirtualStripSegments( [ cIndex, sIndex ] );
                 controllerUpdates[cIndex] = true;
-                controller[sIndex] = blankStrip( strip );
             }
         } );
     } );
@@ -367,28 +489,77 @@ function blankStrip( strip ) {
     };
 }
 
-function writeConfigToStrips( stripIndex, options ) {
-    //clear any outstanding effects
+function clearStrip( currentStrip, options = {} ) {
     let oldColorArr = [];
-    let currentStrip = currentLEDs[stripIndex[0]][stripIndex[1]];
-    if ( currentStrip.effect ) {
-        clearInterval( currentStrip.effectTimout );
-        currentStrip.effect = {};
-    }
-    if ( currentStrip.transition ) {
-        clearInterval( currentStrip.transition.interval );
-    }
+    clearStripEffects( currentStrip );
     if ( options.transition ) {
         oldColorArr = currentStrip.arr;
         if ( oldColorArr.length === 0 ) {
             oldColorArr = newLEDarr( currentStrip.length, "000000" );
         }
     }
-    //clear strip config completely
+
+    // Clear strip config completely
     Object.assign( currentStrip, blankStrip( currentStrip ) );
 
-    const stripConfiguration = controllersConfig[stripIndex[0]].strips[stripIndex[1]];
-    //generate pattern
+    return oldColorArr;
+}
+
+function writeConfigToStrips( stripIndex, options ) {
+    let currentStrip, oldColorArr, stripConfiguration;
+
+    // Clear any outstanding effects and prep strip
+    if ( stripIndex.type === "sharedRender" ) {
+        // We're dealing with a virtual strip, we need to set one up
+
+        // Check to see if any virtual strip is already going with the same group (stripIndex.group is equal)
+        // If it is, clear and use that strip
+        const existingVStrip = virtualStrips.find( vs => vs.group === stripIndex.group );
+        if ( existingVStrip ) {
+            const existingKeys = ( existingVStrip.strips || [] ).map( stripIndexTextKey ).join( "|" );
+            const nextKeys = ( stripIndex.strips || [] ).map( stripIndexTextKey ).join( "|" );
+            if ( existingKeys !== nextKeys ) {
+                clearStripEffects( existingVStrip );
+                virtualStrips = virtualStrips.filter( vStrip => vStrip !== existingVStrip );
+                currentStrip = buildVirtualStrip( stripIndex.group, stripIndex.strips );
+                virtualStrips.push( currentStrip );
+            } else {
+                oldColorArr = clearStrip( existingVStrip, options );
+                resetVirtualStripSegments( existingVStrip );
+                currentStrip = existingVStrip;
+            }
+        } else {
+            // If there isn't an existing virtual strip, create one
+            currentStrip = buildVirtualStrip( stripIndex.group, stripIndex.strips );
+            virtualStrips.push( currentStrip );
+        }
+
+        currentStrip.segments?.forEach( segment => {
+            const target = currentLEDs?.[segment.controller]?.[segment.stripIndex];
+            if ( target ) {
+                clearStripEffects( target );
+            }
+        } );
+        currentStrip.strips.forEach( stripId => disableVirtualStripSegments( stripId, stripIndex.group ) );
+
+        stripConfiguration = {
+            length: currentStrip.length,
+            configuredLength: currentStrip.length,
+            controllers: currentStrip.controllers
+        };
+    } else {
+        // Normal strip, set and clear
+        currentStrip = currentLEDs[stripIndex[0]][stripIndex[1]];
+        oldColorArr = clearStrip( currentStrip, options );
+        stripConfiguration = controllersConfig[stripIndex[0]].strips[stripIndex[1]];
+
+        // Check to see if this strip was a part of any virtual strips
+        // If it is, disable just the strip on the vStrip
+        // If there are no enabled parts of the vStrip, clear any intervals and delete it
+        disableVirtualStripSegments( stripIndex );
+    }
+
+    // Generate pattern
     currentStrip.arr = ledScripts.patterns[options.pattern].generate( stripConfiguration.configuredLength ?? stripConfiguration.length, options.patternOptions );
     //set trigger
     currentStrip.trigger = options.trigger;
@@ -400,7 +571,10 @@ function writeConfigToStrips( stripIndex, options ) {
             if ( currentStrip.transition ) {
                 currentStrip.transition.step( ( arr ) => {
                     currentStrip.arr = arr;
-                    controllerUpdates[stripConfiguration.controller] = true;
+                    markControllersUpdated( stripConfiguration, stripIndex );
+                    if ( currentStrip.type === "sharedRender" ) {
+                        currentStrip.applyToStrips( currentStrip.arr );
+                    }
                     drawLEDs();
                 } )
             }
@@ -415,18 +589,26 @@ function writeConfigToStrips( stripIndex, options ) {
                 ...options.effectOptions,
                 numLEDs: stripConfiguration.configuredLength ?? stripConfiguration.length
             } );
-        //run the effect once
+
+        // Run the effect once - Needed for effects that completely change the initial pattern
         currentStrip.effect.step( ( arr ) => {
             currentStrip.arr = arr;
         } );
-        //set the effect to run continuously
+
+        // Set the effect to run continuously
         currentStrip.effectTimout = setInterval( () => {
             currentStrip.effect.step( ( arr ) => {
                 currentStrip.arr = arr;
-                controllerUpdates[stripIndex[0]] = true;
+                markControllersUpdated( stripConfiguration, stripIndex );
+                if ( currentStrip.type === "sharedRender" ) {
+                    currentStrip.applyToStrips( currentStrip.arr );
+                }
                 drawLEDs();
             } )
         }, currentStrip.effect.interval );
+    }
+    if ( currentStrip.type === "sharedRender" ) {
+        currentStrip.applyToStrips( currentStrip.arr );
     }
 }
 
@@ -449,7 +631,7 @@ function turnAllLightsOff() {
     controllersConfig.forEach( ( controller, cIndex ) => {
             controller.strips.forEach( ( strip, sIndex ) => {
                 controllerUpdates[cIndex] = true;
-                writeConfigToStrips( [cIndex, sIndex], {
+                writeConfigToStrips( [ cIndex, sIndex ], {
                     "trigger": "system",
                     "pattern": "off",
                     "patternOptions": {},
@@ -468,15 +650,45 @@ function setLEDs( options ) {
         clearAppConfigs( options.strips );
         setStripDefaults();
     }
-    //write the config to each strip separately
+    // Write the config to each strip separately
     options.strips.forEach( ( stripIndex ) => {
-        if ( options.trigger === "default" ) {
-            currentLEDs[stripIndex[0]][stripIndex[1]].default = options;
+        // Unless there is a sharedRender group, then create a virtual strip
+        if ( stripIndex[0] === "sharedRender" ) {
+            const sharedGroup = scriptGroups?.[stripIndex[1]];
+            if ( !sharedGroup ) {
+                return;
+            }
+            // If sharedRender is set to 'off', set each strip individually
+            if ( options.pattern === "off" ) {
+                sharedGroup.strips.forEach( ( stripId ) => {
+                    markControllersUpdated( { controller: stripId[0] }, stripId );
+                    writeConfigToStrips( stripId, options );
+                } );
+                return;
+            }
+
+            // No default config is set for strips in a sharedRender
+            const sharedStrips = sharedGroup.strips || [];
+            const sharedControllers = [ ...new Set( sharedStrips.map( s => s[0] ) ) ];
+            const vStrip = {
+                type: "sharedRender",
+                group: stripIndex[1],
+                strips: sharedStrips,
+                controllers: sharedControllers
+            };
+            sharedControllers.forEach( controller => {
+                controllerUpdates[controller] = true;
+            } );
+            writeConfigToStrips( vStrip, options );
+        } else {
+            if ( options.trigger === "default" ) {
+                currentLEDs[stripIndex[0]][stripIndex[1]].default = options;
+            }
+            controllerUpdates[stripIndex[0]] = true;
+            writeConfigToStrips( stripIndex, options );
         }
-        controllerUpdates[stripIndex[0]] = true;
-        writeConfigToStrips( stripIndex, options );
     } );
-    //after all the strips are set, draw the colors to the strip
+    // After all the strips are set, draw the colors to the strip
     drawLEDs();
 }
 

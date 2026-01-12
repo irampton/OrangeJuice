@@ -8,7 +8,12 @@
         <EffectSelector :effects="ledScripts.effects" v-model="selectedEffect"/>
       </div>
       <div class="column box is-full">
-        <StripList :stripConfig="ledStripConfig" v-model="selectedStrips"/>
+        <StripList
+            :stripConfig="displayStripConfig"
+            :model-value="selectedStrips"
+            @update:modelValue="setSelectedStrips"
+            @edit="editStripFromList"
+        />
         <hr class="my-2" v-if="stripGroupButtons.length">
         <div class="is-flex is-flex-wrap-wrap">
           <button
@@ -58,6 +63,14 @@
           />
         </div>
       </div>
+      <div class="field">
+        <div class="control">
+          <BaseCheckbox
+              v-model="stripGroupModal.shareRender"
+              label="Render group as a single strip"
+          />
+        </div>
+      </div>
       <template #footer>
         <button
             v-if="stripGroupModal.editIndex !== null && stripGroupModal.editIndex !== undefined"
@@ -80,6 +93,7 @@ import StripList from '@/components/StripList.vue';
 import PresetSelector from "@/components/PresetSelector.vue";
 import BasePopup from "@/components/base/BasePopup.vue";
 import BaseStripCheckbox from "@/components/base/BaseStripCheckbox.vue";
+import BaseCheckbox from "@/components/base/BaseCheckbox.vue";
 import BaseTextInput from "@/components/base/BaseTextInput.vue";
 import { getSocket } from "@/socket";
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -89,7 +103,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 library.add( faPlus );
 export default {
   name: "Home",
-  components: { FontAwesomeIcon, BaseTextInput, BaseStripCheckbox, BasePopup, PresetSelector, StripList, EffectSelector, PatternSelector },
+  components: { FontAwesomeIcon, BaseCheckbox, BaseTextInput, BaseStripCheckbox, BasePopup, PresetSelector, StripList, EffectSelector, PatternSelector },
   data() {
     return {
       socket: undefined,
@@ -100,7 +114,8 @@ export default {
       stripGroupModal: {
         name: "",
         strips: [],
-        editIndex: null
+        editIndex: null,
+        shareRender: false
       },
       selectedPattern: {},
       selectedEffect: {},
@@ -112,6 +127,12 @@ export default {
       if( !this.ledStripConfig.length ) {
         return [];
       }
+      const groups = ( this.scriptGroups || [] )
+          .map( ( group, index ) => ( {
+            ...group,
+            sourceIndex: index
+          } ) )
+          .filter( group => !group.shareRender );
       return [
         {
           name: "Select All",
@@ -123,16 +144,71 @@ export default {
           strips: [],
           isBuiltIn: true
         },
-        ...( this.scriptGroups || [] ).map( ( group, index ) => ( {
-          ...group,
-          sourceIndex: index
-        } ) ),
+        ...groups,
         {
           name: "+ Group",
           strips: null,
           isAdd: true
         }
       ];
+    },
+    sharedRenderGroups() {
+      return ( this.scriptGroups || [] )
+          .map( ( group, index ) => ( {
+            ...group,
+            sourceIndex: index
+          } ) )
+          .filter( group => group.shareRender );
+    },
+    selectedSharedGroups() {
+      return ( this.selectedStrips || [] )
+          .filter( stripId => this.isSharedRenderId( stripId ) )
+          .map( stripId => this.sharedRenderGroups.find( group => group.sourceIndex === stripId[1] ) )
+          .filter( Boolean );
+    },
+    disabledStripKeys() {
+      const keys = new Set();
+      this.selectedSharedGroups.forEach( group => {
+        ( group.strips || [] ).forEach( stripId => {
+          const key = this.stripIdKey( stripId );
+          if( key ) {
+            keys.add( key );
+          }
+        } );
+      } );
+      return keys;
+    },
+    disabledSharedGroupKeys() {
+      const keys = new Set();
+      const selectedSharedKeys = new Set(
+          this.selectedSharedGroups.map( group => `sharedRender.${group.sourceIndex}` )
+      );
+      this.sharedRenderGroups.forEach( group => {
+        const groupKey = `sharedRender.${group.sourceIndex}`;
+        if( selectedSharedKeys.has( groupKey ) ) {
+          return;
+        }
+        const overlaps = ( group.strips || [] )
+            .some( stripId => this.disabledStripKeys.has( this.stripIdKey( stripId ) ) );
+        if( overlaps ) {
+          keys.add( groupKey );
+        }
+      } );
+      return keys;
+    },
+    displayStripConfig() {
+      const baseStrips = this.ledStripConfig.map( strip => ( {
+        ...strip,
+        disabled: this.disabledStripKeys.has( this.stripIdKey( strip.id ) )
+      } ) );
+      const sharedStrips = this.sharedRenderGroups.map( group => ( {
+        id: [ "sharedRender", group.sourceIndex ],
+        name: group.name || `Group ${group.sourceIndex}`,
+        shareRender: true,
+        disabled: this.disabledSharedGroupKeys.has( `sharedRender.${group.sourceIndex}` ),
+        labelClass: "shared-render-label"
+      } ) );
+      return baseStrips.concat( sharedStrips );
     },
     stripGroupModalTitle() {
       if( this.stripGroupModal.editIndex !== null && this.stripGroupModal.editIndex !== undefined ) {
@@ -168,6 +244,9 @@ export default {
     },
     stripIdKey( id ) {
       if( Array.isArray( id ) ) {
+        if( id[0] === "sharedRender" ) {
+          return `sharedRender.${ id[1] }`;
+        }
         return `${ id[0] }.${ id[1] }`;
       }
       if( Number.isFinite( Number( id ) ) ) {
@@ -177,6 +256,12 @@ export default {
         }
       }
       return "";
+    },
+    selectionKey( id ) {
+      return this.stripIdKey( id );
+    },
+    isSharedRenderId( id ) {
+      return Array.isArray( id ) && id[0] === "sharedRender";
     },
     normalizeStripId( id ) {
       if( Array.isArray( id ) ) {
@@ -213,11 +298,11 @@ export default {
       return unique;
     },
     isStripSelected( selectedStrips, stripId ) {
-      const key = this.stripIdKey( stripId );
+      const key = this.selectionKey( stripId );
       if( !key ) {
         return false;
       }
-      return ( selectedStrips || [] ).some( entry => this.stripIdKey( entry ) === key );
+      return ( selectedStrips || [] ).some( entry => this.selectionKey( entry ) === key );
     },
     toggleGroupStrip( stripId, enabled ) {
       const strips = ( this.stripGroupModal.strips || [] ).slice();
@@ -236,9 +321,89 @@ export default {
         const groups = Array.isArray( data ) ? data : [];
         this.scriptGroups = groups.map( group => ( {
           ...group,
-          strips: this.uniqueStripIds( group.strips || [] )
+          strips: this.uniqueStripIds( group.strips || [] ),
+          shareRender: Boolean( group.shareRender )
         } ) );
       } );
+    },
+    normalizeSelection( selected ) {
+      const normalized = [];
+      ( selected || [] ).forEach( entry => {
+        if( this.isSharedRenderId( entry ) ) {
+          normalized.push( [ "sharedRender", entry[1] ] );
+          return;
+        }
+        const strip = this.normalizeStripId( entry );
+        if( strip ) {
+          normalized.push( strip );
+        }
+      } );
+      return normalized;
+    },
+    setSelectedStrips( selected ) {
+      const next = this.normalizeSelection( selected );
+      const resolved = [];
+      const prevKeys = new Set( ( this.selectedStrips || [] ).map( item => this.selectionKey( item ) ) );
+      const nextKeys = new Set( next.map( item => this.selectionKey( item ) ) );
+      const addedSharedKeys = new Set(
+          [ ...nextKeys ]
+              .filter( key => !prevKeys.has( key ) && key.startsWith( "sharedRender." ) )
+      );
+
+      const sharedEntries = next
+          .filter( entry => this.isSharedRenderId( entry ) )
+          .map( entry => {
+            const group = this.sharedRenderGroups.find( item => item.sourceIndex === entry[1] );
+            if( !group ) {
+              return null;
+            }
+            return {
+              id: [ "sharedRender", group.sourceIndex ],
+              key: `sharedRender.${group.sourceIndex}`,
+              group
+            };
+          } )
+          .filter( Boolean );
+
+      const selectedSharedStripKeys = new Set();
+      const addSharedGroup = ( entry ) => {
+        const groupKeys = ( entry.group.strips || [] )
+            .map( stripId => this.stripIdKey( stripId ) )
+            .filter( Boolean );
+        const overlaps = groupKeys.some( key => selectedSharedStripKeys.has( key ) );
+        if( overlaps ) {
+          return;
+        }
+        resolved.push( entry.id );
+        groupKeys.forEach( key => selectedSharedStripKeys.add( key ) );
+      };
+
+      sharedEntries.forEach( entry => {
+        if( addedSharedKeys.has( entry.key ) ) {
+          addSharedGroup( entry );
+        }
+      } );
+      sharedEntries.forEach( entry => {
+        if( addedSharedKeys.has( entry.key ) ) {
+          return;
+        }
+        addSharedGroup( entry );
+      } );
+
+      next.forEach( entry => {
+        if( this.isSharedRenderId( entry ) ) {
+          return;
+        }
+        const key = this.stripIdKey( entry );
+        if( !key || selectedSharedStripKeys.has( key ) ) {
+          return;
+        }
+        if( resolved.some( item => this.selectionKey( item ) === key ) ) {
+          return;
+        }
+        resolved.push( entry );
+      } );
+      this.selectedStrips = resolved;
     },
     async selectStripGroup( group ) {
       if( group?.isAdd ) {
@@ -247,7 +412,7 @@ export default {
       }
       const next = this.uniqueStripIds( group?.strips || [] );
       if( !next.length ) {
-        this.selectedStrips = [];
+        this.setSelectedStrips( [] );
         return;
       }
       const allSelected = next.every( stripId => this.isStripSelected( this.selectedStrips, stripId ) );
@@ -255,10 +420,10 @@ export default {
         const remaining = ( this.selectedStrips || [] ).filter(
             stripId => !this.isStripSelected( next, stripId )
         );
-        this.selectedStrips = this.uniqueStripIds( remaining );
+        this.setSelectedStrips( this.uniqueStripIds( remaining ) );
         return;
       }
-      this.selectedStrips = next;
+      this.setSelectedStrips( next );
     },
     async editStripGroup( group ) {
       if( !group || group.isAdd || group.isBuiltIn ) {
@@ -266,18 +431,29 @@ export default {
       }
       await this.openStripGroupModal( group );
     },
+    async editStripFromList( strip ) {
+      if( !strip?.shareRender ) {
+        return;
+      }
+      const group = this.sharedRenderGroups.find( item => item.sourceIndex === strip.id?.[1] );
+      if( group ) {
+        await this.openStripGroupModal( group );
+      }
+    },
     async openStripGroupModal( group = null ) {
       if( group ) {
         this.stripGroupModal = {
           name: group.name || "",
           strips: this.uniqueStripIds( group.strips || [] ),
-          editIndex: group.sourceIndex
+          editIndex: group.sourceIndex,
+          shareRender: Boolean( group.shareRender )
         };
       } else {
         this.stripGroupModal = {
           name: "",
           strips: this.uniqueStripIds( this.selectedStrips || [] ),
-          editIndex: null
+          editIndex: null,
+          shareRender: false
         };
       }
       try {
@@ -287,10 +463,11 @@ export default {
           return;
         }
         const strips = this.uniqueStripIds( this.stripGroupModal.strips || [] );
+        const shareRender = Boolean( this.stripGroupModal.shareRender );
         if( this.stripGroupModal.editIndex !== null && this.stripGroupModal.editIndex !== undefined ) {
-          this.socket.emit( 'editStripGroup', 'update', { name, strips }, this.stripGroupModal.editIndex );
+          this.socket.emit( 'editStripGroup', 'update', { name, strips, shareRender }, this.stripGroupModal.editIndex );
         } else {
-          this.socket.emit( 'editStripGroup', 'add', { name, strips } );
+          this.socket.emit( 'editStripGroup', 'add', { name, strips, shareRender } );
         }
         this.fetchStripGroups();
       } catch ( e ) {
@@ -311,8 +488,12 @@ export default {
     },
     setLEDs() {
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
+      const selectionSnapshot = JSON.parse( JSON.stringify( this.selectedStrips || [] ) );
       ledConfig.trigger = "website";
       this.socket.emit( 'setLEDs', ledConfig );
+      this.$nextTick( () => {
+        this.setSelectedStrips( selectionSnapshot );
+      } );
     }
   },
   created() {
@@ -338,3 +519,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.shared-render-label {
+  border: 1px solid rgba(30, 60, 120, 0.35);
+  color: #1b3f6b;
+  background-color: transparent;
+}
+</style>
