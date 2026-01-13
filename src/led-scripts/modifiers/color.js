@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     'id': "color",
@@ -36,7 +36,7 @@ module.exports = {
             newColor[0] = color[Number(options.redTo)] * options.red / 100;
             newColor[1] = color[Number(options.greenTo)] * options.green / 100;
             newColor[2] = color[Number(options.blueTo)] * options.blue / 100;
-            tempArr[i] = new Color( newColor ).getHex( false );
+            tempArr[i] = new Color( newColor ).getHex();
         }
         return tempArr;
     }

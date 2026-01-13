@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     id: "saturation-shift",
@@ -17,7 +17,7 @@ module.exports = {
             if ( newColor[1] > 100 ) {
                 newColor[1] = 100;
             }
-            return new Color( newColor, 'hsl' ).getHex( false );
+            return new Color( newColor, 'hsl' ).getHex();
         } );
     }
 };

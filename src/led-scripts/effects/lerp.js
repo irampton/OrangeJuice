@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 const { randomNum, randomInt } = require( '../led-scripts-helper' );
 
 module.exports = {
@@ -53,7 +53,7 @@ module.exports = {
                 callback( this.outputArray.fill( this.color2 ) );
             } else {
                 const fadeAmount = 1 - this.fadeAt / this.fadeSpeed;
-                const adjustedColor = new Color( this.color1, 'hex' ).lerp( new Color( this.color2, 'hex' ), fadeAmount ).getHex( false );
+                const adjustedColor = new Color( this.color1, 'hex' ).lerp( new Color( this.color2, 'hex' ), fadeAmount ).getHex();
                 callback( this.outputArray.fill( adjustedColor ) );
             }
         }

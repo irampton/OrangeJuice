@@ -490,6 +490,7 @@ export default {
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
       const selectionSnapshot = JSON.parse( JSON.stringify( this.selectedStrips || [] ) );
       ledConfig.trigger = "website";
+      console.log(ledConfig);
       this.socket.emit( 'setLEDs', ledConfig );
       this.$nextTick( () => {
         this.setSelectedStrips( selectionSnapshot );

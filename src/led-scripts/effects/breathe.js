@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 const { randomNum, randomInt } = require( '../led-scripts-helper' );
 
 module.exports = {
@@ -75,7 +75,7 @@ module.exports = {
                     if( fadeInAmount > this.maxBrightness){
                         fadeInAmount = this.maxBrightness
                     }
-                    callback( out.map( v => new Color( v, 'hex' ).brightness( fadeInAmount ).getHex( false ) ) );
+                    callback( out.map( v => new Color( v, 'hex' ).brightness( fadeInAmount ).getHex() ) );
                     return;
                 case 'fade-out':
                     this.counter -= 1 / this.steps;
@@ -89,7 +89,7 @@ module.exports = {
                     if ( fadeOutAmount < this.minBrightness ) {
                         fadeOutAmount = this.minBrightness;
                     }
-                    callback( out.map( v => new Color( v, 'hex' ).brightness( fadeOutAmount ).getHex( false ) ) );
+                    callback( out.map( v => new Color( v, 'hex' ).brightness( fadeOutAmount ).getHex() ) );
                     return;
             }
         }

@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 const { randomInt } = require( '../led-scripts-helper' );
 
 module.exports = {
@@ -131,7 +131,7 @@ module.exports = {
                     const amt = steps === 0 ? 0 : ( s / steps );
                     out[led] = new Color( colors[i], 'hex' )
                         .lerp( new Color( colors[next], 'hex' ), amt )
-                        .getHex( false );
+                        .getHex();
                 }
             }
             return out;
@@ -178,7 +178,7 @@ module.exports = {
                 } else {
                     this.blendedGradient[i] = new Color( base, 'hex' )
                         .lerp( new Color( target, 'hex' ), this.fadeProgress )
-                        .getHex( false );
+                        .getHex();
                 }
             }
 
@@ -203,7 +203,7 @@ module.exports = {
                 } else {
                     this.outputArray[j] = new Color( this.blendedGradient[i0], 'hex' )
                         .lerp( new Color( this.blendedGradient[i1], 'hex' ), frac )
-                        .getHex( false );
+                        .getHex();
                 }
             }
 

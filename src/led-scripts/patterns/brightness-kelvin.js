@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     id: "brightness-kelvin",
@@ -8,6 +8,6 @@ module.exports = {
         { id: "brightness", name: "Brightness", type: "number", default: 100 }
     ],
     generate: ( numLEDs, { kelvin, brightness } ) => {
-        return new Array(numLEDs).fill(new Color( kelvin, 'kelvin' ).brightness( brightness ).getHex( false ));
+        return new Array(numLEDs).fill(new Color( kelvin, 'kelvin' ).brightness( brightness ).getHex());
     }
 };

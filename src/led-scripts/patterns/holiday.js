@@ -44,6 +44,6 @@ module.exports = {
                 break;
         }
 
-        return arr.map( c => new Color( c, 'hex' ).brightness( brightness ).getHex( false ) );
+        return arr.map( c => new Color( c, 'hexText' ).brightness( brightness ).getHex() );
     }
 };

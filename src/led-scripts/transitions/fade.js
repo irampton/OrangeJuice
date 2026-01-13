@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     'id': "fade",
@@ -18,7 +18,7 @@ module.exports = {
             let arr = [];
             let percent = this.currentStep / (this.steps - 1);
             for ( let i = 0; i < this.rgb.length; i++ ) {
-                arr.push( this.oldRgb[i].lerp( this.rgb[i], percent ).getHex( false ) );
+                arr.push( this.oldRgb[i].lerp( this.rgb[i], percent ).getHex() );
             }
             this.currentStep++;
             if ( this.currentStep >= this.steps ) {

@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 const { randomNum } = require( '../led-scripts-helper' );
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
         this.step = function ( callback ) {
             this.timerMap = this.timerMap.map( v => v <= (this.speed * -2) ? randomNum( this.minTime, this.maxTime ) : v - (1 / this.steps) );
             this.brigtnessMap = this.brigtnessMap.map( ( v, index ) => this.timerMap[index] >= 0 ? this.averageBrightness : ((1 - (Math.abs( this.timerMap[index] + this.speed ) / this.speed)) * this.diffrence) + this.averageBrightness );
-            callback( this.patternArray.map( ( v, index ) => new Color( v, 'hex' ).brightness( this.brigtnessMap[index] ).getHex( false ) ) );
+            callback( this.patternArray.map( ( v, index ) => new Color( v, 'hex' ).brightness( this.brigtnessMap[index] ).getHex() ) );
         }
     }
 };

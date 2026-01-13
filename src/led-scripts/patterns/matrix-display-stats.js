@@ -35,7 +35,7 @@ module.exports = {
                 if ( matrix[i][j] === 0 ) {
                     arr.push( "000000" );
                 } else {
-                    arr.push( new Color( matrix[i][j], 'hex' ).brightness( (options?.brightness ?? .2) * 100 ).getHex( false ) );
+                    arr.push( new Color( matrix[i][j], 'hexText' ).brightness( (options?.brightness ?? .2) * 100 ).getHex() );
                 }
             }
 

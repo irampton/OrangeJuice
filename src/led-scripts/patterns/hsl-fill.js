@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     'id': "hsl-fill",
@@ -12,7 +12,7 @@ module.exports = {
         { 'id': "brightness", 'name': "Brightness", 'type': "number", 'default': 100 }
     ],
     'generate': ( numLEDs, options ) => {
-        let color = new Color( [options.hue, options.saturation, options.lightness], 'hsl' ).brightness( options.brightness ).getHex( false );
+        let color = new Color( [options.hue, options.saturation, options.lightness], 'hsl' ).brightness( options.brightness ).getHex();
         let arr = [];
         for ( let i = 0; i < numLEDs; i++ ) {
             arr.push( color );

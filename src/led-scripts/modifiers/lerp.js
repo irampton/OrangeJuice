@@ -1,4 +1,4 @@
-const { Color } = require( '@orangejedi/yacml' );
+const { Color } = require( '../../YACML' );
 
 module.exports = {
     id: "lerp-shift",
@@ -9,6 +9,6 @@ module.exports = {
     ],
     modify: ( arr, { color, amount } ) => {
         const lerpColor = new Color(color, 'hex');
-        return arr.map( v => new Color( v, 'hex' ).lerp(lerpColor, Number( amount ) / 100 ).getHex( false ) );
+        return arr.map( v => new Color( v, 'hex' ).lerp(lerpColor, Number( amount ) / 100 ).getHex() );
     }
 };

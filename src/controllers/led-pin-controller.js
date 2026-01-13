@@ -30,7 +30,7 @@ module.exports = function ( arr ) {
         return {
             updateLEDs: function ( arr ) {
                 for ( let j = 0; j < arr.length; j++ ) {
-                    channels[i].array[j] = parseInt( arr[j], 16 );
+                    channels[i].array[j] =  arr[j];
                 }
                 ws281x.render();
             }
