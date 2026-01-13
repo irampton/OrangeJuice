@@ -88,7 +88,7 @@ export default {
       default: "Transition"
     }
   },
-  emits: [ "update:modelValue" ],
+  emits: ["update:modelValue"],
   data() {
     return {
       selection: {
@@ -106,7 +106,7 @@ export default {
       const arr = [
         { id: 'none', name: 'Off' }
       ];
-      if ( this.ledScripts?.transitions?.list ) {
+      if( this.ledScripts?.transitions?.list ) {
         arr.push( ...this.ledScripts.transitions.list.map( id => ( {
           id,
           name: this.ledScripts.transitions[id].name
@@ -129,8 +129,8 @@ export default {
       },
       deep: true
     },
-    'selection.id': function () {
-      if ( this.ignoreWatch ) {
+    'selection.id': function() {
+      if( this.ignoreWatch ) {
         return;
       }
       this.selection.selectedOptions = this.buildTransitionOptions( this.selection.id );
@@ -140,7 +140,7 @@ export default {
     },
     'selection.selectedOptions': {
       handler() {
-        if ( this.ignoreWatch || !this.inline ) {
+        if( this.ignoreWatch || !this.inline ) {
           return;
         }
         this.emitSelection();
@@ -153,7 +153,7 @@ export default {
   },
   methods: {
     buildTransitionOptions( transitionId, existingOptions = {} ) {
-      if ( !this.ledScripts?.transitions?.[transitionId] ) {
+      if( !this.ledScripts?.transitions?.[transitionId] ) {
         return [];
       }
       return this.ledScripts.transitions[transitionId].options.map( option => ( {
@@ -165,7 +165,7 @@ export default {
       this.$emit( 'update:modelValue', {
         id: this.selection.id,
         options: Object.fromEntries(
-            this.selection.selectedOptions.map( option => [ option.id, option.value ] )
+            this.selection.selectedOptions.map( option => [option.id, option.value] )
         )
       } );
     },
@@ -194,7 +194,7 @@ export default {
       try {
         await this.$refs.transitionModal.open();
         this.emitSelection();
-      } catch ( e ) {
+      } catch( e ) {
         return;
       }
     }

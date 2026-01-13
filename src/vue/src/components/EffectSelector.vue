@@ -51,7 +51,7 @@ export default {
           name: 'None'
         }
       ];
-      if ( this.effects?.list ) {
+      if( this.effects?.list ) {
         arr.push( ...this.effects.list.map( id => ( { id, name: this.effects[id].name } ) ) );
       }
       return arr;
@@ -75,7 +75,7 @@ export default {
         this.noUpdate = true;
         const value = {
           id: this.selectedEffect,
-          options: Object.fromEntries( this.selectedOptions.map( o => [ o.id, o.value ] ) )
+          options: Object.fromEntries( this.selectedOptions.map( o => [o.id, o.value] ) )
         };
         this.$emit( 'update:modelValue', value );
         this.$nextTick( () => this.noUpdate = false );
@@ -84,10 +84,10 @@ export default {
     modelValue: {
       deep: true,
       handler() {
-        if(this.modelValue.id === 'none'){
+        if( this.modelValue.id === 'none' ) {
           this.selectedEffect = this.modelValue.id;
         }
-        if ( this.noUpdate || !( this.modelValue.id && this.effects[this.modelValue.id] ) ) {
+        if( this.noUpdate || !( this.modelValue.id && this.effects[this.modelValue.id] ) ) {
           return;
         }
         this.selectedEffect = this.modelValue.id;

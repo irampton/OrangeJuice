@@ -25,6 +25,7 @@
 
 <script>
 import { HELPER } from "@/mixins/HELPER.js";
+
 export default {
   name: "BasePopup",
   props: {
@@ -36,7 +37,7 @@ export default {
       type: String,
       default: "Save"
     },
-    saveColor:{
+    saveColor: {
       type: String,
       default: "action"
     },
@@ -55,8 +56,8 @@ export default {
     }
   },
   computed: {
-    saveButtonColor(){
-      return HELPER.colorClass(this.saveColor);
+    saveButtonColor() {
+      return HELPER.colorClass( this.saveColor );
     }
   },
   methods: {
@@ -69,7 +70,7 @@ export default {
     },
     internalClose( success = false ) {
       this.isOpen = false;
-      if ( success ) {
+      if( success ) {
         this.resolve();
       } else {
         this.reject();

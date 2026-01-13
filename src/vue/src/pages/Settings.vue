@@ -728,12 +728,12 @@ export default {
   methods: {
     stripIdKey( id ) {
       if( Array.isArray( id ) ) {
-        return `${ id[0] }.${ id[1] }`;
+        return `${id[0]}.${id[1]}`;
       }
       if( Number.isFinite( Number( id ) ) ) {
         const strip = this.stripConfig?.[Number( id )];
         if( strip ) {
-          return `${ strip.controller }.${ strip.controllerStripIndex }`;
+          return `${strip.controller}.${strip.controllerStripIndex}`;
         }
       }
       return "";
@@ -1358,7 +1358,7 @@ export default {
         if( !strip ) {
           return {
             id: stripId,
-            key: key || `${ stripId }`,
+            key: key || `${stripId}`,
             name: `Strip ${key || stripId}`,
             type: "strip"
           };

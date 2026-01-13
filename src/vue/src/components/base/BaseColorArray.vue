@@ -61,7 +61,7 @@ export default {
       } );
     },
     removeColor() {
-      if ( this.colorArr.length > 0 ) {
+      if( this.colorArr.length > 0 ) {
         this.colorArr.splice( 0, 1 );
       }
     }

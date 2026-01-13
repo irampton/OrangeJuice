@@ -40,13 +40,13 @@ export default {
   },
   methods: {
     stripIdKey( id ) {
-      if ( Array.isArray( id ) ) {
-        if ( id[0] === "sharedRender" ) {
-          return `sharedRender.${ id[1] }`;
+      if( Array.isArray( id ) ) {
+        if( id[0] === "sharedRender" ) {
+          return `sharedRender.${id[1]}`;
         }
-        return `${ id[0] }.${ id[1] }`;
+        return `${id[0]}.${id[1]}`;
       }
-      return `${ id }`;
+      return `${id}`;
     },
     stripKeyForIndex( strip, index ) {
       return this.stripIdKey( strip?.id ?? index );

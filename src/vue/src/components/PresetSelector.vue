@@ -82,14 +82,14 @@ export default {
   },
   methods: {
     setPreset() {
-      if ( this.selectedPreset === null ) {
+      if( this.selectedPreset === null ) {
         return;
       }
 
       this.socket.emit( 'setLEDs', this.presets[this.selectedPreset] );
     },
     loadPreset() {
-      if ( this.selectedPreset === null ) {
+      if( this.selectedPreset === null ) {
         return;
       }
 
@@ -116,13 +116,13 @@ export default {
         };
         this.socket.emit( 'editPresets', 'add', preset );
         this.presets.push( preset );
-      } catch ( e ) {
+      } catch( e ) {
         //popup closed, no action needed
       }
       this.nameText = "";
     },
     updatePreset() {
-      if ( this.selectedPreset === null ) {
+      if( this.selectedPreset === null ) {
         return;
       }
 
@@ -135,7 +135,7 @@ export default {
       this.presets[this.selectedPreset] = preset;
     },
     deletePreset() {
-      if ( this.selectedPreset === null ) {
+      if( this.selectedPreset === null ) {
         return;
       }
 

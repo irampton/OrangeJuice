@@ -133,8 +133,8 @@ function rgbToHex( arr ) {
 
 function hexToRgb( hex ) {
 	return [
-		(hex >> 16) & 0xff,
-		(hex >> 8) & 0xff,
+		( hex >> 16 ) & 0xff,
+		( hex >> 8 ) & 0xff,
 		hex & 0xff
 	];
 }
