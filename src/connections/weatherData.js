@@ -1,8 +1,6 @@
 const DHT11 = require( 'node-dht-sensor' );
 const AHT20 = require( "aht20" );
-const https = require( "https" );
-const { URL } = require( "url" );
-const cheerio = require( "cheerio" );
+const { fetchWeatherApi } = require( "openmeteo" );
 
 
 //assign data to the passed by reference object
@@ -13,7 +11,7 @@ module.exports = {
 let sensor;
 let type;
 
-function setData( weatherData, { useSensor, fetchOnlineData, sensorType } ) {
+function setData( weatherData, { useSensor, fetchOnlineData, sensorType, userData } ) {
 	if( useSensor ) {
 		type = sensorType;
 		if( sensorType === "AHT20" ) {
@@ -35,8 +33,9 @@ function setData( weatherData, { useSensor, fetchOnlineData, sensorType } ) {
 		setInterval( () => getIndoorData( weatherData ), 2000 );
 	}
 	if( fetchOnlineData ) {
-		getOutdoorData( weatherData );
-		setInterval( () => getOutdoorData( weatherData ), 30000 );
+		const weatherLocation = userData?.weather || {};
+		getOutdoorData( weatherData, weatherLocation );
+		setInterval( () => getOutdoorData( weatherData, weatherLocation ), 30000 );
 	}
 }
 
@@ -51,59 +50,70 @@ async function getIndoorData( weatherData ) {
 	}
 }
 
-function getOutdoorData( weatherData ) {
-	let url = "https://marvin.byu.edu/Weather/cgi-bin/textbritish";
-	fetchText( url, ( error, body ) => {
-		if( error ) {
-			console.warn( "Failed to fetch weather data:", error.message );
+async function getOutdoorData( weatherData, weatherLocation ) {
+	const latitude = Number( weatherLocation?.latitude );
+	const longitude = Number( weatherLocation?.longitude );
+	if( !Number.isFinite( latitude ) || !Number.isFinite( longitude ) ) {
+		console.warn( "Missing or invalid weather location data (latitude/longitude)." );
+		return;
+	}
+	try {
+		const params = {
+			latitude: [latitude],
+			longitude: [longitude],
+			current: "temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,shortwave_radiation"
+		};
+		const url = "https://api.open-meteo.com/v1/forecast";
+		const responses = await fetchWeatherApi( url, params );
+		const response = responses[0];
+		const current = response?.current();
+		if( !current ) {
+			console.warn( "Open-Meteo returned no current weather data." );
 			return;
 		}
-		//console.log('body:', body);
-		const $ = cheerio.load( body );
-		let path = $( 'td' );
+		// Keep index order in sync with params.current
+		const temp = current.variables( 0 )?.value();
+		const humidity = current.variables( 1 )?.value();
+		const dewpoint = current.variables( 2 )?.value();
+		const apparent = current.variables( 3 )?.value();
+		const pressure = current.variables( 4 )?.value();
+		const windSpeed = current.variables( 5 )?.value();
+		const windDirection = current.variables( 6 )?.value();
+		const windGusts = current.variables( 7 )?.value();
+		const solar = current.variables( 8 )?.value();
+
 		weatherData.outdoor = {
-			tempText: path[3].children[0].data,
-			temp: Number( path[3].children[0].data.match( /\d+/g )[0] ),
-			tempRising: path[4].children[0].data.includes( "rising" ),
-			humidityText: path[6].children[0].data,
-			humidity: Number( path[6].children[0].data.match( /\d+/g )[0] ),
-			humidityRising: path[7].children[0].data.includes( "rising" ),
-			dewpointText: path[9].children[0].data,
-			dewpoint: Number( path[9].children[0].data.match( /\d+/g )[0] ),
-			pressureText: path[12].children[0].data,
-			pressure: Number( path[12].children[0].data.match( /[\d.]+/g )[0] ),
-			windText: path[17].children[0].data,
-			windSpeed: Number( path[17].children[0].data.match( /\d+/g )[0] ),
-			windDirectionCardinal: path[17].children[0].data.match( /[NSEW]+/g )[0],
-			WindDirectionDegrees: Number( path[17].children[0].data.match( /\d+/g )[1] ),
-			solarText: path[19].children[0].data,
-			solar: Number( path[19].children[0].data.match( /[\d.]+/g )[0] ),
-			windChillText: path[26].children[0].data,
-			windChill: Number( path[26].children[0].data.match( /\d+/g )[0] ),
-			heatIndexText: path[28].children[0].data,
-			heatIndex: Number( path[28].children[0].data.match( /\d+/g )[0] )
-		}
-	} );
+			tempText: temp != null ? `${temp.toFixed( 1 )} C` : "",
+			temp: temp != null ? Math.round( temp ) : "",
+			tempRising: false,
+			humidityText: humidity != null ? `${Math.round( humidity )}%` : "",
+			humidity: humidity != null ? Math.round( humidity ) : "",
+			humidityRising: false,
+			dewpointText: dewpoint != null ? `${dewpoint.toFixed( 1 )} C` : "",
+			dewpoint: dewpoint != null ? Math.round( dewpoint ) : "",
+			pressureText: pressure != null ? `${pressure.toFixed( 1 )} hPa` : "",
+			pressure: pressure != null ? Number( pressure.toFixed( 1 ) ) : "",
+			windText: windSpeed != null ? `${windSpeed.toFixed( 1 )} km/h` : "",
+			windSpeed: windSpeed != null ? Math.round( windSpeed ) : "",
+			windDirectionCardinal: windDirection != null ? degreesToCardinal( windDirection ) : "",
+			WindDirectionDegrees: windDirection != null ? Math.round( windDirection ) : "",
+			solarText: solar != null ? `${solar.toFixed( 1 )} W/m2` : "",
+			solar: solar != null ? Number( solar.toFixed( 1 ) ) : "",
+			windChillText: apparent != null ? `${apparent.toFixed( 1 )} C` : "",
+			windChill: apparent != null ? Math.round( apparent ) : "",
+			heatIndexText: apparent != null ? `${apparent.toFixed( 1 )} C` : "",
+			heatIndex: apparent != null ? Math.round( apparent ) : "",
+			windGustText: windGusts != null ? `${windGusts.toFixed( 1 )} km/h` : "",
+			windGust: windGusts != null ? Math.round( windGusts ) : ""
+		};
+	} catch( error ) {
+		console.warn( "Failed to fetch weather data:", error?.message || error );
+	}
 }
 
-function fetchText( url, callback ) {
-	const requestUrl = new URL( url );
-	const req = https.get( requestUrl, ( res ) => {
-		if( res.statusCode !== 200 ) {
-			res.resume();
-			callback( new Error( `HTTP ${res.statusCode}` ) );
-			return;
-		}
-		res.setEncoding( "utf8" );
-		let data = "";
-		res.on( "data", ( chunk ) => {
-			data += chunk;
-		} );
-		res.on( "end", () => {
-			callback( null, data );
-		} );
-	} );
-	req.on( "error", ( error ) => {
-		callback( error );
-	} );
+function degreesToCardinal( degrees ) {
+	const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+	const normalized = ( degrees % 360 + 360 ) % 360;
+	const index = Math.round( normalized / 45 ) % 8;
+	return directions[index];
 }

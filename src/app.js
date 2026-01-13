@@ -22,6 +22,14 @@ let disconnectConfigs = config.get( 'disconnectConfigs' );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
 let userPresets = config.get( 'userPresets' ) ?? [];
+let userData = config.get( "userData" );
+if( !userData || typeof userData !== "object" ) {
+	userData = { weather: { latitude: 0, longitude: 0 } };
+	config.set( "userData", userData );
+} else if( !userData.weather || typeof userData.weather !== "object" ) {
+	userData.weather = { latitude: 0, longitude: 0 };
+	config.set( "userData", userData );
+}
 
 const MAX_FPS = 48;
 
@@ -255,7 +263,8 @@ if( features.weatherSensor || features.weatherFetch ) {
 	require( "./connections/weatherData.js" ).setData( weatherData, {
 		useSensor: features.weatherSensor,
 		fetchOnlineData: features.weatherFetch,
-		sensorType: features.sensorType
+		sensorType: features.sensorType,
+		userData
 	} );
 }
 
