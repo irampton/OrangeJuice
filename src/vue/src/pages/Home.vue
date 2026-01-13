@@ -31,7 +31,14 @@
         </div>
       </div>
     </div>
-    <button class="button is-primary is-large is-fullwidth" @click="setLEDs">Set Pattern & Effect</button>
+    <div class="transition-controls">
+      <button class="button transition-gear" @click="openTransitionModal" aria-label="Transition Settings">
+        <span class="icon">
+          <FontAwesomeIcon :icon="['fas', 'gear']"/>
+        </span>
+      </button>
+      <button class="button is-primary is-large transition-action" @click="setLEDs">Set Pattern & Effect</button>
+    </div>
     <div class="columns is-mobile is-multiline mt-3">
       <div class="column box is-full">
         <PresetSelector
@@ -83,6 +90,25 @@
         <button class="button" @click="$refs.stripGroupModal.internalClose()">Cancel</button>
       </template>
     </BasePopup>
+
+    <BasePopup ref="transitionModal" name="Transition Settings" save-text="Apply" save-color="success">
+      <div class="field">
+        <label class="label">Transition</label>
+        <div class="control">
+          <BaseDropdown
+              :options="transitionOptionsList"
+              v-model="transitionModal.id"
+          />
+        </div>
+      </div>
+      <div class="block ml-1 mt-3" v-if="transitionModal.selectedOptions.length">
+        <Option
+            v-for="option in transitionModal.selectedOptions"
+            :key="option.id"
+            :option="option"
+        />
+      </div>
+    </BasePopup>
   </section>
 </template>
 
@@ -95,15 +121,17 @@ import BasePopup from "@/components/base/BasePopup.vue";
 import BaseStripCheckbox from "@/components/base/BaseStripCheckbox.vue";
 import BaseCheckbox from "@/components/base/BaseCheckbox.vue";
 import BaseTextInput from "@/components/base/BaseTextInput.vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import Option from "@/components/Option.vue";
 import { getSocket } from "@/socket";
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faGear } from '@fortawesome/free-solid-svg-icons';
 
-library.add( faPlus );
+library.add( faPlus, faGear );
 export default {
   name: "Home",
-  components: { FontAwesomeIcon, BaseCheckbox, BaseTextInput, BaseStripCheckbox, BasePopup, PresetSelector, StripList, EffectSelector, PatternSelector },
+  components: { FontAwesomeIcon, Option, BaseDropdown, BaseCheckbox, BaseTextInput, BaseStripCheckbox, BasePopup, PresetSelector, StripList, EffectSelector, PatternSelector },
   data() {
     return {
       socket: undefined,
@@ -119,7 +147,16 @@ export default {
       },
       selectedPattern: {},
       selectedEffect: {},
-      selectedStrips: []
+      selectedStrips: [],
+      selectedTransition: {
+        id: 'none',
+        options: {}
+      },
+      transitionModal: {
+        id: 'none',
+        selectedOptions: []
+      },
+      transitionModalIgnoreWatch: false
     }
   },
   computed: {
@@ -225,9 +262,30 @@ export default {
         "effectOptions": isEffect ? this.selectedEffect.options : undefined,
         "strips": this.selectedStrips
       }
+    },
+    transitionOptionsList() {
+      const arr = [
+        { id: 'none', name: 'Off' }
+      ];
+      if ( this.ledScripts?.transitions?.list ) {
+        arr.push( ...this.ledScripts.transitions.list.map( id => ( {
+          id,
+          name: this.ledScripts.transitions[id].name
+        } ) ) );
+      }
+      return arr;
     }
   },
   methods: {
+    buildTransitionOptions( transitionId, existingOptions = {} ) {
+      if ( !this.ledScripts?.transitions?.[transitionId] ) {
+        return [];
+      }
+      return this.ledScripts.transitions[transitionId].options.map( o => ( {
+        ...o,
+        value: existingOptions[o.id] !== undefined ? existingOptions[o.id] : o.default
+      } ) );
+    },
     buildStripConfig( controllers ) {
       const strips = [];
       ( controllers || [] ).forEach( ( controller, controllerIndex ) => {
@@ -486,15 +544,48 @@ export default {
       this.fetchStripGroups();
       this.$refs.stripGroupModal.internalClose();
     },
+    async openTransitionModal() {
+      this.transitionModalIgnoreWatch = true;
+      this.transitionModal.id = this.selectedTransition?.id || 'none';
+      this.transitionModal.selectedOptions = this.buildTransitionOptions(
+          this.transitionModal.id,
+          this.selectedTransition?.options || {}
+      );
+      this.$nextTick( () => {
+        this.transitionModalIgnoreWatch = false;
+      } );
+      try {
+        await this.$refs.transitionModal.open();
+        this.selectedTransition = {
+          id: this.transitionModal.id,
+          options: Object.fromEntries(
+              this.transitionModal.selectedOptions.map( o => [ o.id, o.value ] )
+          )
+        };
+      } catch ( e ) {
+        return;
+      }
+    },
     setLEDs() {
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
       const selectionSnapshot = JSON.parse( JSON.stringify( this.selectedStrips || [] ) );
+      if ( this.selectedTransition?.id && this.selectedTransition.id !== 'none' ) {
+        ledConfig.transition = this.selectedTransition.id;
+        ledConfig.transitionOptions = this.selectedTransition.options;
+      }
       ledConfig.trigger = "website";
-      console.log(ledConfig);
       this.socket.emit( 'setLEDs', ledConfig );
       this.$nextTick( () => {
         this.setSelectedStrips( selectionSnapshot );
       } );
+    }
+  },
+  watch: {
+    'transitionModal.id': function () {
+      if ( this.transitionModalIgnoreWatch ) {
+        return;
+      }
+      this.transitionModal.selectedOptions = this.buildTransitionOptions( this.transitionModal.id );
     }
   },
   created() {
@@ -526,5 +617,15 @@ export default {
   border: 1px solid rgba(30, 60, 120, 0.35);
   color: #1b3f6b;
   background-color: transparent;
+}
+.transition-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+.transition-gear {
+  flex: 0 0 auto;
+}
+.transition-action {
+  flex: 1 1 auto;
 }
 </style>
