@@ -3,7 +3,6 @@ function registerWebSockets( http, {
     setFeatures,
     getControllersConfig,
     setControllersConfig,
-    getStripConfig,
     getLedScripts,
     matrixScripts,
     buttonMap,
@@ -23,7 +22,7 @@ function registerWebSockets( http, {
     drawLEDs,
     writeConfigToStrips,
     reloadLEDScripts,
-    rebuildControllersAndStrips,
+    rebuildControllers,
     setHomekitConfig,
     setLiveViewEnabled,
     setLiveViewEmitter
@@ -50,9 +49,6 @@ function registerWebSockets( http, {
         } );
 
         //new actually good stuff
-        socket.on( 'getStripConfig', ( callback ) => {
-            callback( getStripConfig() );
-        } );
         socket.on( 'getScripts', ( callback ) => {
             const ledScripts = getLedScripts();
             let scriptsList = {
@@ -116,7 +112,7 @@ function registerWebSockets( http, {
         socket.on( 'statsUpdate', ( data ) => {
             setConnectedSystemStats( data );
         } );
-        socket.on( 'editStripGroup', ( method, data ) => {
+        socket.on( 'editStripGroup', ( method, data, index ) => {
             const next = [ ...getScriptGroups() ];
             switch ( method ) {
                 case "add":
@@ -124,6 +120,11 @@ function registerWebSockets( http, {
                     break;
                 case "remove":
                     next.splice( data, 1 );
+                    break;
+                case "update":
+                    if ( index !== null && index !== undefined ) {
+                        next.splice( index, 1, data );
+                    }
                     break;
             }
             setScriptGroups( next );
@@ -174,7 +175,7 @@ function registerWebSockets( http, {
                     break;
                 case "controllers":
                     config.set( "controllers", data );
-                    rebuildControllersAndStrips( data );
+                    rebuildControllers( data );
                     setControllersConfig( data );
                     break;
                 case "homekit":

@@ -147,7 +147,7 @@
                     <div class="content is-flex is-flex-wrap-wrap">
                       <span
                           v-for="strip in stripsForService(service)"
-                          :key="strip.index"
+                          :key="strip.key"
                           :class="['tag', typeClass[strip.type] || 'is-light', 'is-medium', 'px-2', 'py-1', 'm-1']"
                       >
                         {{ strip.name }}
@@ -415,8 +415,8 @@
               v-for="(strip, index) in stripConfig"
               :key="`${strip.name}-${strip.controller}-${strip.controllerStripIndex}-${index}`"
               :name="strip.name || `Strip ${index}`"
-              :model-value="homekitServiceModal.strips.includes(index)"
-              @update:modelValue="toggleHomekitStrip(index, $event)"
+              :model-value="isStripSelected(homekitServiceModal.strips, strip.id)"
+              @update:modelValue="toggleHomekitStrip(strip.id, $event)"
           />
           <p v-if="!stripConfig.length" class="help ml-1">No strips available.</p>
         </div>
@@ -573,6 +573,7 @@ export default {
         ( controller.strips || [] ).forEach( ( strip, stripIndex ) => {
           strips.push( {
             ...strip,
+            id: [controllerIndex, stripIndex],
             controller: controllerIndex,
             controllerStripIndex: stripIndex
           } );
@@ -643,10 +644,10 @@ export default {
       return this.systemConfig?.displayMatrix || this.systemConfig?.matrixDisplay;
     },
     matrixStripIndex() {
-      return this.displayMatrix?.strip ?? "";
+      return this.stripIdKey( this.displayMatrix?.strip );
     },
     matrixStripName() {
-      const strip = this.stripConfig?.[this.displayMatrix?.strip];
+      const strip = this.getStripById( this.displayMatrix?.strip );
       return strip?.name || "";
     },
     matrixDefaultName() {
@@ -713,6 +714,49 @@ export default {
     }
   },
   methods: {
+    stripIdKey( id ) {
+      if( Array.isArray( id ) ) {
+        return `${ id[0] }.${ id[1] }`;
+      }
+      if( Number.isFinite( Number( id ) ) ) {
+        const strip = this.stripConfig?.[Number( id )];
+        if( strip ) {
+          return `${ strip.controller }.${ strip.controllerStripIndex }`;
+        }
+      }
+      return "";
+    },
+    normalizeStripId( id ) {
+      if( Array.isArray( id ) ) {
+        const controllerIndex = Number( id[0] );
+        const stripIndex = Number( id[1] );
+        if( Number.isFinite( controllerIndex ) && Number.isFinite( stripIndex ) ) {
+          return [controllerIndex, stripIndex];
+        }
+      }
+      const flatIndex = Number( id );
+      if( Number.isFinite( flatIndex ) ) {
+        const strip = this.stripConfig?.[flatIndex];
+        if( strip ) {
+          return [strip.controller, strip.controllerStripIndex];
+        }
+      }
+      return null;
+    },
+    isStripSelected( selectedStrips, stripId ) {
+      const key = this.stripIdKey( stripId );
+      if( !key ) {
+        return false;
+      }
+      return ( selectedStrips || [] ).some( entry => this.stripIdKey( entry ) === key );
+    },
+    getStripById( stripId ) {
+      const key = this.stripIdKey( stripId );
+      if( !key ) {
+        return null;
+      }
+      return this.stripConfig.find( strip => this.stripIdKey( strip.id ) === key ) || null;
+    },
     getStripEntry( index ) {
       const strip = this.stripConfig?.[index];
       if( !strip ) {
@@ -929,7 +973,8 @@ export default {
     },
     toggleHomekitStrip( stripIndex, enabled ) {
       const strips = this.homekitServiceModal.strips.slice();
-      const index = strips.indexOf( stripIndex );
+      const key = this.stripIdKey( stripIndex );
+      const index = strips.findIndex( entry => this.stripIdKey( entry ) === key );
       if( enabled && index === -1 ) {
         strips.push( stripIndex );
       }
@@ -951,8 +996,20 @@ export default {
         return false;
       }
       const services = this.getHomekitServices( accessory ).slice();
-      const strips = [...new Set( this.homekitServiceModal.strips.map( value => Number( value ) ) )]
-          .filter( value => Number.isFinite( value ) );
+      const uniqueStrips = [];
+      const seen = new Set();
+      this.homekitServiceModal.strips.forEach( value => {
+        const normalized = this.normalizeStripId( value );
+        if( !normalized ) {
+          return;
+        }
+        const key = this.stripIdKey( normalized );
+        if( !key || seen.has( key ) ) {
+          return;
+        }
+        seen.add( key );
+        uniqueStrips.push( normalized );
+      } );
       const temperature = Boolean( this.homekitServiceModal.temperature );
       const hueAndSat = Boolean( this.homekitServiceModal.hueAndSat );
       const index = this.editHomekitServiceIndex;
@@ -961,7 +1018,7 @@ export default {
       const service = {
         ...( existing || {} ),
         name,
-        strips,
+        strips: uniqueStrips,
         temperature,
         hueAndSat,
         type: existing?.type || this.homekitServiceModal.type || "light"
@@ -1274,29 +1331,34 @@ export default {
     },
     stripsForService( service ) {
       const strips = Array.isArray( service?.strips ) ? service.strips : [];
-      return strips.map( index => {
-        const strip = this.stripConfig?.[index];
+      return strips.map( stripId => {
+        const strip = this.getStripById( stripId );
+        const key = this.stripIdKey( stripId );
         if( !strip ) {
           return {
-            index,
-            name: `Strip ${index}`,
+            id: stripId,
+            key: key || `${ stripId }`,
+            name: `Strip ${key || stripId}`,
             type: "strip"
           };
         }
         return {
-          index,
+          id: stripId,
+          key,
           ...strip
         };
       } );
     },
     buttonStrips( config ) {
       const strips = ( config.strips || [] ).slice();
-      if( config.matrix && this.displayMatrix?.strip !== undefined && !strips.includes( this.displayMatrix.strip ) ) {
+      const matrixKey = this.stripIdKey( this.displayMatrix?.strip );
+      if( config.matrix && matrixKey && !strips.some( entry => this.stripIdKey( entry ) === matrixKey ) ) {
         strips.unshift( this.displayMatrix.strip );
       }
-      return strips.map( index => ( {
-        index,
-        ...this.stripConfig[index]
+      return strips.map( stripId => ( {
+        id: stripId,
+        key: this.stripIdKey( stripId ),
+        ...( this.getStripById( stripId ) || {} )
       } ) );
     },
     patternName( id ) {
