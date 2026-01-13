@@ -1,4 +1,4 @@
 export const PAGES = {
-    home: 'home',
-    settings: 'settings'
+	home: 'home',
+	settings: 'settings'
 };

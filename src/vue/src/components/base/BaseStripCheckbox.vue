@@ -51,10 +51,10 @@ export default {
     }
   },
   created() {
-    if ( !window.stripCheckboxCount ) {
+    if( !window.stripCheckboxCount ) {
       window.stripCheckboxCount = 0;
     }
-    this.id = `stripCheckbox-${ window.stripCheckboxCount }`;
+    this.id = `stripCheckbox-${window.stripCheckboxCount}`;
     window.stripCheckboxCount++;
   }
 }

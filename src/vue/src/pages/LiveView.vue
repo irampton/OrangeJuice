@@ -7,7 +7,7 @@
         class="controller-block"
     >
       <h2 class="controller-title">
-        {{ controllerLabel(controller, controllerIndex) }}
+        {{ controllerLabel( controller, controllerIndex ) }}
       </h2>
       <div
           v-for="(strip, stripIndex) in (controller.strips || [])"
@@ -15,7 +15,7 @@
           class="strip-block"
       >
         <h3 class="strip-title">
-          {{ stripLabel(strip, stripIndex) }}
+          {{ stripLabel( strip, stripIndex ) }}
         </h3>
         <div class="pixel-grid">
           <div
@@ -51,27 +51,27 @@ export default {
     }
   },
   methods: {
-    controllerLabel(controller, index) {
+    controllerLabel( controller, index ) {
       return controller?.name || controller?.type || `Controller ${index + 1}`;
     },
-    stripLabel(strip, index) {
+    stripLabel( strip, index ) {
       return strip?.name || `Strip ${index + 1}`;
     },
-    pixelArray(length) {
-      const count = Number(length) || 0;
-      return Array.from({ length: count }, (_, index) => index);
+    pixelArray( length ) {
+      const count = Number( length ) || 0;
+      return Array.from( { length: count }, ( _, index ) => index );
     },
     enableLiveView() {
-      if (this.socket) {
-        this.socket.emit("enableLiveView");
+      if( this.socket ) {
+        this.socket.emit( "enableLiveView" );
       }
     },
-    handleLiveViewUpdate(payload) {
-      if (!payload) {
+    handleLiveViewUpdate( payload ) {
+      if( !payload ) {
         return;
       }
       const { controllerIndex, colors } = payload;
-      if (controllerIndex === undefined) {
+      if( controllerIndex === undefined ) {
         return;
       }
       this.liveViewColors = {
@@ -79,23 +79,23 @@ export default {
         [controllerIndex]: colors || []
       };
     },
-    stripOffset(controller, stripIndex) {
-      if (!controller?.strips?.length) {
+    stripOffset( controller, stripIndex ) {
+      if( !controller?.strips?.length ) {
         return 0;
       }
       return controller.strips
-          .slice(0, stripIndex)
-          .reduce((sum, strip) => sum + (Number(strip.length) || 0), 0);
+          .slice( 0, stripIndex )
+          .reduce( ( sum, strip ) => sum + ( Number( strip.length ) || 0 ), 0 );
     },
-    pixelStyle(controllerIndex, stripIndex, pixelIndex) {
+    pixelStyle( controllerIndex, stripIndex, pixelIndex ) {
       const controller = this.controllers?.[controllerIndex];
-      const offset = this.stripOffset(controller, stripIndex);
+      const offset = this.stripOffset( controller, stripIndex );
       const colors = this.liveViewColors?.[controllerIndex] || [];
       const color = colors[offset + pixelIndex];
       let hex = "000000";
-      if ( typeof color === "number" && Number.isFinite( color ) ) {
+      if( typeof color === "number" && Number.isFinite( color ) ) {
         hex = color.toString( 16 ).padStart( 6, "0" );
-      } else if ( typeof color === "string" ) {
+      } else if( typeof color === "string" ) {
         hex = color.padStart( 6, "0" );
       }
       return { backgroundColor: `#${hex}` };
@@ -104,30 +104,30 @@ export default {
   created() {
     this.socket = getSocket();
     this.socketConnectHandler = () => {
-      this.socket.emit("getSettings", (data) => {
+      this.socket.emit( "getSettings", ( data ) => {
         this.systemConfig = data;
-      });
+      } );
     };
-    this.socket.on("connect", this.socketConnectHandler);
-    if (this.socket.connected) {
+    this.socket.on( "connect", this.socketConnectHandler );
+    if( this.socket.connected ) {
       this.socketConnectHandler();
     }
-    this.liveViewHandler = (payload) => this.handleLiveViewUpdate(payload);
-    this.socket.on("liveViewUpdate", this.liveViewHandler);
+    this.liveViewHandler = ( payload ) => this.handleLiveViewUpdate( payload );
+    this.socket.on( "liveViewUpdate", this.liveViewHandler );
     this.enableLiveView();
-    this.liveViewInterval = setInterval(() => {
+    this.liveViewInterval = setInterval( () => {
       this.enableLiveView();
-    }, 5000);
+    }, 5000 );
   },
   beforeUnmount() {
-    if (this.socket && this.socketConnectHandler) {
-      this.socket.off("connect", this.socketConnectHandler);
+    if( this.socket && this.socketConnectHandler ) {
+      this.socket.off( "connect", this.socketConnectHandler );
     }
-    if (this.socket && this.liveViewHandler) {
-      this.socket.off("liveViewUpdate", this.liveViewHandler);
+    if( this.socket && this.liveViewHandler ) {
+      this.socket.off( "liveViewUpdate", this.liveViewHandler );
     }
-    if (this.liveViewInterval) {
-      clearInterval(this.liveViewInterval);
+    if( this.liveViewInterval ) {
+      clearInterval( this.liveViewInterval );
     }
   }
 };

@@ -9,7 +9,8 @@
           to="/live-view"
           :class="linkClass()"
           active-class="is-underlined"
-      >Live View</RouterLink>
+      >Live View
+      </RouterLink>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
       <RouterLink
@@ -17,7 +18,8 @@
           :class="linkClass()"
           active-class="is-underlined"
           exact-active-class="is-underlined"
-      >Control</RouterLink>
+      >Control
+      </RouterLink>
     </p>
     <p :class="['level-item has-text-centered is-hidden-mobile', menuOpen ? '' : 'noMargin']">
       <a class="title is-size-3 brand py-4 is-disabled has-text-white-ter has-text-weight-semibold">OrangeJuice</a>
@@ -27,10 +29,12 @@
           to="/settings"
           :class="linkClass()"
           active-class="is-underlined"
-      >Settings</RouterLink>
+      >Settings
+      </RouterLink>
     </p>
     <p :class="['level-item has-text-centered', menuOpen ? '' : 'noMargin']">
-      <a href="https://github.com/irampton/OrangeJuice" target="_blank" :class="['link headerText', menuOpen ? '' : 'noShow']">GitHub</a>
+      <a href="https://github.com/irampton/OrangeJuice" target="_blank"
+         :class="['link headerText', menuOpen ? '' : 'noShow']">GitHub</a>
     </p>
   </nav>
 </template>
@@ -38,7 +42,7 @@
 <script>
 export default {
   name: "NavBar.vue",
-  data(){
+  data() {
     return {
       menuOpen: true
     }

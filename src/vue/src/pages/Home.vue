@@ -111,7 +111,18 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 library.add( faPlus );
 export default {
   name: "Home",
-  components: { FontAwesomeIcon, TransitionSelector, BaseCheckbox, BaseTextInput, BaseStripCheckbox, BasePopup, PresetSelector, StripList, EffectSelector, PatternSelector },
+  components: {
+    FontAwesomeIcon,
+    TransitionSelector,
+    BaseCheckbox,
+    BaseTextInput,
+    BaseStripCheckbox,
+    BasePopup,
+    PresetSelector,
+    StripList,
+    EffectSelector,
+    PatternSelector
+  },
   data() {
     return {
       socket: undefined,
@@ -214,7 +225,7 @@ export default {
         disabled: this.disabledStripKeys.has( this.stripIdKey( strip.id ) )
       } ) );
       const sharedStrips = this.sharedRenderGroups.map( group => ( {
-        id: [ "sharedRender", group.sourceIndex ],
+        id: ["sharedRender", group.sourceIndex],
         name: group.name || `Group ${group.sourceIndex}`,
         shareRender: true,
         disabled: this.disabledSharedGroupKeys.has( `sharedRender.${group.sourceIndex}` ),
@@ -257,14 +268,14 @@ export default {
     stripIdKey( id ) {
       if( Array.isArray( id ) ) {
         if( id[0] === "sharedRender" ) {
-          return `sharedRender.${ id[1] }`;
+          return `sharedRender.${id[1]}`;
         }
-        return `${ id[0] }.${ id[1] }`;
+        return `${id[0]}.${id[1]}`;
       }
       if( Number.isFinite( Number( id ) ) ) {
         const strip = this.ledStripConfig?.[Number( id )];
         if( strip ) {
-          return `${ strip.controller }.${ strip.controllerStripIndex }`;
+          return `${strip.controller}.${strip.controllerStripIndex}`;
         }
       }
       return "";
@@ -342,7 +353,7 @@ export default {
       const normalized = [];
       ( selected || [] ).forEach( entry => {
         if( this.isSharedRenderId( entry ) ) {
-          normalized.push( [ "sharedRender", entry[1] ] );
+          normalized.push( ["sharedRender", entry[1]] );
           return;
         }
         const strip = this.normalizeStripId( entry );
@@ -358,7 +369,7 @@ export default {
       const prevKeys = new Set( ( this.selectedStrips || [] ).map( item => this.selectionKey( item ) ) );
       const nextKeys = new Set( next.map( item => this.selectionKey( item ) ) );
       const addedSharedKeys = new Set(
-          [ ...nextKeys ]
+          [...nextKeys]
               .filter( key => !prevKeys.has( key ) && key.startsWith( "sharedRender." ) )
       );
 
@@ -370,7 +381,7 @@ export default {
               return null;
             }
             return {
-              id: [ "sharedRender", group.sourceIndex ],
+              id: ["sharedRender", group.sourceIndex],
               key: `sharedRender.${group.sourceIndex}`,
               group
             };
@@ -482,7 +493,7 @@ export default {
           this.socket.emit( 'editStripGroup', 'add', { name, strips, shareRender } );
         }
         this.fetchStripGroups();
-      } catch ( e ) {
+      } catch( e ) {
         return;
       }
     },
@@ -501,7 +512,7 @@ export default {
     setLEDs() {
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
       const selectionSnapshot = JSON.parse( JSON.stringify( this.selectedStrips || [] ) );
-      if ( this.selectedTransition?.id && this.selectedTransition.id !== 'none' ) {
+      if( this.selectedTransition?.id && this.selectedTransition.id !== 'none' ) {
         ledConfig.transition = this.selectedTransition.id;
         ledConfig.transitionOptions = this.selectedTransition.options;
       }
@@ -542,10 +553,12 @@ export default {
   color: #1b3f6b;
   background-color: transparent;
 }
+
 .transition-controls {
   display: flex;
   gap: 0.5rem;
 }
+
 .transition-action {
   flex: 1 1 auto;
 }

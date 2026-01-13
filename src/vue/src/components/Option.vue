@@ -6,7 +6,7 @@
         <BaseNumberInput v-model="option.value"/>
       </template>
       <template v-else-if="option.type === 'color'">
-        <BaseColorInput v-model="option.value" />
+        <BaseColorInput v-model="option.value"/>
       </template>
     </div>
   </div>
@@ -19,7 +19,7 @@
       <BaseDropdown :options="option.options.map(o => ({...o, id: o.value}))" v-model="option.value"/>
     </div>
     <div v-else-if="option.type === 'colorArray'">
-      <BaseColorArray v-model="option.value" />
+      <BaseColorArray v-model="option.value"/>
     </div>
   </div>
 </template>
@@ -45,7 +45,7 @@ export default {
   },
   computed: {
     isBasic() {
-      return [ 'color', 'number' ].includes( this.option.type );
+      return ['color', 'number'].includes( this.option.type );
       //todo - other basic input types
     }
   }
