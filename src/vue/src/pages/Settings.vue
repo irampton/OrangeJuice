@@ -383,6 +383,12 @@
           <BaseTextInput v-model="homekitAccessoryModal.name"/>
         </div>
       </div>
+      <TransitionSelector
+          inline
+          label="Default Transition"
+          :led-scripts="ledScripts"
+          v-model="homekitAccessoryModal.transitionSelection"
+      />
       <template #footer>
         <button
             v-if="editHomekitAccessoryIndex !== null && editHomekitAccessoryIndex !== undefined"
@@ -454,6 +460,7 @@ import BasePopup from '@/components/base/BasePopup.vue';
 import BaseStripCheckbox from '@/components/base/BaseStripCheckbox.vue';
 import BaseTextInput from '@/components/base/BaseTextInput.vue';
 import Option from '@/components/Option.vue';
+import TransitionSelector from '@/components/TransitionSelector.vue';
 import { getSocket } from "@/socket";
 
 export default {
@@ -465,6 +472,7 @@ export default {
     BasePopup,
     BaseStripCheckbox,
     BaseTextInput,
+    TransitionSelector,
     Option,
     SettingsSideNav,
     SettingsSection,
@@ -503,7 +511,11 @@ export default {
         existingValues: {}
       },
       homekitAccessoryModal: {
-        name: ""
+        name: "",
+        transitionSelection: {
+          id: 'none',
+          options: {}
+        }
       },
       homekitServiceModal: {
         name: "",
@@ -897,7 +909,11 @@ export default {
           ? this.systemConfig?.homekit?.[index]
           : null;
       this.homekitAccessoryModal = {
-        name: config?.name || ""
+        name: config?.name || "",
+        transitionSelection: {
+          id: config?.transition || 'none',
+          options: config?.transitionOptions || {}
+        }
       };
       this.$refs.homekitAccessoryModal.open()
           .catch( () => {
@@ -916,10 +932,15 @@ export default {
       const index = this.editHomekitAccessoryIndex;
       const isEdit = index !== null && index !== undefined;
       const existing = isEdit ? accessories[index] : null;
+      const transitionSelection = this.homekitAccessoryModal.transitionSelection || {};
+      const transitionId = transitionSelection.id || 'none';
+      const transitionOptions = transitionSelection.options || {};
       const accessory = {
         ...( existing || {} ),
         name,
-        services: this.getHomekitServices( existing ).slice()
+        services: this.getHomekitServices( existing ).slice(),
+        transition: transitionId,
+        transitionOptions
       };
       if( isEdit ) {
         accessories.splice( index, 1, accessory );

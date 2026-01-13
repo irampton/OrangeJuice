@@ -98,22 +98,22 @@ module.exports = function ( config, setLEDs, { weatherData } ) {
 
         function sendToLights( mode = undefined ) {
             currentMode = mode ?? currentMode
-            let config;
+            let ledConfig;
             if ( mode === "temperature" ) {
-                config = createConfig( currentLightState, currentBrightnessLevel, {
+                ledConfig = createConfig( currentLightState, currentBrightnessLevel, {
                     'type': "temp",
                     'temp': currentColorTemp
-                }, strips );
+                }, strips, config.transition, config.transitionOptions );
             } else if ( mode === "hueAndSat" ) {
-                config = createConfig( currentLightState, currentBrightnessLevel, {
+                ledConfig = createConfig( currentLightState, currentBrightnessLevel, {
                     'type': "hsl",
                     'hue': currentHue,
                     'sat': currentSat
-                }, strips );
+                }, strips, config.transition, config.transitionOptions );
             } else {
-                config = createConfig( currentLightState, currentBrightnessLevel, { 'type': "none" }, strips );
+                ledConfig = createConfig( currentLightState, currentBrightnessLevel, { 'type': "none" }, strips, config.transition, config.transitionOptions );
             }
-            setLEDs( config );
+            setLEDs( ledConfig );
         }
 
         return lightService;
@@ -162,21 +162,19 @@ module.exports = function ( config, setLEDs, { weatherData } ) {
     return { config, destroy };
 }
 
-function createConfig( state, brightness, special, strips ) {
+function createConfig( state, brightness, special, strips, transition, transitionOptions ) {
     if ( state ) {
         switch ( special.type ) {
             case 'temp':
-                return {
+                return applyTransition( {
                     "trigger": 'homekit',
                     "pattern": 'brightness-kelvin',
                     "patternOptions": { "kelvin": special.temp, "brightness": brightness },
                     "effect": "",
-                    "strips": strips,
-                    "transition": 'fade',
-                    "transitionOptions": { "time": .7 }
-                }
+                    "strips": strips
+                }, transition, transitionOptions );
             case 'hsl':
-                return {
+                return applyTransition( {
                     "trigger": 'homekit',
                     "pattern": 'hsl-fill',
                     "patternOptions": {
@@ -186,32 +184,40 @@ function createConfig( state, brightness, special, strips ) {
                         "brightness": brightness
                     },
                     "effect": "",
-                    "strips": strips,
-                    "transition": 'fade',
-                    "transitionOptions": { "time": .7 }
-                }
+                    "strips": strips
+                }, transition, transitionOptions );
             case 'none':
-                return {
+                return applyTransition( {
                     "trigger": 'homekit',
                     "pattern": 'brightness-kelvin',
                     "patternOptions": { "kelvin": "3200", "brightness": brightness },
                     "effect": "",
-                    "strips": strips,
-                    "transition": 'fade',
-                    "transitionOptions": { "time": .7 }
-                }
+                    "strips": strips
+                }, transition, transitionOptions );
         }
 
     }
-    return {
+    return applyTransition( {
         "trigger": 'homekit',
         "pattern": 'off',
         "patternOptions": {},
         "effect": "",
-        "strips": strips,
-        "transition": 'fade',
-        "transitionOptions": { "time": .7 }
+        "strips": strips
+    }, transition, transitionOptions );
+}
+
+function applyTransition( config, transition, transitionOptions ) {
+    if ( transition === 'none' ) {
+        return config;
     }
+    if ( transition ) {
+        config.transition = transition;
+        config.transitionOptions = transitionOptions || {};
+        return config;
+    }
+    config.transition = 'fade';
+    config.transitionOptions = { "time": .7 };
+    return config;
 }
 
 function randomInt( low, high ) {
