@@ -4,7 +4,7 @@ module.exports = {
 	id: "fill",
 	name: "Fill",
 	options: [
-		{ id: "colors", name: "Colors", type: "colorArray", default: ["000000"] },
+		{ id: "colors", name: "Colors", type: "colorArray", default: ["#ff0000", "#00ff00", "#0000ff"] },
 		{ id: "brightness", name: "Brightness", type: "number", default: 100 },
 	],
 	generate: ( numLEDs, { colors, brightness } ) => {

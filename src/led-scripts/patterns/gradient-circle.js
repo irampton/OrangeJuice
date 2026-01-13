@@ -4,8 +4,8 @@ module.exports = {
     id: "gradient-circle",
     name: "Gradient (Circle)",
     options: [
-        { id: "color_1", name: "Color #1", type: "color", default: "000000" },
-        { id: "color_2", name: "Color #2", type: "color", default: "000000" },
+        { id: "color_1", name: "Color #1", type: "color", default: "#000000" },
+        { id: "color_2", name: "Color #2", type: "color", default: "#000000" },
         { id: "distance", name: "Distance", type: "number", default: .5 },
         { id: "duplicate", name: "Duplicate Colors", type: "checkbox", default: false }
     ],

@@ -4,7 +4,7 @@ module.exports = {
 	'id': "gradient",
 	'name': "Gradient",
 	'options': [
-		{ id: "colors", name: "Colors", type: "colorArray", default: ["000000", "ffffff"] },
+		{ id: "colors", name: "Colors", type: "colorArray", default: ["#000000", "#ffffff"] },
 		{ id: "continues", name: "Treat identical, sequential colors as one unit", type: "checkbox", default: true }
 	],
 	'generate': ( numLEDs, { colors, continues } ) => {
