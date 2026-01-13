@@ -92,7 +92,12 @@ export default {
       const offset = this.stripOffset(controller, stripIndex);
       const colors = this.liveViewColors?.[controllerIndex] || [];
       const color = colors[offset + pixelIndex];
-      const hex = typeof color === "string" ? color : "000000";
+      let hex = "000000";
+      if ( typeof color === "number" && Number.isFinite( color ) ) {
+        hex = color.toString( 16 ).padStart( 6, "0" );
+      } else if ( typeof color === "string" ) {
+        hex = color.padStart( 6, "0" );
+      }
       return { backgroundColor: `#${hex}` };
     }
   },
