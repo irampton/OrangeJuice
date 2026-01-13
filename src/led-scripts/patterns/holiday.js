@@ -1,4 +1,4 @@
-const { Color } = require( "@orangejedi/yacml" );
+const { Color } = require( '../YACML' );
 module.exports = {
     id: "holiday",
     name: "Holiday",

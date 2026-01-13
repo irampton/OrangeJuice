@@ -1,4 +1,4 @@
-const { Color, hexTextToRgb } = require( '../../YACML' );
+const { Color, hexTextToRgb } = require( '../YACML' );
 
 module.exports = {
 	id: "fill",

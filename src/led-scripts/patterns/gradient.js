@@ -1,4 +1,4 @@
-const { Color } = require( '../../YACML' );
+const { Color } = require( '../YACML' );
 
 module.exports = {
 	'id': "gradient",
