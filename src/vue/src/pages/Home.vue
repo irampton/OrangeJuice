@@ -36,7 +36,96 @@
           v-model="selectedTransition"
           :led-scripts="ledScripts"
       />
-      <button class="button is-primary is-large transition-action" @click="setLEDs">Set Pattern & Effect</button>
+      <div class="set-leds-control" ref="stripModeMenuWrapper">
+        <div class="set-leds-buttons">
+          <button class="button is-primary is-large transition-action" @click="setLEDs">Set Pattern & Effect</button>
+          <button
+              class="button is-primary is-large set-leds-toggle"
+              aria-haspopup="true"
+              :aria-expanded="stripModeMenuOpen ? 'true' : 'false'"
+              @click.stop="toggleStripModeMenu"
+          >
+            <span class="icon is-small">
+              <FontAwesomeIcon :icon="['fas', 'chevron-down']"/>
+            </span>
+          </button>
+        </div>
+        <div v-if="stripModeMenuOpen" class="strip-mode-menu box" @click.stop>
+          <div class="field">
+            <label class="radio strip-mode-option">
+              <input
+                  type="radio"
+                  value="together"
+                  v-model="stripMode"
+              >
+              Together
+            </label>
+          </div>
+          <div class="field">
+            <label class="radio strip-mode-option">
+              <input
+                  type="radio"
+                  value="staggered"
+                  v-model="stripMode"
+              >
+              Staggered
+            </label>
+          </div>
+          <div class="field">
+            <label class="radio strip-mode-option">
+              <input
+                  type="radio"
+                  value="random"
+                  v-model="stripMode"
+              >
+              Random
+            </label>
+          </div>
+          <div v-if="stripMode === 'staggered' || stripMode === 'random'">
+            <div class="field is-horizontal strip-mode-input">
+              <div class="field-label is-normal">
+                <label class="label">Offset</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input
+                        class="input"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        :value="stripModeOffset"
+                        @input="event => stripModeOffset = Number(event.target.value)"
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+                v-if="stripMode === 'random'"
+                class="field is-horizontal strip-mode-input"
+            >
+              <div class="field-label is-normal">
+                <label class="label">Variation</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input
+                        class="input"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        :value="stripModeVariation"
+                        @input="event => stripModeVariation = Number(event.target.value)"
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="columns is-mobile is-multiline mt-3">
       <div class="column box is-full">
@@ -106,9 +195,9 @@ import TransitionSelector from "@/components/TransitionSelector.vue";
 import { getSocket } from "@/socket";
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
-library.add( faPlus );
+library.add( faPlus, faChevronDown );
 export default {
   name: "Home",
   components: {
@@ -142,7 +231,11 @@ export default {
       selectedTransition: {
         id: 'none',
         options: {}
-      }
+      },
+      stripMode: "together",
+      stripModeOffset: 2,
+      stripModeVariation: 1,
+      stripModeMenuOpen: false
     }
   },
   computed: {
@@ -251,6 +344,48 @@ export default {
     }
   },
   methods: {
+    toggleStripModeMenu() {
+      this.stripModeMenuOpen = !this.stripModeMenuOpen;
+    },
+    closeStripModeMenu() {
+      this.stripModeMenuOpen = false;
+    },
+    onStripModeDocumentClick( event ) {
+      if( !this.stripModeMenuOpen ) {
+        return;
+      }
+      if( this.$refs.stripModeMenuWrapper?.contains( event.target ) ) {
+        return;
+      }
+      this.closeStripModeMenu();
+    },
+    normalizeSeconds( value ) {
+      const seconds = Number( value );
+      if( !Number.isFinite( seconds ) || seconds < 0 ) {
+        return 0;
+      }
+      return seconds;
+    },
+    randomStepSeconds() {
+      const offset = this.normalizeSeconds( this.stripModeOffset );
+      const variation = this.normalizeSeconds( this.stripModeVariation );
+      if( variation <= 0 ) {
+        return offset;
+      }
+      const delta = ( Math.random() * ( variation * 2 ) ) - variation;
+      const next = Math.max( 0, offset + delta );
+      return Math.round( next * 10 ) / 10;
+    },
+    shuffleStrips( strips ) {
+      const result = strips.slice();
+      for( let i = result.length - 1; i > 0; i -= 1 ) {
+        const swapIndex = Math.floor( Math.random() * ( i + 1 ) );
+        const temp = result[i];
+        result[i] = result[swapIndex];
+        result[swapIndex] = temp;
+      }
+      return result;
+    },
     buildStripConfig( controllers ) {
       const strips = [];
       ( controllers || [] ).forEach( ( controller, controllerIndex ) => {
@@ -510,6 +645,7 @@ export default {
       this.$refs.stripGroupModal.internalClose();
     },
     setLEDs() {
+      this.closeStripModeMenu();
       const ledConfig = JSON.parse( JSON.stringify( this.currentConfig ) );
       const selectionSnapshot = JSON.parse( JSON.stringify( this.selectedStrips || [] ) );
       if( this.selectedTransition?.id && this.selectedTransition.id !== 'none' ) {
@@ -517,11 +653,37 @@ export default {
         ledConfig.transitionOptions = this.selectedTransition.options;
       }
       ledConfig.trigger = "website";
-      this.socket.emit( 'setLEDs', ledConfig );
+  if( this.stripMode !== "together" && selectionSnapshot.length > 1 ) {
+        const baseConfig = JSON.parse( JSON.stringify( ledConfig ) );
+        const offsetSeconds = this.normalizeSeconds( this.stripModeOffset );
+        const orderedStrips = this.stripMode === "random"
+            ? this.shuffleStrips( selectionSnapshot )
+            : selectionSnapshot;
+        let delayMs = 0;
+        orderedStrips.forEach( stripId => {
+          const payload = {
+            ...baseConfig,
+            strips: [stripId]
+          };
+          window.setTimeout( () => {
+            this.socket.emit( 'setLEDs', payload );
+          }, delayMs );
+          if( this.stripMode === "random" ) {
+            delayMs += Math.round( this.randomStepSeconds() * 1000 );
+          } else {
+            delayMs += Math.round( offsetSeconds * 1000 );
+          }
+        } );
+      } else {
+        this.socket.emit( 'setLEDs', ledConfig );
+      }
       this.$nextTick( () => {
         this.setSelectedStrips( selectionSnapshot );
       } );
     }
+  },
+  mounted() {
+    document.addEventListener( 'click', this.onStripModeDocumentClick );
   },
   created() {
     this.socket = getSocket();
@@ -540,6 +702,7 @@ export default {
     }
   },
   beforeUnmount() {
+    document.removeEventListener( 'click', this.onStripModeDocumentClick );
     if( this.socket && this.socketConnectHandler ) {
       this.socket.off( 'connect', this.socketConnectHandler );
     }
@@ -562,4 +725,65 @@ export default {
 .transition-action {
   flex: 1 1 auto;
 }
+
+.set-leds-control {
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.set-leds-buttons {
+  display: flex;
+  width: 100%;
+}
+
+.set-leds-buttons .button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.set-leds-buttons .button:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.set-leds-toggle {
+  flex: 0 0 auto;
+  padding: 0.75rem 2.25rem;
+}
+
+.strip-mode-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 220px;
+  z-index: 20;
+}
+
+.strip-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.strip-mode-input {
+  margin-top: 0.75rem;
+}
+
+.strip-mode-input .field-label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  text-align: left;
+}
+
+.strip-mode-input .label {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.strip-mode-input .input {
+  width: 100%;
+  min-width: 110px;
+  text-align: right;
+}
+
 </style>

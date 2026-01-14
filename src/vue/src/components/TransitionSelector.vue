@@ -2,7 +2,7 @@
   <div class="transition-selector">
     <button
         v-if="usePopup"
-        class="button transition-gear"
+        class="button is-large transition-gear"
         @click="openTransitionModal"
         aria-label="Transition Settings"
     >
