@@ -138,6 +138,7 @@ export default {
   background-color: #000;
   color: #fff;
   min-height: 100vh;
+  padding-top: 0;
 }
 
 .empty-state {
