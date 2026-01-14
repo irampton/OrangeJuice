@@ -175,7 +175,9 @@ if( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) {
 		registerWebAPIs( app, {
 			setLEDs,
 			turnAllLightsOff,
-			userPresets,
+			getUserPresets: () => userPresets,
+			getControllersConfig: () => controllersConfig,
+			getScriptGroups: () => scriptGroups
 		} );
 	}
 

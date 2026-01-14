@@ -135,22 +135,36 @@ function registerWebSockets( http, {
 		} );
 		socket.on( 'editPresets', ( method, ledConfig, index ) => {
 			const next = [...getUserPresets()];
+			const presetConfig = ( () => {
+				if( !ledConfig || typeof ledConfig !== "object" ) {
+					return ledConfig;
+				}
+				const { strips, ...rest } = ledConfig;
+				return rest;
+			} )();
 			switch( method ) {
 				case "add":
-					next.push( ledConfig );
+					next.push( presetConfig );
 					break;
 				case "remove":
 					next.splice( index, 1 );
 					break;
 				case "update":
-					next[index] = ledConfig;
+					next[index] = presetConfig;
 					break;
 			}
 			setUserPresets( next );
 			config.set( 'userPresets', next );
 		} );
 		socket.on( 'getPresets', ( callback ) => {
-			callback( getUserPresets() );
+			const sanitized = ( getUserPresets() || [] ).map( preset => {
+				if( !preset || typeof preset !== "object" ) {
+					return preset;
+				}
+				const { strips, ...rest } = preset;
+				return rest;
+			} );
+			callback( sanitized );
 		} );
 		socket.on( 'getSettings', ( callback ) => {
 			let send = {

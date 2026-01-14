@@ -12,7 +12,7 @@
         :label-class="strip.labelClass"
         v-model="checked[i]"
         @dblclick="stripDblClick(strip)"
-        @change="checkEvent"/>
+        @change="checkEvent(i)"/>
   </div>
 </template>
 
@@ -51,10 +51,28 @@ export default {
     stripKeyForIndex( strip, index ) {
       return this.stripIdKey( strip?.id ?? index );
     },
-    checkEvent() {
-      const selected = this.checked
-          .map( ( checked, index ) => checked ? ( this.stripConfig[index]?.id ?? index ) : false )
-          .filter( value => value !== false );
+    checkEvent( changedIndex ) {
+      if( changedIndex === null || changedIndex === undefined ) {
+        const selected = this.checked
+            .map( ( checked, index ) => checked ? ( this.stripConfig[index]?.id ?? index ) : false )
+            .filter( value => value !== false );
+        this.$emit( 'update:modelValue', selected );
+        return;
+      }
+      const changedStrip = this.stripConfig[changedIndex];
+      const changedId = changedStrip?.id ?? changedIndex;
+      const changedKey = this.stripIdKey( changedId );
+      const selected = ( this.modelValue || [] ).slice();
+      const existingIndex = selected.findIndex(
+          id => this.stripIdKey( id ) === changedKey
+      );
+      if( this.checked[changedIndex] ) {
+        if( existingIndex === -1 ) {
+          selected.push( changedId );
+        }
+      } else if( existingIndex !== -1 ) {
+        selected.splice( existingIndex, 1 );
+      }
       this.$emit( 'update:modelValue', selected );
     },
     stripDblClick( strip ) {

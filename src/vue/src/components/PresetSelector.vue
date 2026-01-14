@@ -81,12 +81,20 @@ export default {
     }
   },
   methods: {
+    presetPayload() {
+      const { strips, ...payload } = this.selectedConfig || {};
+      return payload;
+    },
     setPreset() {
       if( this.selectedPreset === null ) {
         return;
       }
 
-      this.socket.emit( 'setLEDs', this.presets[this.selectedPreset] );
+      const preset = {
+        ...this.presets[this.selectedPreset],
+        strips: this.selectedStrips
+      };
+      this.socket.emit( 'setLEDs', preset );
     },
     loadPreset() {
       if( this.selectedPreset === null ) {
@@ -96,12 +104,10 @@ export default {
       const preset = this.presets[this.selectedPreset];
       this.selectedPattern.id = preset.pattern;
       this.selectedEffect.id = preset.effect || 'none';
-      this.selectedStrips.splice( 0, this.selectedStrips.length );
-      this.selectedStrips.push( ...preset.strips );
       this.$nextTick( () => {
-        this.selectedPattern.options = preset.patternOptions;
+        this.selectedPattern.options = preset.patternOptions || {};
         this.selectedEffect.options = preset.effect
-            ? preset.effectOptions
+            ? ( preset.effectOptions || {} )
             : {};
       } );
     },
@@ -110,7 +116,7 @@ export default {
         await this.$refs['namePopup'].open();
         //todo handle no name || strips
         let preset = {
-          ...this.selectedConfig,
+          ...this.presetPayload(),
           trigger: "userPreset",
           name: this.nameText
         };
@@ -127,7 +133,7 @@ export default {
       }
 
       let preset = {
-        ...this.selectedConfig,
+        ...this.presetPayload(),
         trigger: this.presets[this.selectedPreset].trigger,
         name: this.presets[this.selectedPreset].name
       };
