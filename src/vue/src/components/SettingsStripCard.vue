@@ -45,7 +45,7 @@ export default {
     },
     typeClass: {
       type: Object,
-      default: () => ({})
+      default: () => ( {} )
     },
     controllerLabel: {
       type: String,

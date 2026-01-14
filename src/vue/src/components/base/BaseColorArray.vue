@@ -33,10 +33,27 @@ export default {
   },
   data() {
     return {
-      colorArr: this.modelValue ?? []
+      colorArr: []
     }
   },
   methods: {
+    normalizeColors( colors ) {
+      return ( colors || [] ).map( ( color, index ) => {
+        if( typeof color === 'object' && color !== null && 'color' in color ) {
+          return {
+            index: Number.isFinite( color.index ) ? color.index : index,
+            color: color.color || '#000000'
+          };
+        }
+        return {
+          index,
+          color: typeof color === 'string' ? color : '#000000'
+        };
+      } );
+    },
+    currentColors() {
+      return this.colorArr.map( c => c.color );
+    },
     addColor() {
       this.colorArr.push( {
         index: this.colorArr.length,
@@ -44,19 +61,36 @@ export default {
       } );
     },
     removeColor() {
-      if ( this.colorArr.length > 0 ) {
+      if( this.colorArr.length > 0 ) {
         this.colorArr.splice( 0, 1 );
       }
     }
   },
   created() {
-    this.addColor();
+    this.colorArr = this.normalizeColors( this.modelValue );
+    if( this.colorArr.length === 0 ) {
+      this.addColor();
+    }
   },
   watch: {
+    modelValue: {
+      deep: true,
+      handler( value ) {
+        const incoming = ( value || [] ).map( c => ( typeof c === 'string' ? c : c?.color ) );
+        const current = this.currentColors();
+        if( JSON.stringify( incoming ) === JSON.stringify( current ) ) {
+          return;
+        }
+        this.colorArr = this.normalizeColors( value );
+        if( this.colorArr.length === 0 ) {
+          this.addColor();
+        }
+      }
+    },
     colorArr: {
       deep: true,
       handler() {
-        this.$emit( 'update:modelValue', this.colorArr.map( c => c.color ) );
+        this.$emit( 'update:modelValue', this.currentColors() );
       }
     }
   }

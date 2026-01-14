@@ -3,10 +3,13 @@
          class="stripBox bigger"
          type="checkbox"
          :checked="modelValue"
+         :disabled="disabled"
          @change="checked"
   >
   <label class="button py-2 px-3 m-1"
-         :for="id">
+         :class="[labelClass, disabled ? 'is-disabled' : '']"
+         :for="id"
+         @dblclick="dblClick">
     {{ name }}
   </label>
 </template>
@@ -14,7 +17,7 @@
 <script>
 export default {
   name: "BaseStripCheckbox",
-  emits: ['change', 'update:modelValue'],
+  emits: ['change', 'update:modelValue', 'dblclick'],
   props: {
     name: {
       type: String,
@@ -23,6 +26,14 @@ export default {
     modelValue: {
       type: Boolean,
       default: false
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    labelClass: {
+      type: String,
+      default: ""
     }
   },
   data() {
@@ -34,18 +45,24 @@ export default {
     checked( event ) {
       this.$emit( 'update:modelValue', event.target.checked );
       this.$emit( 'change' );
+    },
+    dblClick() {
+      this.$emit( 'dblclick' );
     }
   },
   created() {
-    if ( !window.stripCheckboxCount ) {
+    if( !window.stripCheckboxCount ) {
       window.stripCheckboxCount = 0;
     }
-    this.id = `stripCheckbox-${ window.stripCheckboxCount }`;
+    this.id = `stripCheckbox-${window.stripCheckboxCount}`;
     window.stripCheckboxCount++;
   }
 }
 </script>
 
 <style scoped>
-
+.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 </style>

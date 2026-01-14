@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     patternOptions() {
-      if ( this.patterns?.list ) {
+      if( this.patterns?.list ) {
         return this.patterns.list.map( id => ( { id, name: this.patterns[id].name } ) );
       } else {
         return [];
@@ -71,7 +71,7 @@ export default {
         this.noUpdate = true;
         const value = {
           id: this.selectedPattern,
-          options: Object.fromEntries( this.selectedOptions.map( o => [ o.id, o.value ] ) )
+          options: Object.fromEntries( this.selectedOptions.map( o => [o.id, o.value] ) )
         };
         this.$emit( 'update:modelValue', value );
         this.$nextTick( () => this.noUpdate = false );
@@ -80,7 +80,7 @@ export default {
     modelValue: {
       deep: true,
       handler() {
-        if ( this.noUpdate || !( this.modelValue.id && this.patterns[this.modelValue.id] ) ) {
+        if( this.noUpdate || !( this.modelValue.id && this.patterns[this.modelValue.id] ) ) {
           return;
         }
         this.selectedPattern = this.modelValue.id;

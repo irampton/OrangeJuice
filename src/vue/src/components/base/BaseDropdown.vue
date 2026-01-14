@@ -14,6 +14,7 @@
 
 <script>
 import { HELPER } from "@/mixins/HELPER.js";
+
 export default {
   name: "BaseDropdown",
   props: {
@@ -23,7 +24,7 @@ export default {
       required: true
     },
     modelValue: {
-      type: [ String, Number ],
+      type: [String, Number],
       required: false
     },
     color: {
@@ -34,18 +35,18 @@ export default {
     return {}
   },
   computed: {
-    colorClass: function () {
-      return HELPER.colorClass(this.color);
+    colorClass: function() {
+      return HELPER.colorClass( this.color );
     }
   },
   methods: {
     onChange( event ) {
-      this.$emit('update:modelValue', event.target.value );
+      this.$emit( 'update:modelValue', event.target.value );
     }
   },
-  watch:{
-    value(){
-      console.log(this.value);
+  watch: {
+    value() {
+      console.log( this.value );
     }
   }
 }

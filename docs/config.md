@@ -167,8 +167,19 @@ Each config is applied when a WebSocket client disconnects. The structure is
 the same as other LED configs and must include `strips`.
 
 ## scriptGroups
-Stored grouping data for scripts. This is persisted in config but not consumed
-by the LED runtime in `src/app.js`.
+Stored grouping data for the web UI. Each entry lists strip ids as controller
+tuples.
+
+Example:
+```json
+{
+  "name": "Living Room",
+  "strips": [
+    [0, 1],
+    [0, 2]
+  ]
+}
+```
 
 ## Managing Controllers and Strips in the Web UI
 The Settings page (`src/vue/src/pages/Settings.vue`) writes to `controllers`

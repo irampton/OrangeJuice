@@ -17,5 +17,6 @@
   "buttonConfigs": [],
   "disconnectConfigs": [],
   "scriptGroups": [],
-  "userPresets": []
+  "presets": [],
+  "scenes": []
 }
