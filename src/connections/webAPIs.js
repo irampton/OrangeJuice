@@ -6,6 +6,7 @@ function registerWebAPIs( app, {
 	getScriptGroups,
 	getScenes
 } ) {
+	const apiBasePath = "/api/v1";
 	function sanitizePreset( preset ) {
 		if( !preset || typeof preset !== "object" ) {
 			return preset;
@@ -152,26 +153,23 @@ function registerWebAPIs( app, {
 	}
 
 	//web listeners
-	app.get( '/lightsOff', ( req, res ) => {
+	app.get( `${apiBasePath}/lightsOff`, ( req, res ) => {
 		turnAllLightsOff();
 		res.send( 'done' );
 	} );
 	//preset control (for shortcut)
-	app.get( '/presets', ( req, res ) => {
+	app.get( `${apiBasePath}/presets`, ( req, res ) => {
 		const presets = getPresets?.() || [];
 		res.send( presets.map( p => p.name ) );
 	} );
-	app.get( '/scenes', ( req, res ) => {
+	app.get( `${apiBasePath}/scenes`, ( req, res ) => {
 		const scenes = getScenes?.() || [];
-		res.send( scenes.map( ( scene, index ) => ( {
-			name: scene?.name || `Scene ${index}`,
-			index
-		} ) ) );
+		res.send( scenes.map( ( scene, index ) => scene?.name || `Scene ${index}` ) );
 	} );
-	app.get( '/strips', ( req, res ) => {
-		res.send( buildStripList() );
+	app.get( `${apiBasePath}/strips`, ( req, res ) => {
+		res.send( buildStripList().map( entry => entry.name ) );
 	} );
-	app.get( '/setScene', ( req, res ) => {
+	app.get( `${apiBasePath}/setScene`, ( req, res ) => {
 		const index = Number( req.headers?.index ?? req.query?.index ?? req.headers?.scene ?? req.query?.scene );
 		if( !Number.isFinite( index ) ) {
 			res.status( 400 ).send( "Scene index required" );
@@ -216,7 +214,7 @@ function registerWebAPIs( app, {
 		} );
 		res.send( 'done' );
 	} );
-	app.get( '/setPreset', ( req, res ) => {
+	app.get( `${apiBasePath}/setPreset`, ( req, res ) => {
 		const index = Number( req.headers?.preset ?? req.query?.preset ?? req.headers?.index ?? req.query?.index );
 		const stripInput = req.headers?.strips || req.query?.strips || req.headers?.strip || req.query?.strip;
 		const stripIndexes = parseIndexInput( stripInput );
