@@ -137,6 +137,13 @@
             :socket="socket"
         />
       </div>
+      <div class="column box is-full">
+        <SceneSelector
+            :socket="socket"
+            :strip-config="sceneStripConfig"
+            :led-scripts="ledScripts"
+        />
+      </div>
     </div>
 
     <BasePopup ref="stripGroupModal" :name="stripGroupModalTitle" save-text="Save" save-color="success">
@@ -187,6 +194,7 @@ import PatternSelector from '@/components/PatternSelector.vue';
 import EffectSelector from '@/components/EffectSelector.vue';
 import StripList from '@/components/StripList.vue';
 import PresetSelector from "@/components/PresetSelector.vue";
+import SceneSelector from "@/components/SceneSelector.vue";
 import BasePopup from "@/components/base/BasePopup.vue";
 import BaseStripCheckbox from "@/components/base/BaseStripCheckbox.vue";
 import BaseCheckbox from "@/components/base/BaseCheckbox.vue";
@@ -208,6 +216,7 @@ export default {
     BaseStripCheckbox,
     BasePopup,
     PresetSelector,
+    SceneSelector,
     StripList,
     EffectSelector,
     PatternSelector
@@ -322,6 +331,18 @@ export default {
         name: group.name || `Group ${group.sourceIndex}`,
         shareRender: true,
         disabled: this.disabledSharedGroupKeys.has( `sharedRender.${group.sourceIndex}` ),
+        labelClass: "shared-render-label"
+      } ) );
+      return baseStrips.concat( sharedStrips );
+    },
+    sceneStripConfig() {
+      const baseStrips = this.ledStripConfig.map( strip => ( {
+        ...strip
+      } ) );
+      const sharedStrips = this.sharedRenderGroups.map( group => ( {
+        id: ["sharedRender", group.sourceIndex],
+        name: group.name || `Group ${group.sourceIndex}`,
+        shareRender: true,
         labelClass: "shared-render-label"
       } ) );
       return baseStrips.concat( sharedStrips );

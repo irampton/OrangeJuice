@@ -21,7 +21,12 @@ const buttonMap = config.get( 'buttonConfigs' );
 let disconnectConfigs = config.get( 'disconnectConfigs' );
 const displayMatrix = config.get( "displayMatrix" );
 let scriptGroups = config.get( 'scriptGroups' ) ?? [];
-let userPresets = config.get( 'userPresets' ) ?? [];
+let presets = config.get( 'presets' );
+if( !Array.isArray( presets ) ) {
+	const legacyPresets = config.get( 'userPresets' );
+	presets = Array.isArray( legacyPresets ) ? legacyPresets : [];
+}
+let scenes = config.get( 'scenes' ) ?? [];
 let userData = config.get( "userData" );
 if( !userData || typeof userData !== "object" ) {
 	userData = { weather: { latitude: 0, longitude: 0 } };
@@ -175,9 +180,10 @@ if( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) {
 		registerWebAPIs( app, {
 			setLEDs,
 			turnAllLightsOff,
-			getUserPresets: () => userPresets,
+			getPresets: () => presets,
 			getControllersConfig: () => controllersConfig,
-			getScriptGroups: () => scriptGroups
+			getScriptGroups: () => scriptGroups,
+			getScenes: () => scenes
 		} );
 	}
 
@@ -232,9 +238,13 @@ if( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) {
 			setScriptGroups: ( next ) => {
 				scriptGroups = next;
 			},
-			getUserPresets: () => userPresets,
-			setUserPresets: ( next ) => {
-				userPresets = next;
+			getPresets: () => presets,
+			setPresets: ( next ) => {
+				presets = next;
+			},
+			getScenes: () => scenes,
+			setScenes: ( next ) => {
+				scenes = next;
 			},
 			getDisconnectConfigs: () => disconnectConfigs,
 			setDisconnectConfigs: ( next ) => {

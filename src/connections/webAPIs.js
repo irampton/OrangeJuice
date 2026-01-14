@@ -1,9 +1,10 @@
 function registerWebAPIs( app, {
 	setLEDs,
 	turnAllLightsOff,
-	getUserPresets,
+	getPresets,
 	getControllersConfig,
-	getScriptGroups
+	getScriptGroups,
+	getScenes
 } ) {
 	function sanitizePreset( preset ) {
 		if( !preset || typeof preset !== "object" ) {
@@ -62,71 +63,6 @@ function registerWebAPIs( app, {
 		return unique;
 	}
 
-	function parseStripToken( token ) {
-		if( token === null || token === undefined ) {
-			return null;
-		}
-		const text = String( token ).trim();
-		if( !text ) {
-			return null;
-		}
-		if( text.startsWith( "[" ) ) {
-			try {
-				return JSON.parse( text );
-			} catch( e ) {
-				return null;
-			}
-		}
-		const delimiter = text.includes( ":" ) ? ":" : ( text.includes( "," ) ? "," : null );
-		if( !delimiter ) {
-			return null;
-		}
-		const parts = text.split( delimiter ).map( part => part.trim() ).filter( Boolean );
-		if( parts.length !== 2 ) {
-			return null;
-		}
-		const first = parts[0];
-		const second = parts[1];
-		const firstValue = ( first === "sharedRender" || first === "group" ) ? first : Number( first );
-		const secondValue = ( second === "sharedRender" || second === "group" ) ? second : Number( second );
-		return [firstValue, secondValue];
-	}
-
-	function parseStripInput( input ) {
-		if( input === null || input === undefined ) {
-			return [];
-		}
-		if( Array.isArray( input ) ) {
-			if( input.length === 2 && !Array.isArray( input[0] ) ) {
-				return [input];
-			}
-			return input;
-		}
-		const text = String( input ).trim();
-		if( !text ) {
-			return [];
-		}
-		if( text.startsWith( "[" ) ) {
-			try {
-				const parsed = JSON.parse( text );
-				if( Array.isArray( parsed ) ) {
-					if( parsed.length === 2 && !Array.isArray( parsed[0] ) ) {
-						return [parsed];
-					}
-					return parsed;
-				}
-			} catch( e ) {
-				// ignore
-			}
-		}
-		const tokens = text.split( /[|;]/ ).map( part => part.trim() ).filter( Boolean );
-		if( tokens.length > 1 ) {
-			return tokens.map( parseStripToken ).filter( Boolean );
-		}
-		const parsed = parseStripToken( text );
-		return parsed ? [parsed] : [];
-	}
-
 	function resolveStripTargets( ids ) {
 		const scriptGroups = getScriptGroups?.() || [];
 		const resolved = [];
@@ -175,6 +111,46 @@ function registerWebAPIs( app, {
 		return strips.concat( groups );
 	}
 
+	function stripListByIndexes( indexes ) {
+		const list = buildStripList();
+		const resolved = [];
+		( indexes || [] ).forEach( value => {
+			const index = Number( value );
+			if( !Number.isFinite( index ) ) {
+				return;
+			}
+			const entry = list[index];
+			if( entry?.id ) {
+				resolved.push( entry.id );
+			}
+		} );
+		return resolved;
+	}
+
+	function parseIndexInput( input ) {
+		if( input === null || input === undefined ) {
+			return [];
+		}
+		if( Array.isArray( input ) ) {
+			return input;
+		}
+		const text = String( input ).trim();
+		if( !text ) {
+			return [];
+		}
+		if( text.startsWith( "[" ) ) {
+			try {
+				const parsed = JSON.parse( text );
+				if( Array.isArray( parsed ) ) {
+					return parsed;
+				}
+			} catch( e ) {
+				return [];
+			}
+		}
+		return text.split( /[,\s|;]+/ ).map( value => value.trim() ).filter( Boolean );
+	}
+
 	//web listeners
 	app.get( '/lightsOff', ( req, res ) => {
 		turnAllLightsOff();
@@ -182,23 +158,80 @@ function registerWebAPIs( app, {
 	} );
 	//preset control (for shortcut)
 	app.get( '/presets', ( req, res ) => {
-		const presets = getUserPresets?.() || [];
+		const presets = getPresets?.() || [];
 		res.send( presets.map( p => p.name ) );
+	} );
+	app.get( '/scenes', ( req, res ) => {
+		const scenes = getScenes?.() || [];
+		res.send( scenes.map( ( scene, index ) => ( {
+			name: scene?.name || `Scene ${index}`,
+			index
+		} ) ) );
 	} );
 	app.get( '/strips', ( req, res ) => {
 		res.send( buildStripList() );
 	} );
+	app.get( '/setScene', ( req, res ) => {
+		const index = Number( req.headers?.index ?? req.query?.index ?? req.headers?.scene ?? req.query?.scene );
+		if( !Number.isFinite( index ) ) {
+			res.status( 400 ).send( "Scene index required" );
+			return;
+		}
+		const scenes = getScenes?.() || [];
+		const scene = scenes[index];
+		if( !scene ) {
+			res.status( 400 ).send( "Scene not found" );
+			return;
+		}
+		const presets = getPresets?.() || [];
+		( scene?.rows || [] ).forEach( row => {
+			const strips = Array.isArray( row?.strips ) ? row.strips : [];
+			if( !strips.length ) {
+				return;
+			}
+			let payload = null;
+			if( row.mode === "preset" ) {
+				const preset = sanitizePreset( presets?.[row.presetIndex] );
+				if( preset ) {
+					payload = { ...preset };
+				}
+			} else if( row?.pattern?.id ) {
+				payload = {
+					pattern: row.pattern.id,
+					patternOptions: row.pattern.options || {}
+				};
+				if( row.effect?.id && row.effect.id !== "none" ) {
+					payload.effect = row.effect.id;
+					payload.effectOptions = row.effect.options || {};
+				}
+			}
+			if( !payload ) {
+				return;
+			}
+			setLEDs( {
+				...payload,
+				strips,
+				trigger: "webAPI"
+			} );
+		} );
+		res.send( 'done' );
+	} );
 	app.get( '/setPreset', ( req, res ) => {
-		let name = req.headers?.preset || req.query?.preset;
-		const stripInput = req.headers?.strip || req.query?.strip || req.headers?.strips || req.query?.strips;
-		const stripIds = resolveStripTargets( parseStripInput( stripInput ) );
+		const index = Number( req.headers?.preset ?? req.query?.preset ?? req.headers?.index ?? req.query?.index );
+		const stripInput = req.headers?.strips || req.query?.strips || req.headers?.strip || req.query?.strip;
+		const stripIndexes = parseIndexInput( stripInput );
+		const stripIds = resolveStripTargets( stripListByIndexes( stripIndexes ) );
+		if( !Number.isFinite( index ) ) {
+			res.status( 400 ).send( "Preset index required" );
+			return;
+		}
 		if( !stripIds.length ) {
-			res.status( 400 ).send( "Strip ID required" );
+			res.status( 400 ).send( "Strip index list required" );
 			return;
 		}
 		try {
-			const presets = getUserPresets?.() || [];
-			const preset = sanitizePreset( presets.find( p => p.name === name ) );
+			const presets = getPresets?.() || [];
+			const preset = sanitizePreset( presets[index] );
 			if( !preset ) {
 				throw new Error( "Preset not found" );
 			}

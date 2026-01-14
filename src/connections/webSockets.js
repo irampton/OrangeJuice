@@ -9,8 +9,10 @@ function registerWebSockets( http, {
 	displayMatrix,
 	getScriptGroups,
 	setScriptGroups,
-	getUserPresets,
-	setUserPresets,
+	getPresets,
+	setPresets,
+	getScenes,
+	setScenes,
 	getDisconnectConfigs,
 	setDisconnectConfigs,
 	setConnectedSystemStats,
@@ -134,7 +136,7 @@ function registerWebSockets( http, {
 			callback( getScriptGroups() );
 		} );
 		socket.on( 'editPresets', ( method, ledConfig, index ) => {
-			const next = [...getUserPresets()];
+			const next = [...( getPresets?.() || [] )];
 			const presetConfig = ( () => {
 				if( !ledConfig || typeof ledConfig !== "object" ) {
 					return ledConfig;
@@ -153,11 +155,13 @@ function registerWebSockets( http, {
 					next[index] = presetConfig;
 					break;
 			}
-			setUserPresets( next );
-			config.set( 'userPresets', next );
+			if( setPresets ) {
+				setPresets( next );
+				config.set( 'presets', next );
+			}
 		} );
 		socket.on( 'getPresets', ( callback ) => {
-			const sanitized = ( getUserPresets() || [] ).map( preset => {
+			const sanitized = ( getPresets?.() || [] ).map( preset => {
 				if( !preset || typeof preset !== "object" ) {
 					return preset;
 				}
@@ -165,6 +169,27 @@ function registerWebSockets( http, {
 				return rest;
 			} );
 			callback( sanitized );
+		} );
+		socket.on( 'editScenes', ( method, scene, index ) => {
+			const next = [...( getScenes?.() || [] )];
+			switch( method ) {
+				case "add":
+					next.push( scene );
+					break;
+				case "remove":
+					next.splice( index, 1 );
+					break;
+				case "update":
+					next[index] = scene;
+					break;
+			}
+			if( setScenes ) {
+				setScenes( next );
+				config.set( 'scenes', next );
+			}
+		} );
+		socket.on( 'getScenes', ( callback ) => {
+			callback( getScenes?.() || [] );
 		} );
 		socket.on( 'getSettings', ( callback ) => {
 			let send = {
