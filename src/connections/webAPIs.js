@@ -4,7 +4,10 @@ function registerWebAPIs( app, {
 	getPresets,
 	getControllersConfig,
 	getScriptGroups,
-	getScenes
+	getScenes,
+	getLedScripts,
+	writeConfigToStripsWithContext,
+	drawLEDs
 } ) {
 	const apiBasePath = "/api/v1";
 	function sanitizePreset( preset ) {
@@ -152,6 +155,35 @@ function registerWebAPIs( app, {
 		return text.split( /[,\s|;]+/ ).map( value => value.trim() ).filter( Boolean );
 	}
 
+	function parseOptionsInput( input ) {
+		if( input === null || input === undefined ) {
+			return null;
+		}
+		if( typeof input === "object" ) {
+			return input;
+		}
+		const text = String( input ).trim();
+		if( !text ) {
+			return null;
+		}
+		try {
+			return JSON.parse( text );
+		} catch( e ) {
+			return null;
+		}
+	}
+
+	function buildScriptsList( type ) {
+		const ledScripts = getLedScripts?.();
+		const scriptGroup = ledScripts?.[type];
+		const list = scriptGroup?.list || [];
+		return list.map( ( id ) => ( {
+			name: scriptGroup?.[id]?.name || id,
+			id: scriptGroup?.[id]?.id || id,
+			options: scriptGroup?.[id]?.options || {}
+		} ) );
+	}
+
 	//web listeners
 	app.get( `${apiBasePath}/lightsOff`, ( req, res ) => {
 		turnAllLightsOff();
@@ -168,6 +200,15 @@ function registerWebAPIs( app, {
 	} );
 	app.get( `${apiBasePath}/strips`, ( req, res ) => {
 		res.send( buildStripList().map( entry => entry.name ) );
+	} );
+	app.get( `${apiBasePath}/patterns`, ( req, res ) => {
+		res.send( buildScriptsList( "patterns" ) );
+	} );
+	app.get( `${apiBasePath}/effects`, ( req, res ) => {
+		res.send( buildScriptsList( "effects" ) );
+	} );
+	app.get( `${apiBasePath}/transitions`, ( req, res ) => {
+		res.send( buildScriptsList( "transitions" ) );
 	} );
 	app.get( `${apiBasePath}/setScene`, ( req, res ) => {
 		const index = Number( req.headers?.index ?? req.query?.index ?? req.headers?.scene ?? req.query?.scene );
@@ -243,6 +284,29 @@ function registerWebAPIs( app, {
 		} catch( e ) {
 			res.status( 400 ).send( "Preset not found" );
 		}
+	} );
+	app.get( `${apiBasePath}/setConfig`, ( req, res ) => {
+		const stripInput = req.headers?.strips || req.query?.strips || req.headers?.strip || req.query?.strip;
+		const stripIndexes = parseIndexInput( stripInput );
+		const stripIds = resolveStripTargets( stripListByIndexes( stripIndexes ) );
+		if( !stripIds.length ) {
+			res.status( 400 ).send( "Strip index list required" );
+			return;
+		}
+		const optionsInput = req.headers?.options || req.query?.options || req.headers?.config || req.query?.config || req.headers?.payload || req.query?.payload;
+		const options = parseOptionsInput( optionsInput );
+		if( !options || typeof options !== "object" ) {
+			res.status( 400 ).send( "Config options required" );
+			return;
+		}
+		stripIds.forEach( stripId => {
+			writeConfigToStripsWithContext( stripId, {
+				...options,
+				trigger: "webAPI"
+			} );
+		} );
+		drawLEDs?.();
+		res.send( 'done' );
 	} );
 }
 

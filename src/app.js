@@ -183,7 +183,10 @@ if( features.hostWebControl || features.webAPIs || features.gpioButtonsOnWeb ) {
 			getPresets: () => presets,
 			getControllersConfig: () => controllersConfig,
 			getScriptGroups: () => scriptGroups,
-			getScenes: () => scenes
+			getScenes: () => scenes,
+			getLedScripts: () => ledScripts,
+			writeConfigToStripsWithContext,
+			drawLEDs
 		} );
 	}
 
@@ -449,6 +452,7 @@ function drawLEDs() {
 	controllers.forEach( ( c, i ) => {
 		if( controllerUpdates[i] ) {
 			c.updateLEDs( arr[i] );
+			controllerUpdates[i] = false;
 			if( enableLiveView && emitLiveViewUpdate ) {
 				emitLiveViewUpdate( {
 					controllerIndex: i,
